@@ -65,5 +65,11 @@ public class QAPData {
 			System.out.println("\n");
 		}
 	}
-
+	
+	public  void printSolutionWithCost(int[] array, String cost) {
+		for (int i : array) {
+			System.out.print(i  + ", ");// +1 because the index in java start with 0
+		}
+		System.out.println( "Costo: " + cost );
+	}
 }

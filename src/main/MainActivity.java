@@ -48,7 +48,7 @@ public class MainActivity {
 		// System.out.println("\nFacilidades");
 		System.out.println("\n");
 		for (int i : array) {
-			System.out.print(i + 1 + "\t");// +1 because the index in java start with 0
+			System.out.print(i  + "\t");// +1 because the index in java start with 0
 		}
 		System.out.println("\n");
 	}
