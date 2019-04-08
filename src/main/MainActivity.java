@@ -5,18 +5,19 @@ import java.util.Scanner;
 public class MainActivity {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		// read the problem to solve QAP6, QAP7, QAP8, QAP9
 		int option = showMenu();
 		// read the memory type
-		int memoryType= 2;//memoryType();
+		int memoryType= memoryType();
+		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
+
 
 		int[][] flow, distance;
 		distance = getDataforDistance(option);
 		flow = getDataForFlow(option);
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
-		qap.showData();
+		//qap.showData();
 
 		int size = distance.length, cost;
 		int[] initSolution = new int[size], bestSolutionFound;
@@ -25,32 +26,34 @@ public class MainActivity {
 		initSolution = constructive.createInitSolution(qap);// create the initial solution "intelligently"
 		cost = qap.evalSolution(initSolution);// cost of the seed
 
-		System.out.println("Costo: " + cost);
+		
 		System.out.println("Solución inicial: ");
 		printSolution(initSolution);// show the initial solution
+		System.out.println("Costo: " + cost);
 
 		TabuSearch tabuSearch = new TabuSearch();
 		bestSolutionFound = tabuSearch.execute(initSolution, qap, memoryType);
 		cost = qap.evalSolution(bestSolutionFound);
 
 		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
-		System.out.println("Costo: " + cost);
-		System.out.println("Combinación: ");
 		printSolution(bestSolutionFound);
-
+		System.out.println("Costo: " + cost);
+		tabuSearch.showMemories();
+		
 	}
 
 	public static void printSolution(int[] array) {
 		// System.out.println("Locaciones");
+		String locations= "Locaciones:  ", facilities = "Facilidades: ";
 		for (int i = 0; i < array.length; i++) {
-			System.out.print("P" + (i + 1) + " ");
+			locations = locations + ((i + 1) + " ");
 		}
 		// System.out.println("\nFacilidades");
-		System.out.println("\n");
+		System.out.println(locations);
 		for (int i : array) {
-			System.out.print(i + "  ");// +1 because the index in java start with 0
+			facilities = facilities + ((i + 1)+ " ");// +1 because the index in java start with 0
 		}
-		System.out.println("\n\n");
+		System.out.println(facilities);
 	}
 
 	public static void printArray(int[] array) {
@@ -77,7 +80,7 @@ public class MainActivity {
 	public static int memoryType() {
 		int op;
 		do {
-			System.out.print("/****** ELIJA EL TIPO DE MEMORIA A USAR******/\n");
+			System.out.print("/****** ELIJA EL TIPO DE MEMORIA A USAR ******/\n");
 			System.out.print("\t1. Memoria Corta\n\t2. Memoria Larga\n");
 			System.out.print("Escriba la opción y presione ENTER: ");
 			Scanner in = new Scanner(System.in);
@@ -112,17 +115,17 @@ public class MainActivity {
 
 		switch (option) {
 		case 1:
-			System.out.print("\nSe solucionará QAP6\n");
+			System.out.print("Se solucionará QAP6\n");
 			return d1;
 		case 2:
-			System.out.print("\nSe solucionará QAP7\n");
+			System.out.print("Se solucionará QAP7\n");
 			return d2;
 
 		case 3:
-			System.out.print("\nSe solucionará QAP8\n");
+			System.out.print("Se solucionará QAP8\n");
 			return d3;
 		case 4:
-			System.out.print("\nSe solucionará QAP9\n");
+			System.out.print("Se solucionará QAP9\n");
 			return d4;
 
 		default:
