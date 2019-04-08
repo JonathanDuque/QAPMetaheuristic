@@ -49,7 +49,6 @@ public class LocalSearch {
 		return bestSolution;
 	}
 
-	
 	public  int[] makeSwap(int[] permutation, int positionToSwap) {
 		/*
 		 * the neighgordhood will be to make a swap between one facility with the
@@ -71,40 +70,4 @@ public class LocalSearch {
 
 		return newPermutation;
 	}
-
-
-	// method for look new solution
-	public static int[] localSearch2(int[] permutation) {
-		/*
-		 * the neighgordhood will be change two facilities, so in total we have the
-		 * permutation of n take in 2
-		 */
-
-		int size = permutation.length;
-		int[] newPermutation = Arrays.copyOf(permutation, size); // is necessary make a copy because java pass the
-																	// arrays by referencia like c
-
-		Random r = new Random();
-		int posX, posY, temp;
-
-		// first decide what facilities change ramdonly
-		posX = r.nextInt(size);// with this value we put the range of number
-
-		do {
-			posY = r.nextInt(size);// check that the position to change are diferent
-		} while (posX == posY);
-
-		// change the values
-		temp = newPermutation[posX];
-		newPermutation[posX] = newPermutation[posY];
-		newPermutation[posY] = temp;
-
-		// System.out.println("Cambio " + posX + " por " + posY);
-		// printArray(permutation);
-		// printArray(newPermutation);
-		// System.out.println("\n");
-
-		return newPermutation;
-	}
-
 }

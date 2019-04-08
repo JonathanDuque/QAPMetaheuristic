@@ -6,17 +6,19 @@ public class MainActivity {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		//read the problem to solve QAP6, QAP7, QAP8, QAP9
-		int option =showMenu();
-		
+		// read the problem to solve QAP6, QAP7, QAP8, QAP9
+		int option = showMenu();
+		// read the memory type
+		int memoryType= 2;//memoryType();
+
 		int[][] flow, distance;
 		distance = getDataforDistance(option);
 		flow = getDataForFlow(option);
-		//initialize qap data, i.e matrix of flow and distance matix [row][col]
+		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
 		qap.showData();
 
-		int size = distance.length, cost; 
+		int size = distance.length, cost;
 		int[] initSolution = new int[size], bestSolutionFound;
 
 		Constructive constructive = new Constructive();
@@ -28,7 +30,7 @@ public class MainActivity {
 		printSolution(initSolution);// show the initial solution
 
 		TabuSearch tabuSearch = new TabuSearch();
-		bestSolutionFound = tabuSearch.execute(initSolution, qap);
+		bestSolutionFound = tabuSearch.execute(initSolution, qap, memoryType);
 		cost = qap.evalSolution(bestSolutionFound);
 
 		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
@@ -41,7 +43,7 @@ public class MainActivity {
 	public static void printSolution(int[] array) {
 		// System.out.println("Locaciones");
 		for (int i = 0; i < array.length; i++) {
-			System.out.print("P"+(i + 1) + " ");
+			System.out.print("P" + (i + 1) + " ");
 		}
 		// System.out.println("\nFacilidades");
 		System.out.println("\n");
@@ -68,6 +70,20 @@ public class MainActivity {
 
 			op = in.nextInt();
 		} while (op < 1 || op > 4);
+
+		return op;
+	}
+	
+	public static int memoryType() {
+		int op;
+		do {
+			System.out.print("/****** ELIJA EL TIPO DE MEMORIA A USAR******/\n");
+			System.out.print("\t1. Memoria Corta\n\t2. Memoria Larga\n");
+			System.out.print("Escriba la opción y presione ENTER: ");
+			Scanner in = new Scanner(System.in);
+
+			op = in.nextInt();
+		} while (op < 1 || op > 2);
 
 		return op;
 	}
