@@ -6,23 +6,21 @@ public class MainActivity {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		// first initialize the matrix of flow and distance matix [row][col]
-
+		//read the problem to solve QAP6, QAP7, QAP8, QAP9
+		int option =showMenu();
+		
 		int[][] flow, distance;
-
-		int option = showMenu();
 		distance = getDataforDistance(option);
 		flow = getDataForFlow(option);
+		//initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
+		qap.showData();
 
-		int size = distance.length;
+		int size = distance.length, cost; 
 		int[] initSolution = new int[size], bestSolutionFound;
-		int cost;
-
-		// qap.showData();
 
 		Constructive constructive = new Constructive();
-		initSolution = constructive.createInitSolution(qap);// create the initial solution
+		initSolution = constructive.createInitSolution(qap);// create the initial solution "intelligently"
 		cost = qap.evalSolution(initSolution);// cost of the seed
 
 		System.out.println("Costo: " + cost);
@@ -43,14 +41,14 @@ public class MainActivity {
 	public static void printSolution(int[] array) {
 		// System.out.println("Locaciones");
 		for (int i = 0; i < array.length; i++) {
-			System.out.print(i + 1 + "\t");
+			System.out.print("P"+(i + 1) + " ");
 		}
 		// System.out.println("\nFacilidades");
 		System.out.println("\n");
 		for (int i : array) {
-			System.out.print(i  + "\t");// +1 because the index in java start with 0
+			System.out.print(i + "  ");// +1 because the index in java start with 0
 		}
-		System.out.println("\n");
+		System.out.println("\n\n");
 	}
 
 	public static void printArray(int[] array) {
@@ -64,7 +62,7 @@ public class MainActivity {
 		int op;
 		do {
 			System.out.print("/****** ELIJA EL PROBLEMA A SOLUCIONAR ******/\n");
-			System.out.print("\t1. QAP5\n\t2. QAP6\n\t3. QAP8\n\t4. QAP9\n");
+			System.out.print("\t1. QAP6\n\t2. QAP7\n\t3. QAP8\n\t4. QAP9\n");
 			System.out.print("Escriba la opción y presione ENTER: ");
 			Scanner in = new Scanner(System.in);
 
@@ -75,13 +73,13 @@ public class MainActivity {
 	}
 
 	public static int[][] getDataforDistance(int option) {
-		// QAP 5
-		int[][] d1 = { { 0, 50, 50, 94, 50 }, { 50, 0, 22, 50, 36 }, { 50, 22, 0, 44, 14 }, { 94, 50, 44, 0, 50 },
-				{ 50, 36, 14, 50, 0 } };
-
 		// QAP 6
-		int[][] d2 = { { 0, 40, 64, 36, 22, 60 }, { 40, 0, 41, 22, 36, 72 }, { 64, 41, 0, 28, 44, 53 },
+		int[][] d1 = { { 0, 40, 64, 36, 22, 60 }, { 40, 0, 41, 22, 36, 72 }, { 64, 41, 0, 28, 44, 53 },
 				{ 36, 22, 28, 0, 20, 50 }, { 22, 36, 44, 20, 0, 41 }, { 60, 72, 53, 50, 41, 0 } };
+
+		int[][] d2 = { { 0, 35, 71, 99, 71, 75, 41 }, { 35, 0, 42, 80, 65, 82, 47 }, { 71, 42, 0, 45, 49, 79, 55 },
+				{ 99, 80, 45, 0, 36, 65, 65 }, { 71, 65, 49, 36, 0, 31, 32 }, { 75, 82, 79, 65, 31, 0, 36 },
+				{ 41, 47, 55, 65, 32, 36, 0 } };
 
 		// QAP 8
 		int[][] d3 = { { 0, 32, 68, 97, 75, 70, 75, 40 }, { 32, 0, 42, 80, 53, 65, 82, 47 },
@@ -98,10 +96,10 @@ public class MainActivity {
 
 		switch (option) {
 		case 1:
-			System.out.print("\nSe solucionará QAP5\n");
+			System.out.print("\nSe solucionará QAP6\n");
 			return d1;
 		case 2:
-			System.out.print("\nSe solucionará QAP6\n");
+			System.out.print("\nSe solucionará QAP7\n");
 			return d2;
 
 		case 3:
@@ -118,10 +116,11 @@ public class MainActivity {
 	}
 
 	public static int[][] getDataForFlow(int option) {
-		int[][] f1 = { { 0, 0, 2, 0, 3 }, { 0, 0, 0, 3, 0 }, { 2, 0, 0, 0, 0 }, { 0, 3, 0, 0, 1 }, { 3, 0, 0, 1, 0 } };
-
-		int[][] f2 = { { 0, 1, 1, 2, 0, 0 }, { 1, 0, 0, 0, 0, 2 }, { 1, 0, 0, 0, 0, 1 }, { 2, 0, 0, 0, 3, 0 },
+		int[][] f1 = { { 0, 1, 1, 2, 0, 0 }, { 1, 0, 0, 0, 0, 2 }, { 1, 0, 0, 0, 0, 1 }, { 2, 0, 0, 0, 3, 0 },
 				{ 0, 0, 0, 3, 0, 0 }, { 0, 2, 1, 0, 0, 0 } };
+
+		int[][] f2 = { { 0, 2, 0, 0, 0, 0, 2 }, { 2, 0, 3, 0, 0, 1, 0 }, { 0, 3, 0, 0, 0, 1, 0 },
+				{ 0, 0, 0, 0, 3, 0, 1 }, { 0, 0, 0, 3, 0, 0, 0 }, { 0, 1, 1, 0, 0, 0, 0 }, { 2, 0, 0, 1, 0, 0, 0 } };
 
 		int[][] f3 = { { 0, 2, 4, 0, 0, 0, 2, 0 }, { 2, 0, 3, 1, 0, 1, 0, 0 }, { 4, 3, 0, 0, 0, 1, 0, 0 },
 				{ 0, 1, 0, 0, 3, 0, 1, 5 }, { 0, 0, 0, 3, 0, 0, 0, 0 }, { 0, 1, 1, 0, 0, 0, 0, 0 },

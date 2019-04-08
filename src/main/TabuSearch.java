@@ -8,72 +8,59 @@ public class TabuSearch {
 	 * permutation of n take in 2
 	 */
 	int[][] tabu;
-	int tabuIterations;
+	int tabuIterations;// iterations tabu for a move
 	QAPData qap;
 
 	public int[] execute(int[] initSolution, QAPData qapData) {
-		qap = qapData;
 		// this initial block define the variable needed
+		qap = qapData;
 		int n = qap.getSize();
-		tabuIterations = n + 2;
-		int totalIterations = 50 * n, iterationsCounter = 1;// tabuIterations will be the number
-															// of a number is tabu
+		tabuIterations = n+1; 
+		int totalIterations = 25 * n, iterationsCounter = 1;
+		
 		initTabuMatrix(n);
-		int[] bestNeighbor, currentSolution = Arrays.copyOf(initSolution, n),
-				bestSolution = Arrays.copyOf(initSolution, n);
-		int bestCost = qap.evalSolution(initSolution), bestNeighborCost,
-				currentSolutionCost = qap.evalSolution(initSolution);
 
+		int[] bestNeighbor, currentSolution, bestSolution;
+		currentSolution = Arrays.copyOf(initSolution, n);
+		bestSolution = Arrays.copyOf(initSolution, n);
+		int bestCost = qap.evalSolution(initSolution), bestNeighborCost;
 		int updateSolutionCounter = 0; // this counter has the value where the best was found
 
 		while (iterationsCounter <= totalIterations) {
-
+			
 			bestNeighbor = getBestNeighbor(currentSolution, iterationsCounter, bestCost);
 			bestNeighborCost = qap.evalSolution(bestNeighbor);
 
-			if (iterationsCounter <= 2) {
-				// MainActivity.printArray(bestNeighbor);
-				// MainActivity.printArray(currentSolution);
-				// MainActivity.printArray(bestSolution);
-				// System.out.println("Mejor vecino: " + bestNeighborCost);
-				// System.out.println("Actual: " + currentSolutionCost);
-				// System.out.println("LO MEJOR: " + bestCost );
-				qap.printMatrix(tabu);
-			}
-
+			//update the best solution found if is the best of the moment
+			//at the end this block help to save the best of the best
 			if (bestNeighborCost < bestCost) {
 				bestSolution = bestNeighbor;
 				bestCost = bestNeighborCost;
-				updateSolutionCounter = iterationsCounter;
+				updateSolutionCounter = iterationsCounter;//save this iterations for show late
 			}
 
+			//always update the current solution
 			currentSolution = bestNeighbor;
-			currentSolutionCost = bestNeighborCost;
-
-			System.out.println("Mejor vecino: " + bestNeighborCost);
-			System.out.println("Actual: " + currentSolutionCost);
-			System.out.println("LO MEJOR: " + bestCost);
-			qap.printSolutionWithCost(currentSolution, currentSolutionCost + " Actual\n\n");
 
 			iterationsCounter++;
 		}
 
 		System.out.println("Iteración donde se encontro el mejor: " + updateSolutionCounter);
-		System.out.println("Mejor costo: " + bestCost);
-		MainActivity.printArray(bestSolution);
-
-		//qap.printMatrix(tabu);
-
+		
+		System.out.println("\nValores finales matriz tabu:");
+		qap.printMatrix(tabu);
+		
 		return bestSolution;
 	}
 
+	//this function simply give the solution no tabu with the minor cost, 
+	//unless it satisfies the aspiration criteria.
 	public int[] getBestNeighbor(int[] currentSolution, int currentIteration, int bestCost) {
-
 		int n = currentSolution.length;
 		int[] bestNeighborFound = makeSwap(currentSolution, 0, 1), temporalSolution;
 		int posX = 0, posY = 1;
 
-		// this block init best neighbor fount with a value without tabu
+		// this block init best neighbor fount with a permutation without tabu
 		for (int position1 = 0; position1 < (n - 1); position1++) {
 			boolean found = false;
 			for (int position2 = position1 + 1; position2 < n; position2++) {
@@ -94,27 +81,12 @@ public class TabuSearch {
 
 		int temporalCost, bestNeighborFoundCost = qap.evalSolution(bestNeighborFound);
 
-		// System.out.println("Vecino de Inicio: " + bestNeighborFoundCost);
-		qap.printSolutionWithCost(bestNeighborFound, bestNeighborFoundCost + " de inicio");
-
-		// looking in the neigborhooh
-		String tabuIndicator;
-		System.out.println("\nIteracion: " + currentIteration);
-
+		// looking in the neigborhood the no tabu best.
 		for (int position1 = 0; position1 < (n - 1); position1++) {
 			for (int position2 = position1 + 1; position2 < n; position2++) {
 
 				temporalSolution = makeSwap(currentSolution, position1, position2);
-				// MainActivity.printArray(temporalSolution);
-
-				tabuIndicator = "";
 				temporalCost = qap.evalSolution(temporalSolution);
-				if (isTabu(temporalSolution[position1], temporalSolution[position2], currentIteration)) {
-					tabuIndicator = " *  (" + temporalSolution[position1] + "," + temporalSolution[position2] + ")";
-				}
-
-				qap.printSolutionWithCost(temporalSolution, temporalCost + tabuIndicator);
-				// System.out.println("Vecino: " + temporalCost + tabuIndicator);
 
 				if (temporalCost < bestNeighborFoundCost) {
 					int facX = temporalSolution[position1];
@@ -126,26 +98,23 @@ public class TabuSearch {
 						posX = position1;
 						posY = position2;
 					}
-
-					/*
-					 * else { if (satisfyAspitarionCriteria(temporalCost, bestCost)) {
-					 * System.out.println("se uso criterio de aspiracion");
-					 * 
-					 * bestNeighborFound = temporalSolution; bestNeighborFoundCost = temporalCost;
-					 * posX = position1; posY = position2; } }
-					 */
-
+					else {
+						if (satisfyAspitarionCriteria(temporalCost, bestCost)) {
+							System.out.println("Se uso criterio de aspiracion en la iteración: "  +currentIteration + ", por costo: " + temporalCost);
+							bestNeighborFound = temporalSolution;
+							bestNeighborFoundCost = temporalCost;
+							posX = position1;
+							posY = position2;
+						}
+					}
 				}
-
-				// System.out.println("Costo Mejor vecino: " + bestNeighborFoundCost);
-
 			}
 		}
 
+		//update tabu matrix with values of the best neighbor found 
 		updateTabuMatrix(currentSolution, posX, posY, currentIteration);
 
 		return bestNeighborFound;
-
 	}
 
 	public void updateTabuMatrix(int[] selectedSolution, int posX, int posY, int iterationsCounter) {
@@ -155,11 +124,13 @@ public class TabuSearch {
 		// make tabu this facilities during certain iterations
 		tabu[facX][facY] = iterationsCounter + tabuIterations;
 		tabu[facY][facX] = iterationsCounter + tabuIterations;
-		System.out.println("Cambio " + facX + " por " + facY);
-
 	}
 
-	// init tabu matrix with 0
+	
+	/*
+	 * this matrix will save the iteration number where a facility change is denied
+	 * init tabu matrix with 0
+	 */
 	public void initTabuMatrix(int size) {
 		tabu = new int[size][size];
 		for (int[] row : tabu) {
@@ -184,15 +155,7 @@ public class TabuSearch {
 	}
 
 	public boolean isTabu(int p1, int p2, int iteration) {
-		// System.out.println(tabu[p1][p2] + " iteracopn" + iteration);
-
-		if (tabu[p1][p2] > iteration) {
-			// System.out.println("ojo es tabu");
-			return true;
-		} else {
-			// System.out.println("no es tabu");
-			return false;
-		}
+		return iteration > tabu[p1][p2] ? false : true;
 	}
 
 	public boolean satisfyAspitarionCriteria(int actualCost, int bestCostFound) {
@@ -267,7 +230,6 @@ public class TabuSearch {
 				}
 			}
 
-
 			if (improveCost < currentSolutionCost) {
 				currentSolution = improveSolution;
 				currentSolutionCost = improveCost;
@@ -293,4 +255,15 @@ public class TabuSearch {
 		return bestSolution;
 	}
 
+	
+	/* 
+	 	System.out.println("Vecino de Inicio: " + bestNeighborFoundCost);
+		qap.printSolutionWithCost(bestNeighborFound, bestNeighborFoundCost + " de inicio");
+	 	String tabuIndicator;
+		//System.out.println("\nIteracion: " + currentIteration);
+	 
+	 if (isTabu(temporalSolution[position1], temporalSolution[position2], currentIteration)) {
+					tabuIndicator = " *  (" + temporalSolution[position1] + "," + temporalSolution[position2] + ")";
+				}
+	 */
 }
