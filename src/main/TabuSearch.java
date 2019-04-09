@@ -1,17 +1,13 @@
 package main;
+
 import java.util.Arrays;
 
 public class TabuSearch {
-	/*
-	 * the neighgordhood will be change two facilities, so in total we have the
-	 * permutation of n take in 2
-	 */
-	// this matrix will save the iteration number where a facility change is denied
-	// and the number of a facility change was made
-	int[][] memoryTabuIterations;
-	int[][] memoryTabuFrecuency;
+	
+	int[][] recentMemoryTabu;	// this matrix will save the iteration number where a facility change is denied
+	int[][] frecuencyMemoryTabu;// this matrix save the number of a facility  has been changed
 	int tabuIterations;// iterations tabu for a move
-	QAPData qap;
+	QAPData qap; 
 
 	public int[] execute(int[] initSolution, QAPData qapData, int memoryType) {
 		// this initial block define the variable needed
@@ -19,18 +15,16 @@ public class TabuSearch {
 		int n = qap.getSize();
 		tabuIterations = n + 1;
 		int totalIterations = 25 * n, iterationsCounter = 1, iterationsWithoutImproveCounter = 0;
-	
+
 		boolean largeMemory = isLargeMemory(memoryType);
 		if (largeMemory) {
 			System.out.println("Se usará memoria de largo plazo");
-		}else {
+		} else {
 			System.out.println("Se usará memoria de corto plazo");
 		}
-		
+
 		System.out.println("Total iteraciones: " + totalIterations);
 		System.out.println("Iteraciones Tabu para un movimiento: " + tabuIterations);
-
-
 
 		initTabuMatrix(n);
 
@@ -40,9 +34,10 @@ public class TabuSearch {
 		int bestCost = qap.evalSolution(initSolution), bestNeighborCost;
 		int updateSolutionCounter = 0; // this counter has the value where the best was found
 
-		
 		System.out.println("\n\n/*********** DATOS DURANTE LA EJECUCIÓN DEL ALGORITMO **********/");
 
+		
+		//this while find the best solution during totalIterations
 		while (iterationsCounter <= totalIterations) {
 
 			bestNeighbor = getBestNeighbor(currentSolution, iterationsCounter, bestCost);
@@ -54,15 +49,16 @@ public class TabuSearch {
 				bestSolution = bestNeighbor;
 				bestCost = bestNeighborCost;
 				updateSolutionCounter = iterationsCounter;// save this iterations for show late
-				System.out.println("Pasaron " + iterationsWithoutImproveCounter + " iteraciones sin mejora.");
+				System.out.println("Pasaron " + iterationsWithoutImproveCounter + " iteraciones sin mejora. Mejor: " + bestCost);
 
 				iterationsWithoutImproveCounter = 0;
 			}
 
-			if (largeMemory && iterationsWithoutImproveCounter == totalIterations/10) {
+			//only check when is large memory
+			if (largeMemory && iterationsWithoutImproveCounter == totalIterations / 10) {
 				bestNeighbor = getNeighborWithLowFrecuency(currentSolution, iterationsCounter);
 			}
-			
+
 			// always update the current solution
 			currentSolution = bestNeighbor;
 
@@ -82,7 +78,7 @@ public class TabuSearch {
 		int[] bestNeighborFound = makeSwap(currentSolution, 0, 1), temporalSolution;
 		int posX = 0, posY = 1;
 
-		// this block init best neighbor fount with a permutation without tabu
+		// this block init best neighbor  with a permutation without tabu
 		for (int position1 = 0; position1 < (n - 1); position1++) {
 			boolean found = false;
 			for (int position2 = position1 + 1; position2 < n; position2++) {
@@ -102,8 +98,12 @@ public class TabuSearch {
 		}
 
 		int temporalCost, bestNeighborFoundCost = qap.evalSolution(bestNeighborFound);
-
-		// looking in the neigborhood the no tabu best.
+		
+		/*
+		 * the neighgordhood will be change two facilities, so in total we have the
+		 * permutation of n take in 2
+		 */
+		// looking in the neigborhood the no tabu best for current solution.
 		for (int position1 = 0; position1 < (n - 1); position1++) {
 			for (int position2 = position1 + 1; position2 < n; position2++) {
 
@@ -139,6 +139,7 @@ public class TabuSearch {
 		return bestNeighborFound;
 	}
 
+	//this function is used for the large memory
 	public int[] getNeighborWithLowFrecuency(int[] currentSolution, int currentIteration) {
 		int n = qap.getSize();
 		int[] neighborWithLowFrecuency = Arrays.copyOf(currentSolution, n);
@@ -149,7 +150,7 @@ public class TabuSearch {
 		// this cicle get the minor value of frecuency and its facilities
 		for (int row = 0; row < (n - 1); row++) {
 			for (int col = row + 1; col < n; col++) {
-				temporalFrecuency = memoryTabuFrecuency[row][col];
+				temporalFrecuency = frecuencyMemoryTabu[row][col];
 				if (temporalFrecuency < minorFrecuency) {
 					minorFrecuency = temporalFrecuency;
 					facX = row;
@@ -179,27 +180,29 @@ public class TabuSearch {
 		int facX = selectedSolution[posX];
 		int facY = selectedSolution[posY];
 		// make tabu this facilities during certain iterations
-		memoryTabuIterations[facX][facY] = iterationsCounter + tabuIterations;
-		memoryTabuIterations[facY][facX] = iterationsCounter + tabuIterations;
+		recentMemoryTabu[facX][facY] = iterationsCounter + tabuIterations;
+		recentMemoryTabu[facY][facX] = iterationsCounter + tabuIterations;
 
-		memoryTabuFrecuency[facX][facY]++;
-		memoryTabuFrecuency[facY][facX]++;
+		//update matrix for large memory
+		frecuencyMemoryTabu[facX][facY]++;
+		frecuencyMemoryTabu[facY][facX]++;
 	}
 
 	// init both tabu matrix with 0
 	public void initTabuMatrix(int size) {
-		memoryTabuIterations = new int[size][size];
-		memoryTabuFrecuency = new int[size][size];
+		recentMemoryTabu = new int[size][size];
+		frecuencyMemoryTabu = new int[size][size];
 
-		for (int[] row : memoryTabuIterations) {
+		for (int[] row : recentMemoryTabu) {
 			Arrays.fill(row, 0);
 		}
 
-		for (int[] row : memoryTabuFrecuency) {
+		for (int[] row : frecuencyMemoryTabu) {
 			Arrays.fill(row, 0);
 		}
 	}
 
+	
 	public int[] makeSwap(int[] permutation, int position1, int position2) {
 
 		int size = permutation.length;
@@ -212,12 +215,11 @@ public class TabuSearch {
 		newPermutation[position1] = newPermutation[position2];
 		newPermutation[position2] = temp;
 
-		// MainActivity.printSolution(newPermutation);
 		return newPermutation;
 	}
 
 	public boolean isTabu(int p1, int p2, int iteration) {
-		return iteration > memoryTabuIterations[p1][p2] ? false : true;
+		return iteration > recentMemoryTabu[p1][p2] ? false : true;
 	}
 
 	public boolean satisfyAspitarionCriteria(int actualCost, int bestCostFound) {
@@ -238,9 +240,9 @@ public class TabuSearch {
 
 	public void showMemories() {
 		System.out.println("\nMatriz tabu:");
-		qap.printMatrix(memoryTabuIterations);
+		qap.printMatrix(recentMemoryTabu);
 
 		System.out.println("\nMatriz tabu de frecuencia:");
-		qap.printMatrix(memoryTabuFrecuency);
+		qap.printMatrix(frecuencyMemoryTabu);
 	}
 }

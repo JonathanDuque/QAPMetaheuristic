@@ -19,14 +19,13 @@ public class MainActivity {
 		QAPData qap = new QAPData(distance, flow);
 		//qap.showData();
 
-		int size = distance.length, cost;
-		int[] initSolution = new int[size], bestSolutionFound;
+		int cost;
+		int[] initSolution = new int[qap.getSize()], bestSolutionFound;
 
 		Constructive constructive = new Constructive();
 		initSolution = constructive.createInitSolution(qap);// create the initial solution "intelligently"
 		cost = qap.evalSolution(initSolution);// cost of the seed
 
-		
 		System.out.println("Solución inicial: ");
 		printSolution(initSolution);// show the initial solution
 		System.out.println("Costo: " + cost);
