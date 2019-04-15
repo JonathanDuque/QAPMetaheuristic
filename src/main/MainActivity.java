@@ -6,18 +6,19 @@ public class MainActivity {
 
 	public static void main(String[] args) {
 		// read the problem to solve QAP6, QAP7, QAP8, QAP9
-		int option = showMenu();
+		int option = 1; //showMenu();
 		// read the memory type
-		int memoryType= memoryType();
+		int memoryType = 1; //memoryType();
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
-
 
 		int[][] flow, distance;
 		distance = getDataforDistance(option);
 		flow = getDataForFlow(option);
+		
+		ReadFile readFile = new ReadFile("test.dat");
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
-		//qap.showData();
+		// qap.showData();
 
 		int cost;
 		int[] initSolution = new int[qap.getSize()], bestSolutionFound;
@@ -37,20 +38,22 @@ public class MainActivity {
 		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
 		printSolution(bestSolutionFound);
 		System.out.println("Costo: " + cost);
-		tabuSearch.showMemories();
+		//tabuSearch.showMemories();
 		
 	}
 
+
+
 	public static void printSolution(int[] array) {
 		// System.out.println("Locaciones");
-		String locations= "Locaciones:  ", facilities = "Facilidades: ";
+		String locations = "Locaciones:  ", facilities = "Facilidades: ";
 		for (int i = 0; i < array.length; i++) {
 			locations = locations + ((i + 1) + " ");
 		}
 		// System.out.println("\nFacilidades");
 		System.out.println(locations);
 		for (int i : array) {
-			facilities = facilities + ((i + 1)+ " ");// +1 because the index in java start with 0
+			facilities = facilities + ((i + 1) + " ");// +1 because the index in java start with 0
 		}
 		System.out.println(facilities);
 	}
@@ -75,7 +78,7 @@ public class MainActivity {
 
 		return op;
 	}
-	
+
 	public static int memoryType() {
 		int op;
 		do {
