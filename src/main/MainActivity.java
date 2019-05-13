@@ -2,43 +2,60 @@ package main;
 
 import java.util.Scanner;
 
+import main.GeneticAlgorithm.GeneticAlgorithm;
+import main.GeneticAlgorithm.Results;
+
 public class MainActivity {
 
 	public static void main(String[] args) {
 		// read the problem to solve QAP6, QAP7, QAP8, QAP9
-		int option = 1; //showMenu();
+		int option = showMenu();
 		// read the memory type
-		int memoryType = 1; //memoryType();
+		//int memoryType = memoryType();
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 
 		int[][] flow, distance;
 		distance = getDataforDistance(option);
 		flow = getDataForFlow(option);
 		
-		ReadFile readFile = new ReadFile("test.dat");
+		//ReadFile readFile = new ReadFile("test.dat");//"qapdata/chr12a.dat"
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
 		// qap.showData();
 
-		int cost;
-		int[] initSolution = new int[qap.getSize()], bestSolutionFound;
+		//int cost;
+		//int[] initSolution = new int[qap.getSize()], bestSolutionFound;
 
-		Constructive constructive = new Constructive();
-		initSolution = constructive.createInitSolution(qap);// create the initial solution "intelligently"
-		cost = qap.evalSolution(initSolution);// cost of the seed
+		//Constructive constructive = new Constructive();
+		//initSolution = constructive.createInitSolution(qap);// create the initial solution "intelligently"
+		//cost = qap.evalSolution(initSolution);// cost of the seed
 
-		System.out.println("Solución inicial: ");
-		printSolution(initSolution);// show the initial solution
-		System.out.println("Costo: " + cost);
+		//System.out.println("Solución inicial: ");
+		//printSolution(initSolution);// show the initial solution
+		//System.out.println("Costo: " + cost);
 
-		TabuSearch tabuSearch = new TabuSearch();
-		bestSolutionFound = tabuSearch.execute(initSolution, qap, memoryType);
-		cost = qap.evalSolution(bestSolutionFound);
+		//TabuSearch tabuSearch = new TabuSearch();
+		//bestSolutionFound = tabuSearch.execute(initSolution, qap, memoryType);
+		//cost = qap.evalSolution(bestSolutionFound);
 
-		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
-		printSolution(bestSolutionFound);
-		System.out.println("Costo: " + cost);
+		//System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
+		//printSolution(bestSolutionFound);
+		//System.out.println("Costo: " + cost);
 		//tabuSearch.showMemories();
+		
+		
+		GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
+		// pop_size, generations, mutation_probability, QAPData
+		geneticAlgorithm.execute(10 * qap.getSize(), 20 * qap.getSize(), 0.5, qap);
+		
+		//get the results for the algorithm
+		Results geneticAlgorithmResult = geneticAlgorithm.getResults();
+		//print the results, the best, the worst and the average population fitness
+		System.out.println("\nEl mejor individuo es: ");
+		geneticAlgorithmResult.getBestIndividual().printIndividualWithFitness(qap);
+		System.out.println("El peor individuo es: ");
+		geneticAlgorithmResult.getWorstIndividual().printIndividualWithFitness(qap);
+		System.out.println("El valor promedio de la población es: " + geneticAlgorithmResult.getAvg_value());
 		
 	}
 
@@ -165,4 +182,5 @@ public class MainActivity {
 		}
 
 	}
+
 }
