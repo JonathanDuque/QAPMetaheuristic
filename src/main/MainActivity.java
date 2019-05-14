@@ -9,8 +9,8 @@ public class MainActivity {
 
 	public static void main(String[] args) {
 		// read the problem to solve QAP6, QAP7, QAP8, QAP9
-		int option = 1;//showMenu();
-	
+		int option = 1;// showMenu();
+
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 
 		int[][] flow, distance;
@@ -19,24 +19,20 @@ public class MainActivity {
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
 		// qap.showData();
-		
-		//ReadFile readFile = new ReadFile("test.dat");//"qapdata/chr12a.dat"
-		int [] initSolution = {0,1,2,3,4,5};
-		
+
+		// ReadFile readFile = new ReadFile("test.dat");//"qapdata/chr12a.dat"
+		Constructive constructive = new Constructive();
+		int[] initSolution = constructive.createInitSolution(qap);
+
 		LocalSearch localSearch = new LocalSearch();
-		int []bestSolutionFound = localSearch.executeSimpleSwap(initSolution, qap);
-		
+		int[] bestSolutionFound = localSearch.executeSimpleSwap(initSolution, qap);
 
 		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
 		System.out.println("Costo: " + qap.evalSolution(bestSolutionFound));
 		System.out.println("Combinación: ");
 		printSolution(bestSolutionFound);
-		
-	
-		
+
 	}
-
-
 
 	public static void printSolution(int[] array) {
 		// System.out.println("Locaciones");

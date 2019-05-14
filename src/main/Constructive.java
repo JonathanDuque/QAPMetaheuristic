@@ -29,8 +29,8 @@ public class Constructive {
 				for (int col = row + 1; col < size; col++) { // solo recorro una parte de la matriz lo otro es igual
 
 					// check if the location is not assigned
-					for (int p = 0; p < solution.length; p++) {
-						if (solution[p] != -1 && (p == row || p == col)) {
+					for (int p = 0; p < size; p++) {
+						if ((solution[p] != -1) && (solution[p] == row || solution[p] == col)) {
 							next_d = true;
 							break;// out of the for
 
@@ -57,8 +57,8 @@ public class Constructive {
 				for (int col = row + 1; col < size; col++) {
 
 					// check if the facilitie is not used
-					for (int p = 0; p < solution.length; p++) {
-						if ((solution[p] != -1) && (solution[p] == row || solution[p] == col)) {
+					for (int p = 0; p < size; p++) {
+						if (solution[p] != -1 && (p == row || p == col)) {
 							next_f = true;
 							break;// out of the for
 						} else {
@@ -79,32 +79,38 @@ public class Constructive {
 			}
 
 			// here assigned the facilities in the locations found
-			solution[locations[0]] = facilities[0];
-			solution[locations[1]] = facilities[1];
+			solution[facilities[0]] = locations[0];
+			solution[facilities[1]] = locations[1];
 
 		}
 
 		// when size of matrix is no pair remains one facility for assigned
 		if (size % 2 != 0) {
-			int the_last_facility = -1;
-			for (int f = 0; f < solution.length; f++) {
-				if (qap.getLocationOfFacility(solution, f) == -1) {
-					// System.out.println("Facilidad sin asignar: " + f);
-					the_last_facility = f;// this is the facility that remains to be assigned.
+			int the_last_location = -1;
+			for (int l = 0; l < size; l++) {
+				if (getFacilityOfLocation(solution, l) == -1) {
+					the_last_location = l;// this is the location that remains to be assigned.
 					break;
 				}
 			}
 
-			for (int l = 0; l < solution.length; l++) {
-				if (solution[l] == -1) {// find the location that dont have facility
-					// System.out.println("Se asigno en locación: " + l);
-					solution[l] = the_last_facility;
+			for (int f = 0; f < solution.length; f++) {
+				if (solution[f] == -1) {// find the facility that dont have location
+					solution[f] = the_last_location;
 					break;
 				}
 			}
 		}
 
 		return solution;
+	}
+
+	// function for look the location of any facility
+	private int getFacilityOfLocation(int[] permutation, int location) {
+		for (int i = 0; i < permutation.length; i++)
+			if (permutation[i] == location)
+				return i;
+		return -1;
 	}
 
 }
