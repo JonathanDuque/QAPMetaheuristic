@@ -23,15 +23,13 @@ public class QAPData {
 	// cost function
 	public int evalSolution(int[] s) {
 		int cost = 0;
-		int locX, locY;
+		//s[0] = location of facility 0 
 
 		// run the matrix only upside
 		for (int row = 0; row < size; row++) {
 			for (int col = row + 1; col < size; col++) {
 				if (flow[row][col] != 0) {
-					locX = getLocationOfFacility(s, row);
-					locY = getLocationOfFacility(s, col);
-					cost = cost + flow[row][col] * distance[locX][locY];
+					cost = cost + flow[row][col] * distance[s[row]][s[col]];
 				}
 			}
 		}
