@@ -9,14 +9,14 @@ public class TabuSearch {
 	int tabuIterations;// iterations tabu for a move
 	QAPData qap; 
 
-	public int[] execute(int[] initSolution, QAPData qapData, int memoryType) {
+	public int[] execute(int totalIterations, int[] initSolution, QAPData qapData, boolean largeMemory) {
 		// this initial block define the variable needed
 		qap = qapData;
 		int n = qap.getSize();
-		tabuIterations = n + 1;
-		int totalIterations = 25 * n, iterationsCounter = 1, iterationsWithoutImproveCounter = 0;
+		tabuIterations = (int) (n+ Math.floor(n/4)) ;
+		int iterationsCounter = 1, iterationsWithoutImproveCounter = 0;
 
-		boolean largeMemory = isLargeMemory(memoryType);
+		//boolean largeMemory = isLargeMemory(memoryType);
 		if (largeMemory) {
 			System.out.println("Se usará memoria de largo plazo");
 		} else {

@@ -5,7 +5,7 @@ import java.util.Random;
 
 public class LocalSearch {
 	
-	public int[] executeSimpleSwap(int[] initSolution, QAPData qap) {
+	public int[] execute(int[] initSolution, QAPData qap) {
 		//this initial block define the variable needed
 		int cost = qap.evalSolution(initSolution);// cost of the seed
 		

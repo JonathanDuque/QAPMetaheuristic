@@ -9,28 +9,42 @@ public class MainActivity {
 
 	public static void main(String[] args) {
 		// read the problem to solve QAP6, QAP7, QAP8, QAP9
-		int option = 1;// showMenu();
+		//int problem = 1;//showMenu();
+		int method = showMenuMethod();
 
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 
+		ReadFile readFile = new ReadFile("qapdata/chr12a.dat");//"qapdata/chr12a.dat"
+
 		int[][] flow, distance;
-		distance = getDataforDistance(option);
-		flow = getDataForFlow(option);
+		distance = readFile.getDistance(); //getDataforDistance(problem);
+		flow = readFile.getFlow(); //getDataForFlow(problem);
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
 		// qap.showData();
+		
 
-		// ReadFile readFile = new ReadFile("test.dat");//"qapdata/chr12a.dat"
 		Constructive constructive = new Constructive();
 		int[] initSolution = constructive.createInitSolution(qap);
+		int[] bestSolutionFound = initSolution;
 
-		LocalSearch localSearch = new LocalSearch();
-		int[] bestSolutionFound = localSearch.executeSimpleSwap(initSolution, qap);
+		switch (method) {
+		case 1:
+			LocalSearch localSearch = new LocalSearch();
+			bestSolutionFound = localSearch.execute(initSolution, qap);
+			break;
+		case 2:
+			TabuSearch tabuSearch = new TabuSearch();
+			bestSolutionFound = tabuSearch.execute(50 * qap.getSize(), initSolution, qap, true);
+			//tabuSearch.showMemories();
+			break;
+
+		}
 
 		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
-		System.out.println("Costo: " + qap.evalSolution(bestSolutionFound));
-		System.out.println("Combinación: ");
+		System.out.println("Costo: " + 2*qap.evalSolution(bestSolutionFound));
 		printSolution(bestSolutionFound);
+		
 
 	}
 
@@ -65,6 +79,21 @@ public class MainActivity {
 
 			op = in.nextInt();
 		} while (op < 1 || op > 4);
+
+		return op;
+	}
+	
+	public static int showMenuMethod() {
+		int op;
+		do {
+			System.out.print("/****** ELIJA EL MÉTODO  ******/\n");
+			System.out.print("\t1. Local Search\n\t2. Tabu Search\n\t3. Genetic Algorithm\n");
+			System.out.print("Escriba la opción y presione ENTER: ");
+			Scanner in = new Scanner(System.in);
+
+			op = in.nextInt();
+		} while (op < 1 || op > 3);
+		
 
 		return op;
 	}
