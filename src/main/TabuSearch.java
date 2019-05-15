@@ -226,18 +226,6 @@ public class TabuSearch {
 		return (actualCost < bestCostFound) ? true : false;
 	}
 
-	public boolean isLargeMemory(int memoryType) {
-		switch (memoryType) {
-		case 1:
-			return false;
-		case 2:
-			return true;
-		default:
-			return false;
-		}
-
-	}
-
 	public void showMemories() {
 		System.out.println("\nMatriz tabu:");
 		qap.printMatrix(recentMemoryTabu);

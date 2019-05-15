@@ -71,26 +71,4 @@ public class LocalSearch {
 
 		return newPermutation;
 	}
-
-	public  int[] makeSwap(int[] permutation, int positionToSwap) {
-		/*
-		 * the neighgordhood will be to make a swap between one facility with the
-		 * facility of the right
-		 */
-		int size = permutation.length;
-		int[] newPermutation = Arrays.copyOf(permutation, size);
-		int temp;
-
-		if (positionToSwap != size - 1) {
-			temp = newPermutation[positionToSwap];
-			newPermutation[positionToSwap] = newPermutation[positionToSwap + 1];
-			newPermutation[positionToSwap + 1] = temp;
-		} else {// this happen when is the last position
-			temp = newPermutation[positionToSwap];
-			newPermutation[positionToSwap] = newPermutation[0];
-			newPermutation[0] = temp;
-		}
-
-		return newPermutation;
-	}
 }
