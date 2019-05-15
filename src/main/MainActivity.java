@@ -9,20 +9,21 @@ public class MainActivity {
 
 	public static void main(String[] args) {
 		// read the problem to solve QAP6, QAP7, QAP8, QAP9
-		//int problem = 1;//showMenu();
-		int method = showMenuMethod();
+		//int problem = 4;//showMenu();
+		int method = 3;//showMenuMethod();
 
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 
-		ReadFile readFile = new ReadFile("qapdata/chr12a.dat");//"qapdata/chr12a.dat"
+		ReadFile readFile = new ReadFile("qapdata/chr15a.dat");//"qapdata/chr12a.dat"
 
 		int[][] flow, distance;
-		distance = readFile.getDistance(); //getDataforDistance(problem);
-		flow = readFile.getFlow(); //getDataForFlow(problem);
+		//distance = getDataforDistance(problem); //
+		//flow = getDataForFlow(problem); 
+		distance = readFile.getDistance(); 
+		flow = readFile.getFlow(); 
+		
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
-		// qap.showData();
-		
 
 		Constructive constructive = new Constructive();
 		int[] initSolution = constructive.createInitSolution(qap);
@@ -38,13 +39,27 @@ public class MainActivity {
 			bestSolutionFound = tabuSearch.execute(50 * qap.getSize(), initSolution, qap, true);
 			//tabuSearch.showMemories();
 			break;
+		case 3:
+			GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
+			// pop_size, generations, mutation_probability, QAPData
+			geneticAlgorithm.execute(10 * qap.getSize(), 40 * qap.getSize(), 0.5, qap);
+			
+			//get the results for the algorithm
+			Results geneticAlgorithmResult = geneticAlgorithm.getResults();
+			//print the results, the best, the worst and the average population fitness
+			System.out.println("\nEl mejor individuo es: ");
+			geneticAlgorithmResult.getBestIndividual().printIndividualWithFitness(qap);
+			bestSolutionFound = geneticAlgorithmResult.getBestIndividual().getGenes();
+			System.out.println("El peor individuo es: ");
+			geneticAlgorithmResult.getWorstIndividual().printIndividualWithFitness(qap);
+			System.out.println("El valor promedio de la población es: " + geneticAlgorithmResult.getAvg_value());
+			break;
 
 		}
 
 		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
 		System.out.println("Costo: " + 2*qap.evalSolution(bestSolutionFound));
 		printSolution(bestSolutionFound);
-		
 
 	}
 
