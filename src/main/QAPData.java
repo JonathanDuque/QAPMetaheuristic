@@ -23,7 +23,7 @@ public class QAPData {
 	// cost function
 	public int evalSolution(int[] s) {
 		int cost = 0;
-		//s[0] = location of facility 0 
+		// s[0] = location of facility 0
 
 		// run the matrix only upside
 		for (int row = 0; row < size; row++) {
@@ -34,6 +34,21 @@ public class QAPData {
 			}
 		}
 		return cost;
+	}
+
+	// article A novel multistart hyper-heuristic algorithm on the grid for the
+	// quadratic assignment problem
+	public int evalMovement(int[] solution, int f1, int f2) {
+		int delta = 0;
+		for (int k = 0; k < size; k++) {
+			if (k != f1 && k != f2) {
+				delta = delta + (flow[f2][k] - flow[f1][k])
+						* (distance[solution[f2]][solution[k]] - distance[solution[f1]][solution[k]]);
+			}
+
+		}
+
+		return delta;
 	}
 
 	// function for look the location of any facility
@@ -63,11 +78,11 @@ public class QAPData {
 			System.out.println("\n");
 		}
 	}
-	
-	public  void printSolutionWithCost(int[] array, String cost) {
+
+	public void printSolutionWithCost(int[] array, String cost) {
 		for (int i : array) {
-			System.out.print(i  + ", ");// +1 because the index in java start with 0
+			System.out.print(i + ", ");// +1 because the index in java start with 0
 		}
-		System.out.println( "Costo: " + cost );
+		System.out.println("Costo: " + cost);
 	}
 }

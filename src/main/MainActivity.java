@@ -8,23 +8,32 @@ import main.GeneticAlgorithm.Results;
 public class MainActivity {
 
 	public static void main(String[] args) {
-		// read the problem to solve QAP6, QAP7, QAP8, QAP9
-		//int problem = 4;//showMenu();
-		int method = 3;//showMenuMethod();
+		long start = System.currentTimeMillis();
+
+		int problem = 4;//showMenu();
+		int method = 1;// showMenuMethod();
 
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 
-		ReadFile readFile = new ReadFile("qapdata/chr15a.dat");//"qapdata/chr12a.dat"
+		ReadFile readFile = new ReadFile("qapdata/chr15b.dat");// "qapdata/chr12a.dat"
 
 		int[][] flow, distance;
-		//distance = getDataforDistance(problem); //
-		//flow = getDataForFlow(problem); 
-		distance = readFile.getDistance(); 
-		flow = readFile.getFlow(); 
-		
+		distance = getDataforDistance(problem); //
+		flow = getDataForFlow(problem);
+		//distance = readFile.getDistance();
+		//flow = readFile.getFlow();
+
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
-
+		/*
+		 int [] solution = {8,1,2,3,4,5,6,7,0};
+		System.out.println("Costo test: " +  qap.evalSolution(solution));
+		int []solution2 = {4,1,2,3,8,5,6,7,0};
+		System.out.println("Costo test mov: " + qap.evalSolution(solution2));
+		int delta  = qap.evalMovement(solution, 0, 4);
+		System.out.println("delta: " + delta);
+		 */
+		
 		Constructive constructive = new Constructive();
 		int[] initSolution = constructive.createInitSolution(qap);
 		int[] bestSolutionFound = initSolution;
@@ -36,17 +45,17 @@ public class MainActivity {
 			break;
 		case 2:
 			TabuSearch tabuSearch = new TabuSearch();
-			bestSolutionFound = tabuSearch.execute(50 * qap.getSize(), initSolution, qap, true);
-			//tabuSearch.showMemories();
+			bestSolutionFound = tabuSearch.execute(100 * qap.getSize(), initSolution, qap, true);
+			// tabuSearch.showMemories();
 			break;
 		case 3:
 			GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
 			// pop_size, generations, mutation_probability, QAPData
 			geneticAlgorithm.execute(10 * qap.getSize(), 40 * qap.getSize(), 0.5, qap);
-			
-			//get the results for the algorithm
+
+			// get the results for the algorithm
 			Results geneticAlgorithmResult = geneticAlgorithm.getResults();
-			//print the results, the best, the worst and the average population fitness
+			// print the results, the best, the worst and the average population fitness
 			System.out.println("\nEl mejor individuo es: ");
 			geneticAlgorithmResult.getBestIndividual().printIndividualWithFitness(qap);
 			bestSolutionFound = geneticAlgorithmResult.getBestIndividual().getGenes();
@@ -58,8 +67,11 @@ public class MainActivity {
 		}
 
 		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
-		System.out.println("Costo: " + 2*qap.evalSolution(bestSolutionFound));
+		System.out.println("Costo: " +  qap.evalSolution(bestSolutionFound));
 		printSolution(bestSolutionFound);
+		long finish = System.currentTimeMillis();
+
+		System.out.println("\n" + (finish - start) + " milisegundos");
 
 	}
 
@@ -97,7 +109,7 @@ public class MainActivity {
 
 		return op;
 	}
-	
+
 	public static int showMenuMethod() {
 		int op;
 		do {
@@ -108,7 +120,6 @@ public class MainActivity {
 
 			op = in.nextInt();
 		} while (op < 1 || op > 3);
-		
 
 		return op;
 	}

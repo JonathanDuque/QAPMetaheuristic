@@ -15,7 +15,7 @@ public class ReadFile {
 			scanner= new Scanner (new File(fileName));
 			
 			 int n = Integer.parseInt(scanner.next());	
-			 System.out.println(n);
+			 //System.out.println(n);
 			 
 			 flow = new int [n][n];
 			 distance = new int [n][n];

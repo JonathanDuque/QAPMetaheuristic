@@ -13,7 +13,7 @@ public class TabuSearch {
 		// this initial block define the variable needed
 		qap = qapData;
 		int n = qap.getSize();
-		tabuIterations = (int) (n+ Math.floor(n/4)) ;
+		tabuIterations = (int) (2*n+16);//+ Math.floor(n/4)) ;
 		int iterationsCounter = 1, iterationsWithoutImproveCounter = 0;
 
 		//boolean largeMemory = isLargeMemory(memoryType);
@@ -55,7 +55,8 @@ public class TabuSearch {
 			}
 
 			//only check when is large memory
-			if (largeMemory && iterationsWithoutImproveCounter == totalIterations / 10) {
+			if (largeMemory && iterationsWithoutImproveCounter == totalIterations / 20) {
+				System.out.println("Memoria Larga" );
 				bestNeighbor = getNeighborWithLowFrecuency(currentSolution, iterationsCounter);
 			}
 
