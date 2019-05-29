@@ -11,11 +11,11 @@ public class MainActivity {
 		long start = System.currentTimeMillis();
 
 		int problem = 4;//showMenu();
-		int method = 1;// showMenuMethod();
+		int method = 2;// showMenuMethod();
 
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 
-		ReadFile readFile = new ReadFile("qapdata/chr15b.dat");// "qapdata/chr12a.dat"
+		//ReadFile readFile = new ReadFile("qapdata/chr15b.dat");// "qapdata/chr12a.dat"
 
 		int[][] flow, distance;
 		distance = getDataforDistance(problem); //
@@ -25,14 +25,6 @@ public class MainActivity {
 
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
-		/*
-		 int [] solution = {8,1,2,3,4,5,6,7,0};
-		System.out.println("Costo test: " +  qap.evalSolution(solution));
-		int []solution2 = {4,1,2,3,8,5,6,7,0};
-		System.out.println("Costo test mov: " + qap.evalSolution(solution2));
-		int delta  = qap.evalMovement(solution, 0, 4);
-		System.out.println("delta: " + delta);
-		 */
 		
 		Constructive constructive = new Constructive();
 		int[] initSolution = constructive.createInitSolution(qap);

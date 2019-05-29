@@ -14,36 +14,36 @@ public class LocalSearch {
 		System.out.println("costo: " + cost);
 
 		int n = qap.getSize();
-		int[] temporalSolution, improveSolution = Arrays.copyOf(initSolution, n),
-				bestSolution = Arrays.copyOf(initSolution, n);
-		int temporalCost;
+		int[] improveSolution = Arrays.copyOf(initSolution, n), bestSolution = Arrays.copyOf(initSolution, n);
 		boolean improve = false; // this flag control when the solution no improve and we are in an optimo local
 		int neighboor = 1;
-		int delta = 0;
+		int temporalDelta = 0, bestDelta = 0;
 
 		// here find the best solution from de initSolution
 		do {
 			System.out.println("\nVecindario: " + neighboor);
 
 			improve = false;
+			bestDelta = 0;
 			// here evaluate all the neighboorhood
 			for (int position1 = 0; position1 < (n - 1); position1++) {
 				for (int position2 = position1 + 1; position2 < n; position2++) {
-					delta = qap.evalMovement(bestSolution, position1, position2);
+					temporalDelta = qap.evalMovement(bestSolution, position1, position2);
 
 					// if improve
-					if (delta > 0) {
+					if (temporalDelta > bestDelta) {
 						improveSolution = makeSwap(bestSolution, position1, position2);
-						cost = cost - delta;
+						bestDelta = temporalDelta;
 						improve = true;
 					}
 				}
 			}
 
 			if (improve) {
-				System.out.println("Mejoró: " + cost);
-				MainActivity.printSolution(improveSolution);
+				cost = cost - bestDelta;
 				bestSolution = improveSolution;
+				System.out.println("Mejoró: " + cost);
+				MainActivity.printSolution(bestSolution);
 			} else {
 				improve = false;
 			}
@@ -72,11 +72,14 @@ public class LocalSearch {
 }
 
 /*
- * temporalSolution = makeSwap(bestSolution, position1, position2); temporalCost
- * = qap.evalSolution(temporalSolution); //temporalCost =
- * qap.evalMovement(bestSolution, position1, position2);
+  temporalSolution = makeSwap(bestSolution, position1, position2); 
+  temporalCost = qap.evalSolution(temporalSolution); //temporalCost =
+ * 
  * 
  * //System.out.println("Costo: " + cost + " Costo Vecino: " + temporalCost); //
- * decide if take the new solution if (temporalCost < cost ) { // cost =
- * temporalCost; improveSolution = temporalSolution; improve = true; }
+  decide if take the new solution 
+  if (temporalCost < cost ) { // 
+  cost =temporalCost; 
+  improveSolution = temporalSolution; 
+  improve = true; }
  */

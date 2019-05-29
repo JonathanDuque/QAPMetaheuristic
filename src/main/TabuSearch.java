@@ -3,20 +3,20 @@ package main;
 import java.util.Arrays;
 
 public class TabuSearch {
-	
-	int[][] recentMemoryTabu;	// this matrix will save the iteration number where a facility change is denied
-	int[][] frecuencyMemoryTabu;// this matrix save the number of a facility  has been changed
+
+	int[][] recentMemoryTabu; // this matrix will save the iteration number where a facility change is denied
+	int[][] frecuencyMemoryTabu;// this matrix save the number of a facility has been changed
 	int tabuIterations;// iterations tabu for a move
-	QAPData qap; 
+	QAPData qap;
 
 	public int[] execute(int totalIterations, int[] initSolution, QAPData qapData, boolean largeMemory) {
 		// this initial block define the variable needed
 		qap = qapData;
 		int n = qap.getSize();
-		tabuIterations = (int) (2*n+16);//+ Math.floor(n/4)) ;
+		tabuIterations = (int) (2 * n + 16);// + Math.floor(n/4)) ;
 		int iterationsCounter = 1, iterationsWithoutImproveCounter = 0;
 
-		//boolean largeMemory = isLargeMemory(memoryType);
+		// boolean largeMemory = isLargeMemory(memoryType);
 		if (largeMemory) {
 			System.out.println("Se usará memoria de largo plazo");
 		} else {
@@ -36,8 +36,7 @@ public class TabuSearch {
 
 		System.out.println("\n\n/*********** DATOS DURANTE LA EJECUCIÓN DEL ALGORITMO **********/");
 
-		
-		//this while find the best solution during totalIterations
+		// this while find the best solution during totalIterations
 		while (iterationsCounter <= totalIterations) {
 
 			bestNeighbor = getBestNeighbor(currentSolution, iterationsCounter, bestCost);
@@ -49,14 +48,15 @@ public class TabuSearch {
 				bestSolution = bestNeighbor;
 				bestCost = bestNeighborCost;
 				updateSolutionCounter = iterationsCounter;// save this iterations for show late
-				System.out.println("Pasaron " + iterationsWithoutImproveCounter + " iteraciones sin mejora. Mejor: " + bestCost);
+				System.out.println(
+						"Pasaron " + iterationsWithoutImproveCounter + " iteraciones sin mejora. Mejor: " + bestCost);
 
 				iterationsWithoutImproveCounter = 0;
 			}
 
-			//only check when is large memory
+			// only check when is large memory
 			if (largeMemory && iterationsWithoutImproveCounter == totalIterations / 20) {
-				System.out.println("Memoria Larga" );
+				System.out.println("Memoria Larga");
 				bestNeighbor = getNeighborWithLowFrecuency(currentSolution, iterationsCounter);
 			}
 
@@ -79,7 +79,7 @@ public class TabuSearch {
 		int[] bestNeighborFound = makeSwap(currentSolution, 0, 1), temporalSolution;
 		int posX = 0, posY = 1;
 
-		// this block init best neighbor  with a permutation without tabu
+		// this block init best neighbor with a permutation without tabu
 		for (int position1 = 0; position1 < (n - 1); position1++) {
 			boolean found = false;
 			for (int position2 = position1 + 1; position2 < n; position2++) {
@@ -99,7 +99,8 @@ public class TabuSearch {
 		}
 
 		int temporalCost, bestNeighborFoundCost = qap.evalSolution(bestNeighborFound);
-		
+		int currentCost = qap.evalSolution(currentSolution);
+
 		/*
 		 * the neighgordhood will be change two facilities, so in total we have the
 		 * permutation of n take in 2
@@ -108,14 +109,15 @@ public class TabuSearch {
 		for (int position1 = 0; position1 < (n - 1); position1++) {
 			for (int position2 = position1 + 1; position2 < n; position2++) {
 
-				temporalSolution = makeSwap(currentSolution, position1, position2);
-				temporalCost = qap.evalSolution(temporalSolution);
-
+				//currentCost - delta
+				temporalCost = currentCost - qap.evalMovement(currentSolution, position1, position2);;
 				if (temporalCost < bestNeighborFoundCost) {
-					int facX = temporalSolution[position1];
-					int facY = temporalSolution[position2];
+					temporalSolution = makeSwap(currentSolution, position1, position2);
 
-					if (!isTabu(facX, facY, currentIteration)) {
+					int locX = temporalSolution[position1];
+					int locY = temporalSolution[position2];
+
+					if (!isTabu(locX, locY, currentIteration)) {
 						bestNeighborFound = temporalSolution;
 						bestNeighborFoundCost = temporalCost;
 						posX = position1;
@@ -131,6 +133,7 @@ public class TabuSearch {
 						}
 					}
 				}
+
 			}
 		}
 
@@ -140,7 +143,7 @@ public class TabuSearch {
 		return bestNeighborFound;
 	}
 
-	//this function is used for the large memory
+	// this function is used for the large memory
 	public int[] getNeighborWithLowFrecuency(int[] currentSolution, int currentIteration) {
 		int n = qap.getSize();
 		int[] neighborWithLowFrecuency = Arrays.copyOf(currentSolution, n);
@@ -184,7 +187,7 @@ public class TabuSearch {
 		recentMemoryTabu[facX][facY] = iterationsCounter + tabuIterations;
 		recentMemoryTabu[facY][facX] = iterationsCounter + tabuIterations;
 
-		//update matrix for large memory
+		// update matrix for large memory
 		frecuencyMemoryTabu[facX][facY]++;
 		frecuencyMemoryTabu[facY][facX]++;
 	}
@@ -203,7 +206,6 @@ public class TabuSearch {
 		}
 	}
 
-	
 	public int[] makeSwap(int[] permutation, int position1, int position2) {
 
 		int size = permutation.length;
@@ -235,3 +237,30 @@ public class TabuSearch {
 		qap.printMatrix(frecuencyMemoryTabu);
 	}
 }
+
+
+/*
+ temporalSolution = makeSwap(currentSolution, position1, position2);
+				temporalCost = qap.evalSolution(temporalSolution);
+
+				if (temporalCost < bestNeighborFoundCost) {
+					int facX = temporalSolution[position1];
+					int facY = temporalSolution[position2];
+
+					if (!isTabu(facX, facY, currentIteration)) {
+						bestNeighborFound = temporalSolution;
+						bestNeighborFoundCost = temporalCost;
+						posX = position1;
+						posY = position2;
+					} else {
+						if (satisfyAspitarionCriteria(temporalCost, bestCost)) {
+							System.out.println("Se uso criterio de aspiración en la iteración: " + currentIteration
+									+ ", por costo: " + temporalCost);
+							bestNeighborFound = temporalSolution;
+							bestNeighborFoundCost = temporalCost;
+							posX = position1;
+							posY = position2;
+						}
+					}
+				}
+  */
