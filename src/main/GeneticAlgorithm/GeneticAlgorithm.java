@@ -12,6 +12,7 @@ public class GeneticAlgorithm {
 	QAPData qap;
 	int qap_size;
 	Results results;
+	Random random;
 
 	public void execute(int pop_size, int generations, double mutation_probability, QAPData qapData) {
 		// first the variables necessary for the execution
@@ -21,6 +22,7 @@ public class GeneticAlgorithm {
 		int count_generations = 0;
 		qap = qapData;
 		qap_size = qap.getSize();
+		random = new Random(1);
 
 		// printing the parameters for the execution
 		System.out.println("Tamaño de la población: " + pop_size);
@@ -63,9 +65,8 @@ public class GeneticAlgorithm {
 
 	private Individual getBestOffspring(Individual individual1, Individual individual2, double mp) {
 		// mp = mutation_probability
-		Random rand = new Random();
 		// crossover from 1 until qap_size minus 1
-		int point_crossover = rand.nextInt(qap_size - 1) + 1;
+		int point_crossover = random.nextInt(qap_size - 1) + 1;
 
 		// generate two offspring
 		Individual child1 = crossover(individual1, individual2, point_crossover);
@@ -99,7 +100,6 @@ public class GeneticAlgorithm {
 	}
 
 	private Individual mutate(Individual individual, double mp) {
-		Random random = new Random();
 		double mutation_number = random.nextDouble();
 
 		// checking if the individual will be mutate
@@ -156,10 +156,9 @@ public class GeneticAlgorithm {
 
 	private Individual selectIndividual(List<Individual> temp_generation) {
 		Individual selected;
-		Random rand = new Random();
-
+		
 		// obtain a number between 0 - size population
-		int index = rand.nextInt(temp_generation.size());
+		int index = random.nextInt(temp_generation.size());
 
 		selected = temp_generation.get(index);
 		temp_generation.remove(index);// delete for no selecting later
@@ -206,7 +205,7 @@ public class GeneticAlgorithm {
 		Individual bestIndividual = generation.get(0);
 		Individual worstIndividual = generation.get(0);
 		int avg_value;
-		double standdev = 0;
+		//double standdev = 0;
 		int best_value = qap.evalSolution(bestIndividual.getGenes());
 		int worst_value = best_value;
 
@@ -231,13 +230,13 @@ public class GeneticAlgorithm {
 
 		avg_value = fitness_sum / pop_size;
 
-		for (Individual ind : generation) {
-			int fitness_val = qap.evalSolution(ind.getGenes());
-			standdev += (fitness_val - avg_value) * (fitness_val - avg_value);
-		}
+		//for (Individual ind : generation) {
+		//	int fitness_val = qap.evalSolution(ind.getGenes());
+		//	standdev += (fitness_val - avg_value) * (fitness_val - avg_value);
+		//}
 
-		standdev /= pop_size;
-		standdev = Math.sqrt(standdev);
+		//standdev /= pop_size;
+		//standdev = Math.sqrt(standdev);
 
 		return new Results(bestIndividual, worstIndividual, avg_value);
 	}
@@ -261,22 +260,17 @@ public class GeneticAlgorithm {
 		List<Individual> start_generation = new ArrayList<>(pop_size);
 
 		for (int i = 0; i < pop_size; i++) {
-			// create an array seed in order from 0 until qap_size
-			ArrayList<Integer> seed = new ArrayList<>(qap_size);
-			for (int j = 0; j < qap_size; j++) {
-				seed.add(j);
-			}
-
 			// disorder the array
-			Collections.shuffle(seed);
+			//Collections.shuffle(seed);
 
 			int[] new_genes = new int[qap_size];
+			
 			for (int k = 0; k < qap_size; k++) {
-				new_genes[k] = seed.get(k);
+				new_genes[k] = k;
 			}
-			// introduce new different induvidual
+			
+			// introduce new different individual
 			insertIndividualIntoPoblation(start_generation, new Individual(new_genes));
-			// start_generation.add(new Individual(new_genes));
 		}
 		return start_generation;
 
