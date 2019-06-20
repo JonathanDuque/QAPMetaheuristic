@@ -1,5 +1,7 @@
 package main.GeneticAlgorithm;
 
+import java.util.Arrays;
+
 import main.QAPData;
 
 public class Individual {
@@ -11,6 +13,7 @@ public class Individual {
 
 	public Individual(int amount) {
 		genes = new int[amount];
+		Arrays.fill(genes, -1);
 	}
 
 	public int[] getGenes() {
@@ -24,6 +27,7 @@ public class Individual {
 	public void setGene(int position, int value) {
 		genes[position] = value;
 	}
+	
 
 	public void printIndividual() {
 		String individual = "";

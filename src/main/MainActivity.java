@@ -10,7 +10,7 @@ public class MainActivity {
 	public static void main(String[] args) {
 		long start = System.currentTimeMillis();
 
-		//int problem = 4;//showMenu();
+		int problem = 3;//showMenu();
 		int method = 3;// showMenuMethod();
 
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
@@ -18,10 +18,10 @@ public class MainActivity {
 		ReadFile readFile = new ReadFile("qapdata/chr15b.dat");// "qapdata/chr12a.dat"
 
 		int[][] flow, distance;
-		//distance = getDataforDistance(problem); //
-		//flow = getDataForFlow(problem);
-		distance = readFile.getDistance();
-		flow = readFile.getFlow();
+		distance = getDataforDistance(problem); //
+		flow = getDataForFlow(problem);
+		//distance = readFile.getDistance();
+		//flow = readFile.getFlow();
 
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);

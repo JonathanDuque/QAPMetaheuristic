@@ -36,7 +36,7 @@ public class GeneticAlgorithm {
 		printPopulation(new_generation);
 
 		// this cicle finish when complete all generations
-		while (count_generations < generations) {
+		while (count_generations < 1) {
 			temp_generation = new ArrayList<>(new_generation);
 
 			for (int i = 0; i < pop_size / 2; i++) {
@@ -65,12 +65,17 @@ public class GeneticAlgorithm {
 
 	private Individual getBestOffspring(Individual individual1, Individual individual2, double mp) {
 		// mp = mutation_probability
+		Random rand = new Random();
 		// crossover from 1 until qap_size minus 1
-		int point_crossover = random.nextInt(qap_size - 1) + 1;
+		int point_crossover = rand.nextInt(qap_size - 1) + 1;
 
 		// generate two offspring
 		Individual child1 = crossover(individual1, individual2, point_crossover);
 		Individual child2 = crossover(individual2, individual1, point_crossover);
+
+		Individual childx = crossoverUX(individual1, individual2);
+
+		//child1.printIndividual();
 
 		// mutate two offspring
 		child1 = mutate(child1, mp);
@@ -78,6 +83,7 @@ public class GeneticAlgorithm {
 
 		// return the best by fitness
 		return getBestIndividual(child1, child2);
+		//return childx;
 	}
 
 	private Individual crossover(Individual father, Individual mother, int point_crossover) {
@@ -97,6 +103,42 @@ public class GeneticAlgorithm {
 
 		// fix individual if necessary
 		return fixIndividual(child);
+	}
+
+	private Individual crossoverUX(Individual i1, Individual i2) {
+		// create individual empty
+		Individual child = new Individual(qap_size);
+
+		//System.out.println("\nPadres");
+		//i1.printIndividual();
+		//i2.printIndividual();
+		//child.printIndividual();
+
+		for (int i = 0; i < qap_size; i++) {
+			switch ((i + 1) % 4) {
+			case 1:
+				child.setGene(i, i1.getGene(i));
+				break;
+			case 2:
+				child.setGene(i, i1.getGene(i));
+				break;
+			case 3:
+				child.setGene(i, i2.getGene(i));
+				break;
+			case 0:
+				child.setGene(i, i2.getGene(i));
+				break;
+			default:
+				// code block
+			}
+		}
+
+		//System.out.println("individuo");
+
+		//child.printIndividual();
+
+		return fixIndividual(child);
+
 	}
 
 	private Individual mutate(Individual individual, double mp) {
@@ -156,7 +198,7 @@ public class GeneticAlgorithm {
 
 	private Individual selectIndividual(List<Individual> temp_generation) {
 		Individual selected;
-		
+
 		// obtain a number between 0 - size population
 		int index = random.nextInt(temp_generation.size());
 
@@ -177,24 +219,24 @@ public class GeneticAlgorithm {
 	private void insertIndividualIntoPoblation(List<Individual> generation, Individual new_individual) {
 		boolean exist = false;
 
-		//this cicle finish until the new individual will be different 
+		// this cicle finish until the new individual will be different
 		do {
 			exist = false;
-			//identify if the new individual is already in the generation
+			// identify if the new individual is already in the generation
 			for (Individual temp : generation) {
 				if (areIquals(temp, new_individual)) {
 					exist = true;
 					break;
 				}
 			}
-			//if exist is neccesary mutate
+			// if exist is neccesary mutate
 			if (exist) {
 				new_individual = mutate(new_individual, 1);// mutation_probability = 1
 			} else {
 				generation.add(new_individual);
 			}
 
-		} while (exist); 
+		} while (exist);
 	}
 
 	public Results getResults() {
@@ -205,13 +247,13 @@ public class GeneticAlgorithm {
 		Individual bestIndividual = generation.get(0);
 		Individual worstIndividual = generation.get(0);
 		int avg_value;
-		//double standdev = 0;
+		// double standdev = 0;
 		int best_value = qap.evalSolution(bestIndividual.getGenes());
 		int worst_value = best_value;
 
 		int fitness_sum = 0;
 
-		//this block save the best and the wort individual
+		// this block save the best and the wort individual
 		for (Individual ind : generation) {
 			int fitness_val = qap.evalSolution(ind.getGenes());
 
@@ -230,13 +272,13 @@ public class GeneticAlgorithm {
 
 		avg_value = fitness_sum / pop_size;
 
-		//for (Individual ind : generation) {
-		//	int fitness_val = qap.evalSolution(ind.getGenes());
-		//	standdev += (fitness_val - avg_value) * (fitness_val - avg_value);
-		//}
+		// for (Individual ind : generation) {
+		// int fitness_val = qap.evalSolution(ind.getGenes());
+		// standdev += (fitness_val - avg_value) * (fitness_val - avg_value);
+		// }
 
-		//standdev /= pop_size;
-		//standdev = Math.sqrt(standdev);
+		// standdev /= pop_size;
+		// standdev = Math.sqrt(standdev);
 
 		return new Results(bestIndividual, worstIndividual, avg_value);
 	}
@@ -251,7 +293,7 @@ public class GeneticAlgorithm {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -260,17 +302,50 @@ public class GeneticAlgorithm {
 		List<Individual> start_generation = new ArrayList<>(pop_size);
 
 		for (int i = 0; i < pop_size; i++) {
+			
+			ArrayList<Integer> seed = new ArrayList<>(qap_size);
+			for (int j = 0; j < qap_size; j++) {
+				seed.add(j);
+			}
+
 			// disorder the array
-			//Collections.shuffle(seed);
+			Collections.shuffle(seed);
 
 			int[] new_genes = new int[qap_size];
-			
+
 			for (int k = 0; k < qap_size; k++) {
 				new_genes[k] = k;
 			}
-			
+
 			// introduce new different individual
 			insertIndividualIntoPoblation(start_generation, new Individual(new_genes));
+		}
+		return start_generation;
+
+	}
+
+	
+	private List<Individual> createFirstGeneration2(int pop_size) {
+		// create empty list
+		List<Individual> start_generation = new ArrayList<>(pop_size);
+
+		for (int i = 0; i < pop_size; i++) {
+			// create an array seed in order from 0 until qap_size
+			ArrayList<Integer> seed = new ArrayList<>(qap_size);
+			for (int j = 0; j < qap_size; j++) {
+				seed.add(j);
+			}
+
+			// disorder the array
+			Collections.shuffle(seed);
+
+			int[] new_genes = new int[qap_size];
+			for (int k = 0; k < qap_size; k++) {
+				new_genes[k] = seed.get(k);
+			}
+			// introduce new different induvidual
+			insertIndividualIntoPoblation(start_generation, new Individual(new_genes));
+			// start_generation.add(new Individual(new_genes));
 		}
 		return start_generation;
 
