@@ -11,17 +11,17 @@ public class MainActivity {
 		long start = System.currentTimeMillis();
 
 		int problem = 3;//showMenu();
-		int method = 3;// showMenuMethod();
+		int method = 2;// showMenuMethod();
 
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 
-		ReadFile readFile = new ReadFile("qapdata/chr15b.dat");// "qapdata/chr12a.dat"
+		ReadFile readFile = new ReadFile("qapdata/chr15a.dat");// "qapdata/chr12a.dat"
 
 		int[][] flow, distance;
-		distance = getDataforDistance(problem); //
-		flow = getDataForFlow(problem);
-		//distance = readFile.getDistance();
-		//flow = readFile.getFlow();
+		//distance = getDataforDistance(problem); //
+		//flow = getDataForFlow(problem);
+		distance = readFile.getDistance();
+		flow = readFile.getFlow();
 
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
@@ -37,7 +37,7 @@ public class MainActivity {
 			break;
 		case 2:
 			TabuSearch tabuSearch = new TabuSearch();
-			bestSolutionFound = tabuSearch.execute(100 * qap.getSize(), initSolution, qap, true);
+			bestSolutionFound = tabuSearch.execute(100 * qap.getSize(), initSolution, qap, false);
 			// tabuSearch.showMemories();
 			break;
 		case 3:

@@ -36,7 +36,7 @@ public class GeneticAlgorithm {
 		printPopulation(new_generation);
 
 		// this cicle finish when complete all generations
-		while (count_generations < 1) {
+		while (count_generations < generations) {
 			temp_generation = new ArrayList<>(new_generation);
 
 			for (int i = 0; i < pop_size / 2; i++) {
@@ -82,8 +82,8 @@ public class GeneticAlgorithm {
 		child2 = mutate(child2, mp);
 
 		// return the best by fitness
-		return getBestIndividual(child1, child2);
-		//return childx;
+		//return getBestIndividual(child1, child2);
+		return childx;
 	}
 
 	private Individual crossover(Individual father, Individual mother, int point_crossover) {
@@ -302,23 +302,19 @@ public class GeneticAlgorithm {
 		List<Individual> start_generation = new ArrayList<>(pop_size);
 
 		for (int i = 0; i < pop_size; i++) {
-			
-			ArrayList<Integer> seed = new ArrayList<>(qap_size);
-			for (int j = 0; j < qap_size; j++) {
-				seed.add(j);
-			}
-
 			// disorder the array
-			Collections.shuffle(seed);
+			// Collections.shuffle(seed);
 
 			int[] new_genes = new int[qap_size];
 
 			for (int k = 0; k < qap_size; k++) {
-				new_genes[k] = k;
+				new_genes[k] = random.nextInt(qap_size);;
 			}
 
+			//Individual  individual = mutate(new Individual(new_genes), 1);
 			// introduce new different individual
-			insertIndividualIntoPoblation(start_generation, new Individual(new_genes));
+			Individual  individual = fixIndividual(new Individual(new_genes));
+			insertIndividualIntoPoblation(start_generation, individual);
 		}
 		return start_generation;
 
@@ -337,7 +333,7 @@ public class GeneticAlgorithm {
 			}
 
 			// disorder the array
-			Collections.shuffle(seed);
+			//Collections.shuffle(seed);
 
 			int[] new_genes = new int[qap_size];
 			for (int k = 0; k < qap_size; k++) {
