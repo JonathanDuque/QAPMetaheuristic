@@ -320,33 +320,6 @@ public class GeneticAlgorithm {
 
 	}
 
-	
-	private List<Individual> createFirstGeneration2(int pop_size) {
-		// create empty list
-		List<Individual> start_generation = new ArrayList<>(pop_size);
-
-		for (int i = 0; i < pop_size; i++) {
-			// create an array seed in order from 0 until qap_size
-			ArrayList<Integer> seed = new ArrayList<>(qap_size);
-			for (int j = 0; j < qap_size; j++) {
-				seed.add(j);
-			}
-
-			// disorder the array
-			//Collections.shuffle(seed);
-
-			int[] new_genes = new int[qap_size];
-			for (int k = 0; k < qap_size; k++) {
-				new_genes[k] = seed.get(k);
-			}
-			// introduce new different induvidual
-			insertIndividualIntoPoblation(start_generation, new Individual(new_genes));
-			// start_generation.add(new Individual(new_genes));
-		}
-		return start_generation;
-
-	}
-
 	private void printPopulation(List<Individual> population) {
 		for (int i = 0; i < population.size(); i++) {
 			population.get(i).printIndividualWithFitness(qap);
