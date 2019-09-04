@@ -237,30 +237,3 @@ public class TabuSearch {
 		qap.printMatrix(frecuencyMemoryTabu);
 	}
 }
-
-
-/*
- temporalSolution = makeSwap(currentSolution, position1, position2);
-				temporalCost = qap.evalSolution(temporalSolution);
-
-				if (temporalCost < bestNeighborFoundCost) {
-					int facX = temporalSolution[position1];
-					int facY = temporalSolution[position2];
-
-					if (!isTabu(facX, facY, currentIteration)) {
-						bestNeighborFound = temporalSolution;
-						bestNeighborFoundCost = temporalCost;
-						posX = position1;
-						posY = position2;
-					} else {
-						if (satisfyAspitarionCriteria(temporalCost, bestCost)) {
-							System.out.println("Se uso criterio de aspiración en la iteración: " + currentIteration
-									+ ", por costo: " + temporalCost);
-							bestNeighborFound = temporalSolution;
-							bestNeighborFoundCost = temporalCost;
-							posX = position1;
-							posY = position2;
-						}
-					}
-				}
-  */

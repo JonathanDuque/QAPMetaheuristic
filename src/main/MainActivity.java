@@ -10,7 +10,7 @@ public class MainActivity {
 	public static void main(String[] args) {
 		long start = System.currentTimeMillis();
 
-		int problem = 3;//showMenu();
+		int problem = 3;// showMenu();
 		int method = 2;// showMenuMethod();
 
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
@@ -18,17 +18,18 @@ public class MainActivity {
 		ReadFile readFile = new ReadFile("qapdata/chr15a.dat");// "qapdata/chr12a.dat"
 
 		int[][] flow, distance;
-		//distance = getDataforDistance(problem); //
-		//flow = getDataForFlow(problem);
+		// distance = getDataforDistance(problem); //
+		// flow = getDataForFlow(problem);
 		distance = readFile.getDistance();
 		flow = readFile.getFlow();
 
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
-			
+
+		// get init solution with constructive method
 		Constructive constructive = new Constructive();
 		int[] initSolution = constructive.createInitSolution(qap);
-		int[] bestSolutionFound = initSolution;
+		int[] bestSolutionFound = initSolution;// for now this is the best solution
 
 		switch (method) {
 		case 1:
@@ -59,10 +60,11 @@ public class MainActivity {
 		}
 
 		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
-		System.out.println("Costo: " +  2*qap.evalSolution(bestSolutionFound));
+		System.out.println("Costo: " + 2 * qap.evalSolution(bestSolutionFound));
 		printSolution(bestSolutionFound);
-		long finish = System.currentTimeMillis();
 
+		// show the total time
+		long finish = System.currentTimeMillis();
 		System.out.println("\n" + (finish - start) + " milisegundos");
 
 	}
