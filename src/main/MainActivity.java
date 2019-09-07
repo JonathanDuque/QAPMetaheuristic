@@ -10,18 +10,18 @@ public class MainActivity {
 	public static void main(String[] args) {
 		long start = System.currentTimeMillis();
 
-		int problem = 3;// showMenu();
-		int method = 2;// showMenuMethod();
+		int problem = 4;// showMenu(); //from https://neos-guide.org/content/qap9
+		int method = 3;// showMenuMethod();
 
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 
-		ReadFile readFile = new ReadFile("qapdata/chr15a.dat");// "qapdata/chr12a.dat"
+		//ReadFile readFile = new ReadFile("qapdata/chr15a.dat");// "qapdata/chr12a.dat"
 
 		int[][] flow, distance;
-		// distance = getDataforDistance(problem); //
-		// flow = getDataForFlow(problem);
-		distance = readFile.getDistance();
-		flow = readFile.getFlow();
+		distance = getDataforDistance(problem); //
+		 flow = getDataForFlow(problem);
+		//distance = readFile.getDistance();
+		//flow = readFile.getFlow();
 
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
@@ -39,9 +39,14 @@ public class MainActivity {
 		case 2:
 			TabuSearch tabuSearch = new TabuSearch();
 			bestSolutionFound = tabuSearch.execute(100 * qap.getSize(), initSolution, qap, false);
-			// tabuSearch.showMemories();
+			tabuSearch.showMemories();
 			break;
 		case 3:
+			RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
+			bestSolutionFound = robustTabuSearch.execute(100 * qap.getSize(), initSolution, qap, false);
+			robustTabuSearch.showMemories();
+			break;
+		case 4:
 			GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
 			// pop_size, generations, mutation_probability, QAPData
 			geneticAlgorithm.execute(10 * qap.getSize(), 40 * qap.getSize(), 0.5, qap);
@@ -60,7 +65,7 @@ public class MainActivity {
 		}
 
 		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
-		System.out.println("Costo: " + 2 * qap.evalSolution(bestSolutionFound));
+		System.out.println("Costo: " + 1 * qap.evalSolution(bestSolutionFound));
 		printSolution(bestSolutionFound);
 
 		// show the total time
