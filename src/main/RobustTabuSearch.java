@@ -11,7 +11,7 @@ public class RobustTabuSearch {
 	QAPData qap;
 	Random random;
 
-	public int[] execute(int totalIterations, int[] initSolution, QAPData qapData, boolean largeMemory) {
+	public int[] solve(int totalIterations, int[] initSolution, QAPData qapData, boolean largeMemory) {
 		// this initial block define the variable needed
 		qap = qapData;
 		int n = qap.getSize();

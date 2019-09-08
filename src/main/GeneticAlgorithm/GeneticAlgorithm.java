@@ -14,7 +14,7 @@ public class GeneticAlgorithm {
 	Results results;
 	Random random;
 
-	public void execute(int pop_size, int generations, double mutation_probability, QAPData qapData) {
+	public void solve(int pop_size, int generations, double mutation_probability, QAPData qapData) {
 		// first the variables necessary for the execution
 		Individual individual1, individual2, bestChild;
 		List<Individual> new_generation = new ArrayList<>();

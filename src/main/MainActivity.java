@@ -15,13 +15,14 @@ public class MainActivity {
 
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 
-		//ReadFile readFile = new ReadFile("qapdata/chr15a.dat");// "qapdata/chr12a.dat"
+		// ReadFile readFile = new ReadFile("qapdata/chr15a.dat");//
+		// "qapdata/chr12a.dat"
 
 		int[][] flow, distance;
 		distance = getDataforDistance(problem); //
-		 flow = getDataForFlow(problem);
-		//distance = readFile.getDistance();
-		//flow = readFile.getFlow();
+		flow = getDataForFlow(problem);
+		// distance = readFile.getDistance();
+		// flow = readFile.getFlow();
 
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
@@ -34,22 +35,30 @@ public class MainActivity {
 		switch (method) {
 		case 1:
 			LocalSearch localSearch = new LocalSearch();
-			bestSolutionFound = localSearch.execute(initSolution, qap);
+			bestSolutionFound = localSearch.solve(initSolution, qap);
 			break;
+
 		case 2:
 			TabuSearch tabuSearch = new TabuSearch();
-			bestSolutionFound = tabuSearch.execute(100 * qap.getSize(), initSolution, qap, false);
+			bestSolutionFound = tabuSearch.solve(100 * qap.getSize(), initSolution, qap, false);
 			tabuSearch.showMemories();
 			break;
+
 		case 3:
 			RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
-			bestSolutionFound = robustTabuSearch.execute(100 * qap.getSize(), initSolution, qap, false);
+			bestSolutionFound = robustTabuSearch.solve(100 * qap.getSize(), initSolution, qap, false);
 			robustTabuSearch.showMemories();
 			break;
+
 		case 4:
+			ExtremalOptimization extremalOptimization = new ExtremalOptimization();
+			bestSolutionFound = extremalOptimization.solve(100 * qap.getSize(), initSolution, qap);
+			break;
+
+		case 5:
 			GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
 			// pop_size, generations, mutation_probability, QAPData
-			geneticAlgorithm.execute(10 * qap.getSize(), 40 * qap.getSize(), 0.5, qap);
+			geneticAlgorithm.solve(10 * qap.getSize(), 40 * qap.getSize(), 0.5, qap);
 
 			// get the results for the algorithm
 			Results geneticAlgorithmResult = geneticAlgorithm.getResults();
