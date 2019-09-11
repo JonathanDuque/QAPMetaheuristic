@@ -45,16 +45,23 @@ public class QAPData {
 				delta = delta + (flow[f2][k] - flow[f1][k])
 						* (distance[solution[f2]][solution[k]] - distance[solution[f1]][solution[k]]);
 			}
-
 		}
 
 		return delta;
 	}
 
+	//TODO revisar esta funcion  
 	// function for look the location of any facility
 	public int getLocationOfFacility(int[] permutation, int facility) {
 		for (int i = 0; i < permutation.length; i++)
 			if (permutation[i] == facility)
+				return i;
+		return -1;
+	}
+
+	private int getFacilityOfLocation(int[] permutation, int location) {
+		for (int i = 0; i < permutation.length; i++)
+			if (permutation[i] == location)
 				return i;
 		return -1;
 	}
@@ -84,5 +91,20 @@ public class QAPData {
 			System.out.print(i + ", ");// +1 because the index in java start with 0
 		}
 		System.out.println("Costo: " + cost);
+	}
+
+	// para imorimir solucion en formato ubicaciones - facilidades
+	public void printSolutionInReadFormat(int[] array) {
+		String facilities = "Facilidades: ", locations = "Ubicaciones: ";
+		for (int i = 0; i < array.length; i++) {
+			locations = locations + ((i + 0) + " ");
+		}
+		System.out.println("\n" + locations);
+		for (int l = 0; l < array.length; l++) {
+			facilities = facilities + ((getFacilityOfLocation(array, l) + 0) + " ");// +1 because the index in java
+																					// start with 0
+		}
+
+		System.out.println(facilities);
 	}
 }

@@ -186,7 +186,7 @@ public class RobustTabuSearch {
 	public void updateTabuMatrix(int[] selectedSolution, int posX, int posY, int iterationsCounter) {
 		//random.nextDouble() give decimal between 0 and 1
 		int t1 = (int) (Math.pow(random.nextDouble(), 3)*tabuDuration);
-		int t2 = t1; //(int) (Math.pow(random.nextDouble(), 3)*tabuDuration);
+		int t2 = (int) (Math.pow(random.nextDouble(), 3)*tabuDuration);
 		
 		// get the changed facilities
 		int facX = selectedSolution[posX];

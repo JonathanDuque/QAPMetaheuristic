@@ -11,7 +11,7 @@ public class MainActivity {
 		long start = System.currentTimeMillis();
 
 		int problem = 4;// showMenu(); //from https://neos-guide.org/content/qap9
-		int method = 3;// showMenuMethod();
+		int method = 4;// showMenuMethod();
 
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 
@@ -52,7 +52,7 @@ public class MainActivity {
 
 		case 4:
 			ExtremalOptimization extremalOptimization = new ExtremalOptimization();
-			bestSolutionFound = extremalOptimization.solve(100 * qap.getSize(), initSolution, qap);
+			bestSolutionFound = extremalOptimization.solve(100* qap.getSize(), initSolution, qap);
 			break;
 
 		case 5:
@@ -76,6 +76,7 @@ public class MainActivity {
 		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
 		System.out.println("Costo: " + 1 * qap.evalSolution(bestSolutionFound));
 		printSolution(bestSolutionFound);
+		//qap.printSolutionInReadFormat(bestSolutionFound);
 
 		// show the total time
 		long finish = System.currentTimeMillis();
@@ -87,12 +88,12 @@ public class MainActivity {
 		// System.out.println("Locaciones");
 		String locations = "Facilidades: ", facilities = "Ubicaciones: ";
 		for (int i = 0; i < array.length; i++) {
-			locations = locations + ((i + 1) + " ");
+			locations = locations + ((i + 0) + " ");
 		}
 		// System.out.println("\nFacilidades");
 		System.out.println(locations);
 		for (int i : array) {
-			facilities = facilities + ((i + 1) + " ");// +1 because the index in java start with 0
+			facilities = facilities + ((i + 0) + " ");// +1 because the index in java start with 0
 		}
 		System.out.println(facilities);
 	}
