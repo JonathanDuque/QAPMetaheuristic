@@ -41,13 +41,13 @@ public class MainActivity {
 		case 2:
 			TabuSearch tabuSearch = new TabuSearch();
 			bestSolutionFound = tabuSearch.solve(100 * qap.getSize(), initSolution, qap, false);
-			tabuSearch.showMemories();
+			//tabuSearch.showMemories();
 			break;
 
 		case 3:
 			RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
 			bestSolutionFound = robustTabuSearch.solve(100 * qap.getSize(), initSolution, qap, false);
-			robustTabuSearch.showMemories();
+			//robustTabuSearch.showMemories();
 			break;
 
 		case 4:

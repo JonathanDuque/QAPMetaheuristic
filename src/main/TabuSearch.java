@@ -110,7 +110,7 @@ public class TabuSearch {
 			for (int position2 = position1 + 1; position2 < n; position2++) {
 
 				//currentCost - delta
-				temporalCost = currentCost - qap.evalMovement(currentSolution, position1, position2);;
+				temporalCost = currentCost - qap.evalMovement(currentSolution, position1, position2);
 				if (temporalCost < bestNeighborFoundCost) {
 					temporalSolution = makeSwap(currentSolution, position1, position2);
 

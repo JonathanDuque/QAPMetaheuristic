@@ -29,6 +29,7 @@ public class ExtremalOptimization {
 		List<Delta> deltaList = new ArrayList<>();
 		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
 		random = new Random(1);// set the seed, 1 in this case
+		//TODO implement lambda functions , receive tau parameter
 		initPdf(qap.getSize());
 
 		System.out.println("Solución inicial: ");
@@ -38,8 +39,9 @@ public class ExtremalOptimization {
 		bestCost = currentCost;
 		bestSolution = initSolution;
 		System.out.println("costo: " + currentCost);
+		int counterBest=0;
 
-		while (iterationsCounter <= totalIterations ) {
+		while (iterationsCounter <= totalIterations) {
 			System.out.println("\niter: " + iterationsCounter);
 
 			for (int f1 = 0; f1 < n; f1++) {
@@ -57,13 +59,19 @@ public class ExtremalOptimization {
 					if (tempDelta > bestDelta) {
 						change = f2;
 						bestDelta = tempDelta;
+						counterBest =1;
+					}else if(tempDelta == bestDelta && random.nextInt(++counterBest)==0) {
+						change = f2;
+						bestDelta = tempDelta;
+						System.out.println("                                                              entro" );
+
 					}
 				}
 				deltaList.add(new Delta(bestDelta, f1, change));
 				// System.out.println(f1 + " mejor: " + bestDelta + " con " + change +"\n");
 			}
 
-			// printDeltas(deltaList);
+			//printDeltas(deltaList);
 			Collections.sort(deltaList, compareByCost);
 			//printDeltas(deltaList);
 			Delta delta = deltaList.get(pdfPick()); // pdf pick gets the index recommended
@@ -84,7 +92,7 @@ public class ExtremalOptimization {
 			currentCost = nextSolutionCost;
 
 			iterationsCounter++;
-			deltaList.clear();//delete delta moves
+			deltaList.clear();// delete delta moves
 
 		}
 
@@ -121,9 +129,9 @@ public class ExtremalOptimization {
 			pdf[i] /= sum;
 		}
 
-		 for (int i = 0; i < size; i++) {
-		 System.out.println("f(" + i + ") = " + pdf[i]);
-		 }
+		for (int i = 0; i < size; i++) {
+			System.out.println("f(" + i + ") = " + pdf[i]);
+		}
 
 		// System.out.println("total " + sum);
 
@@ -133,7 +141,7 @@ public class ExtremalOptimization {
 
 	public int pdfPick() {
 		double p = random.nextDouble(), fx;
-		System.out.println("p " + p);
+		//System.out.println("p " + p);
 
 		int index = -1;
 
@@ -141,10 +149,9 @@ public class ExtremalOptimization {
 			p -= fx;
 		}
 
-		System.out.println("index " + index);
+		//System.out.println("index " + index);
 
 		return index;
-
 	}
 
 	private void printDeltas(List<Delta> listDelta) {

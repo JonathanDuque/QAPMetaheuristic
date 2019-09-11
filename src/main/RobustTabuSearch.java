@@ -5,26 +5,27 @@ import java.util.Random;
 
 public class RobustTabuSearch {
 
-	int[][] recentMemoryTabu; // this matrix will save the iteration number where a facility change is denied
-	int[][] frecuencyMemoryTabu;// this matrix save the number of a facility has been changed
+	int[][] recentMemoryTabu; // this matrix will save the iteration number where a location change is denied
+	int[][] frecuencyMemoryTabu;// this matrix save the number of a location has been changed
 	int tabuDuration;// iterations tabu for a move
 	QAPData qap;
 	Random random;
+	int aspiration;
 
 	public int[] solve(int totalIterations, int[] initSolution, QAPData qapData, boolean largeMemory) {
 		// this initial block define the variable needed
 		qap = qapData;
 		int n = qap.getSize();
-		tabuDuration = 8 * n;//this 8 is a factor, is possible to change  
+		int aspiration_factor = 4;
+		tabuDuration = aspiration_factor * n;// this 8 is a factor, is possible to change
+		aspiration = aspiration_factor * n * n;
 		int iterationsCounter = 1, iterationsWithoutImprove = 0;
-		random = new Random(1);//set the seed, 1 in this case
+		random = new Random(1);// set the seed, 1 in this case
 
-
-		/*if (largeMemory) {
-			System.out.println("Se usará memoria de largo plazo");
-		} else {
-			System.out.println("Se usará memoria de corto plazo");
-		}*/
+		/*
+		 * if (largeMemory) { System.out.println("Se usará memoria de largo plazo"); }
+		 * else { System.out.println("Se usará memoria de corto plazo"); }
+		 */
 
 		System.out.println("Total iteraciones: " + totalIterations);
 		System.out.println("Iteraciones Tabu para un movimiento: " + tabuDuration);
@@ -51,8 +52,8 @@ public class RobustTabuSearch {
 				bestSolution = bestNeighbor;
 				bestCost = bestNeighborCost;
 				updateSolutionCounter = iterationsCounter;// save this iterations for show late
-				System.out.println("Pasaron " + iterationsWithoutImprove +
-						" iteraciones sin mejora. Mejor: " + bestCost);
+				System.out
+						.println("Pasaron " + iterationsWithoutImprove + " iteraciones sin mejora. Mejor: " + bestCost);
 
 				iterationsWithoutImprove = 0;
 			}
@@ -80,66 +81,42 @@ public class RobustTabuSearch {
 	public int[] getBestNeighbor(int[] currentSolution, int currentIteration, int bestCost) {
 		int n = qap.getSize();
 		int[] bestNeighborFound = makeSwap(currentSolution, 0, 1), temporalSolution;
-		int posX = 0, posY = 1;
-
-		// this block init best neighbor with a permutation without tabu
-		for (int position1 = 0; position1 < (n - 1); position1++) {
-			boolean found = false;
-			
-			for (int position2 = position1 + 1; position2 < n; position2++) {
-				bestNeighborFound = makeSwap(currentSolution, position1, position2);
-				int facX = bestNeighborFound[position1];
-				int facY = bestNeighborFound[position2];
-				if (!isTabu(facX, facY, currentIteration)) {
-					posX = position1;
-					posY = position2;
-					found = true;
-					break;
-				}
-			}
-			if (found) {
-				break;
-			}
-		}
-
-		int temporalCost, bestNeighborFoundCost = qap.evalSolution(bestNeighborFound);
+		int posX = 0, posY = 1, minDelta = Integer.MAX_VALUE;
 		int currentCost = qap.evalSolution(currentSolution);
 
-		/*
-		 * the neighgordhood will be change two facilities, so in total we have the
-		 * permutation of n take in 2
-		 */
-		// looking in the neigborhood the no tabu best for current solution.
-		for (int position1 = 0; position1 < (n - 1); position1++) {
-			for (int position2 = position1 + 1; position2 < n; position2++) {
+		boolean aspired = false, alreadyAspired = false, autorized = false;
 
-				//currentCost - delta
-				temporalCost = currentCost - qap.evalMovement(currentSolution, position1, position2);
-				if (temporalCost < bestNeighborFoundCost) {
-					temporalSolution = makeSwap(currentSolution, position1, position2);
+		for (int i = 0; i < n - 1; i++) {
+			for (int j = i + 1; j < n; j++) {
 
-					int locX = temporalSolution[position1];
-					int locY = temporalSolution[position2];
+				int delta = qap.evalMovement(currentSolution, i, j);
+				temporalSolution = makeSwap(currentSolution, i, j);
+				int locX = temporalSolution[i];
+				int locY = temporalSolution[j];
+				int newCost = currentCost - delta;
 
-					if (!isTabu(locX, locY, currentIteration)) {
-						bestNeighborFound = temporalSolution;
-						bestNeighborFoundCost = temporalCost;
-						posX = position1;
-						posY = position2;
-					} else {
-						if (satisfyAspitarionCriteria(temporalCost, bestCost)) {
-							System.out.println("Se usó criterio de aspiración en la iteración: " + currentIteration
-									+ ", por costo: " + temporalCost);
-							bestNeighborFound = temporalSolution;
-							bestNeighborFoundCost = temporalCost;
-							posX = position1;
-							posY = position2;
-						}
-					}
+				autorized = !isTabu(locX, locY, currentIteration);
+
+				aspired = (recentMemoryTabu[locX][locY] < currentIteration - aspiration)
+						|| (recentMemoryTabu[locY][locX] < currentIteration - aspiration) || (newCost < bestCost);
+
+				if ((aspired && !alreadyAspired) || /* first move aspired */
+						(aspired && alreadyAspired && /* many move aspired */
+								(delta >= minDelta))|| /* => take best one */
+						(!aspired && !alreadyAspired && /* no move aspired yet */
+								(delta >= minDelta) && autorized)) {
+
+					posX = i;
+					posY = j;
+					minDelta = delta;
+
+					if (aspired)
+						alreadyAspired = true;
 				}
-
 			}
 		}
+		
+		bestNeighborFound = makeSwap(currentSolution, posX, posY);
 
 		// update tabu matrix with values of the best neighbor found
 		updateTabuMatrix(currentSolution, posX, posY, currentIteration);
@@ -184,16 +161,17 @@ public class RobustTabuSearch {
 	}
 
 	public void updateTabuMatrix(int[] selectedSolution, int posX, int posY, int iterationsCounter) {
-		//random.nextDouble() give decimal between 0 and 1
-		int t1 = (int) (Math.pow(random.nextDouble(), 3)*tabuDuration);
-		int t2 = (int) (Math.pow(random.nextDouble(), 3)*tabuDuration);
-		
+		//TODO implement tabuList different
+		// random.nextDouble() give decimal between 0 and 1
+		int t1 = (int) (Math.pow(random.nextDouble(), 3) * tabuDuration);
+		int t2 = (int) (Math.pow(random.nextDouble(), 3) * tabuDuration);
+
 		// get the changed facilities
 		int facX = selectedSolution[posX];
 		int facY = selectedSolution[posY];
 		// make tabu this facilities during certain iterations
-		recentMemoryTabu[facX][facY] =  iterationsCounter + t1;
-		recentMemoryTabu[facY][facX] =  iterationsCounter + t2;
+		recentMemoryTabu[facX][facY] = iterationsCounter + t1;
+		recentMemoryTabu[facY][facX] = iterationsCounter + t2;
 
 		// update matrix for large memory
 		frecuencyMemoryTabu[facX][facY]++;
