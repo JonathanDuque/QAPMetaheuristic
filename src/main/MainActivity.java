@@ -10,8 +10,8 @@ public class MainActivity {
 	public static void main(String[] args) {
 		long start = System.currentTimeMillis();
 
-		int problem = 4;// showMenu(); //from https://neos-guide.org/content/qap9
-		int method = 4;// showMenuMethod();
+		int problem = 1;// showMenu(); //from https://neos-guide.org/content/qap9
+		int method = 3;// showMenuMethod();
 
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 
