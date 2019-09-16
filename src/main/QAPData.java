@@ -27,7 +27,7 @@ public class QAPData {
 
 		// run the matrix only upside
 		for (int row = 0; row < size; row++) {
-			for (int col = row + 1; col < size; col++) {
+			for (int col = 0; col < size; col++) {
 				if (flow[row][col] != 0) {
 					cost = cost + flow[row][col] * distance[s[row]][s[col]];
 				}

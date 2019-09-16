@@ -22,15 +22,15 @@ public class ExtremalOptimization {
 	float[] pdf;
 	Random random;
 
-	public int[] solve(int totalIterations, int[] initSolution, QAPData qap) {
-		int iterationsCounter = 1, n = qap.getSize(), nextSolutionCost = 0, currentCost, bestCost;
+	public int[] solve(int totalIterations, int[] initSolution, QAPData qap, double tau) {
+		int currentIteration = 1, n = qap.getSize(), nextSolutionCost = 0, currentCost, bestCost;
 		int[] currentSolution = Arrays.copyOf(initSolution, n), bestSolution, nextSolution;
 		int tempDelta, bestDelta;
 		List<Delta> deltaList = new ArrayList<>();
 		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
 		random = new Random(1);// set the seed, 1 in this case
-		//TODO implement lambda functions , receive tau parameter
-		initPdf(qap.getSize());
+		// TODO implement lambda functions , receive tau parameter
+		initPdf(qap.getSize(), tau);
 
 		System.out.println("Solución inicial: ");
 		MainActivity.printSolution(initSolution);
@@ -39,10 +39,10 @@ public class ExtremalOptimization {
 		bestCost = currentCost;
 		bestSolution = initSolution;
 		System.out.println("costo: " + currentCost);
-		int counterBest=0;
+		int counterBest = 0;
 
-		while (iterationsCounter <= totalIterations) {
-			System.out.println("\niter: " + iterationsCounter);
+		while (currentIteration <= totalIterations) {
+			// System.out.println("\niter: " + iterationsCounter);
 
 			for (int f1 = 0; f1 < n; f1++) {
 				int change = 0;
@@ -59,11 +59,11 @@ public class ExtremalOptimization {
 					if (tempDelta > bestDelta) {
 						change = f2;
 						bestDelta = tempDelta;
-						counterBest =1;
-					}else if(tempDelta == bestDelta && random.nextInt(++counterBest)==0) {
+						counterBest = 1;
+					} else if (tempDelta == bestDelta && random.nextInt(++counterBest) == 0) {
 						change = f2;
 						bestDelta = tempDelta;
-						System.out.println("                                                              entro" );
+						// System.out.println(" entro");
 
 					}
 				}
@@ -71,14 +71,14 @@ public class ExtremalOptimization {
 				// System.out.println(f1 + " mejor: " + bestDelta + " con " + change +"\n");
 			}
 
-			//printDeltas(deltaList);
+			// printDeltas(deltaList);
 			Collections.sort(deltaList, compareByCost);
-			//printDeltas(deltaList);
+			// printDeltas(deltaList);
 			Delta delta = deltaList.get(pdfPick()); // pdf pick gets the index recommended
 
 			nextSolution = makeSwap(currentSolution, delta.index, delta.change);
 			nextSolutionCost = currentCost - delta.cost;
-			System.out.println("costo next: " + nextSolutionCost);
+			// System.out.println("costo next: " + nextSolutionCost);
 
 			// update the best solution found if is the best of the moment
 			// at the end this block help to save the best of the best
@@ -91,7 +91,7 @@ public class ExtremalOptimization {
 			currentSolution = nextSolution;
 			currentCost = nextSolutionCost;
 
-			iterationsCounter++;
+			currentIteration++;
 			deltaList.clear();// delete delta moves
 
 		}
@@ -114,12 +114,12 @@ public class ExtremalOptimization {
 		return newPermutation;
 	}
 
-	public void initPdf(int size) {
+	public void initPdf(int size, double tau) {
 		pdf = new float[size];
 		float sum = 0;
 		double y = 0;
 		for (int i = 0; i < size; i++) {
-			y = Math.exp(-0.5 * (i + 1));
+			y = Math.exp(tau * (i + 1));
 			// System.out.println("f(" + i + ") = " + (float) y);
 
 			pdf[i] = (float) y; // cast because don't need so much decimals
@@ -129,29 +129,26 @@ public class ExtremalOptimization {
 			pdf[i] /= sum;
 		}
 
-		for (int i = 0; i < size; i++) {
-			System.out.println("f(" + i + ") = " + pdf[i]);
-		}
+		//for (int i = 0; i < size; i++) {
+		//	System.out.println("f(" + i + ") = " + pdf[i]);
+		//}
 
 		// System.out.println("total " + sum);
-
-		// for (x in pdf.range())
-		// Console.OUT.println(pdf(x)+" ");//Console.OUT.println( x+"-"+pdf(x)+" ");
 	}
 
 	public int pdfPick() {
 		double p = random.nextDouble(), fx;
-		//System.out.println("p " + p);
+		// System.out.println("p " + p);
 
-		int index = -1;
+		int index = 0;
 
-		while ((fx = pdf[++index]) < p) {
+		while ((fx = pdf[index++]) < p) {
 			p -= fx;
 		}
 
-		//System.out.println("index " + index);
+		// System.out.println("index " + index);
 
-		return index;
+		return index-1;
 	}
 
 	private void printDeltas(List<Delta> listDelta) {

@@ -11,11 +11,11 @@ public class RobustTabuSearch {
 	Random random;
 	int aspiration;
 
-	public int[] solve(int totalIterations, int[] initSolution, QAPData qapData, boolean largeMemory) {
+	public int[] solve(int totalIterations, int[] initSolution, QAPData qapData) {
 		// this initial block define the variable needed
 		qap = qapData;
 		int n = qap.getSize();
-		int aspiration_factor = 4;
+		int aspiration_factor = 8;
 		tabuDuration = aspiration_factor * n;// this 8 is a factor, is possible to change
 		aspiration = aspiration_factor * n * n;
 		int currentIteration = 1, iterationsWithoutImprove = 0;
@@ -47,16 +47,15 @@ public class RobustTabuSearch {
 				bestSolution = bestNeighbor;
 				bestCost = bestNeighborCost;
 				updateSolutionCounter = currentIteration;// save this iterations for show late
-				System.out
-						.println("Pasaron " + iterationsWithoutImprove + " iteraciones sin mejora. Mejor: " + bestCost);
+				//System.out.println("Pasaron " + iterationsWithoutImprove + " iteraciones sin mejora. Mejor: " + bestCost);
 
-				iterationsWithoutImprove = 0;
+				//iterationsWithoutImprove = 0;
 			}
 
 			// always update the current solution
 			currentSolution = bestNeighbor;
 
-			iterationsWithoutImprove++;
+			//iterationsWithoutImprove++;
 			currentIteration++;
 		}
 
@@ -81,7 +80,7 @@ public class RobustTabuSearch {
 				int delta = qap.evalMovement(currentSolution, i, j);
 				int newCost = currentCost - delta;
 
-				// check is move is tabu
+				// check if move is tabu
 				autorized = (tabuMemory[i][currentSolution[j]] < currentIteration)
 						|| (tabuMemory[j][currentSolution[i]] < currentIteration);
 
@@ -101,7 +100,6 @@ public class RobustTabuSearch {
 
 					if (aspired) {
 						alreadyAspired = true;
-
 					}
 				}
 			}
@@ -125,13 +123,13 @@ public class RobustTabuSearch {
 	public void initTabuMatrix(int size) {
 		tabuMemory = new int[size][size];
 
-		for (int i = 0; i < size; i++)
-			for (int j = 0; j < size; j++)
-				tabuMemory[i][j] = -(size * i + j);
+		// for (int i = 0; i < size; i++)
+		// for (int j = 0; j < size; j++)
+		// tabuMemory[i][j] = -(size * i + j);
 
-		// for (int[] row : tabuMemory) {
-		// Arrays.fill(row, 0);
-		// }
+		for (int[] row : tabuMemory) {
+			Arrays.fill(row, 0);
+		}
 	}
 
 	public int[] makeSwap(int[] permutation, int position1, int position2) {

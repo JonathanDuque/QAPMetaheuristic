@@ -15,14 +15,14 @@ public class MainActivity {
 
 		System.out.println("\n\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 
-		// ReadFile readFile = new ReadFile("qapdata/chr15a.dat");//
+		ReadFile readFile = new ReadFile("qapdata/wil50.dat");//
 		// "qapdata/chr12a.dat"
 
 		int[][] flow, distance;
-		distance = getDataforDistance(problem); //
-		flow = getDataForFlow(problem);
-		// distance = readFile.getDistance();
-		// flow = readFile.getFlow();
+		 //distance = getDataforDistance(problem);
+		 //flow = getDataForFlow(problem);
+		distance = readFile.getDistance();
+		flow = readFile.getFlow();
 
 		// initialize qap data, i.e matrix of flow and distance matix [row][col]
 		QAPData qap = new QAPData(distance, flow);
@@ -30,6 +30,8 @@ public class MainActivity {
 		// get init solution with constructive method
 		Constructive constructive = new Constructive();
 		int[] initSolution = constructive.createInitSolution(qap);
+		printSolution(initSolution);
+
 		int[] bestSolutionFound = initSolution;// for now this is the best solution
 
 		switch (method) {
@@ -41,18 +43,18 @@ public class MainActivity {
 		case 2:
 			TabuSearch tabuSearch = new TabuSearch();
 			bestSolutionFound = tabuSearch.solve(100 * qap.getSize(), initSolution, qap, false);
-			//tabuSearch.showMemories();
+			// tabuSearch.showMemories();
 			break;
 
 		case 3:
 			RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
-			bestSolutionFound = robustTabuSearch.solve(100 * qap.getSize(), initSolution, qap, false);
-			//robustTabuSearch.showMemories();
+			bestSolutionFound = robustTabuSearch.solve(100000, initSolution, qap);
+			// robustTabuSearch.showMemories();
 			break;
 
 		case 4:
 			ExtremalOptimization extremalOptimization = new ExtremalOptimization();
-			bestSolutionFound = extremalOptimization.solve(100* qap.getSize(), initSolution, qap);
+			bestSolutionFound = extremalOptimization.solve(100 * qap.getSize(), initSolution, qap, -0.4);
 			break;
 
 		case 5:
@@ -74,13 +76,13 @@ public class MainActivity {
 		}
 
 		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
-		System.out.println("Costo: " + 1 * qap.evalSolution(bestSolutionFound));
+		System.out.println("Costo: " + qap.evalSolution(bestSolutionFound));
 		printSolution(bestSolutionFound);
-		//qap.printSolutionInReadFormat(bestSolutionFound);
 
 		// show the total time
-		long finish = System.currentTimeMillis();
-		System.out.println("\n" + (finish - start) + " milisegundos");
+		double time = (System.currentTimeMillis() - start);
+		time/=1000;
+		System.out.println("\n" + time + " sec");
 
 	}
 
@@ -88,12 +90,12 @@ public class MainActivity {
 		// System.out.println("Locaciones");
 		String locations = "Facilidades: ", facilities = "Ubicaciones: ";
 		for (int i = 0; i < array.length; i++) {
-			locations = locations + ((i + 0) + " ");
+			locations = locations + ((i + 1) + " ");
 		}
 		// System.out.println("\nFacilidades");
 		System.out.println(locations);
 		for (int i : array) {
-			facilities = facilities + ((i + 0) + " ");// +1 because the index in java start with 0
+			facilities = facilities + ((i + 1) + " ");// +1 because the index in java start with 0
 		}
 		System.out.println(facilities);
 	}

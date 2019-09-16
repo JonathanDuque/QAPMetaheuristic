@@ -19,8 +19,8 @@ public class Constructive {
 		while (counter < size / 2) {
 			next_d = false;
 			next_f = false;
-			minor = 100;
-			major = -1;
+			minor = Integer.MAX_VALUE;
+			major = Integer.MIN_VALUE;
 			counter++;
 
 			// row and col never be iqual, run matrix only upside

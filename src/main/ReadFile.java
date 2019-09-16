@@ -5,46 +5,45 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class ReadFile {
-	
+
 	private int[][] flow, distance;
-	
+
 	public ReadFile(String fileName) {
 		Scanner scanner;
-		 
-		 try {
-			scanner= new Scanner (new File(fileName));
-			
-			 int n = Integer.parseInt(scanner.next());	
-			 //System.out.println(n);
-			 
-			 flow = new int [n][n];
-			 distance = new int [n][n];
-			 
-			 for (int row = 0; row < n; row++) {
-					for (int col =0; col < n; col++) {
-						flow[row][col]=Integer.parseInt(scanner.next());	
-					}
-			 }
-			 
-			 for (int row = 0; row < n; row++) {
-					for (int col =0; col < n; col++) {
-						distance[row][col]=Integer.parseInt(scanner.next());	
-					}
-			 }
-			 
-			 
-			 scanner.close();
-			 
-			 //printMatrix(flow);
-			 //printMatrix(distance);
-			  
+
+		try {
+			scanner = new Scanner(new File(fileName));
+
+			int n = Integer.parseInt(scanner.next());
+			// System.out.println(n);
+
+			flow = new int[n][n];
+			distance = new int[n][n];
+
+			for (int row = 0; row < n; row++) {
+				for (int col = 0; col < n; col++) {
+					flow[row][col] = Integer.parseInt(scanner.next());
+				}
+			}
+
+			for (int row = 0; row < n; row++) {
+				for (int col = 0; col < n; col++) {
+					distance[row][col] = Integer.parseInt(scanner.next());
+				}
+			}
+
+			scanner.close();
+
+			// printMatrix(flow);
+			// printMatrix(distance);
+
 		} catch (FileNotFoundException e) {
 			System.out.println("Error al leer el archivo");
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	public void printMatrix(int[][] matrix) {
 		for (int[] row : matrix) {
 			for (int i : row) {
@@ -61,9 +60,5 @@ public class ReadFile {
 	public int[][] getDistance() {
 		return distance;
 	}
-
-	
-	
-	
 
 }
