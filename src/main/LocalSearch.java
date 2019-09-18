@@ -10,7 +10,7 @@ public class LocalSearch {
 		int cost = qap.evalSolution(initSolution);// cost of the seed
 
 		System.out.println("Solución inicial: ");
-		MainActivity.printSolution(initSolution);
+		qap.printSolution(initSolution);
 		System.out.println("costo: " + cost);
 
 		int n = qap.getSize();
@@ -43,7 +43,7 @@ public class LocalSearch {
 				cost = cost - bestDelta;
 				bestSolution = improveSolution;
 				System.out.println("Mejoró: " + cost);
-				MainActivity.printSolution(bestSolution);
+				qap.printSolution(bestSolution);
 			} else {
 				improve = false;
 			}

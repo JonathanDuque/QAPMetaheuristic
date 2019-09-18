@@ -230,10 +230,7 @@ public class TabuSearch {
 	}
 
 	public void showMemories() {
-		System.out.println("\nMatriz tabu:");
-		qap.printMatrix(recentMemoryTabu);
-
-		System.out.println("\nMatriz tabu de frecuencia:");
-		qap.printMatrix(frecuencyMemoryTabu);
+		Tools.printMatrix(recentMemoryTabu, "\nMatriz tabu:");
+		Tools.printMatrix(frecuencyMemoryTabu, "\nMatriz tabu de frecuencia:");
 	}
 }

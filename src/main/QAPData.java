@@ -2,7 +2,7 @@ package main;
 
 public class QAPData {
 
-	private int[][] flow, distance;
+	private int[][] flow, distance, delta;
 	private int size;
 
 	// constructor for init data
@@ -10,6 +10,7 @@ public class QAPData {
 		this.distance = distance;
 		this.flow = flow;
 		size = distance.length;
+		delta = new int[size][size];
 	}
 
 	public int getDistanceBetween(int location1, int location2) {
@@ -18,6 +19,51 @@ public class QAPData {
 
 	public int getFlowBetween(int facility1, int facility2) {
 		return flow[facility1][facility2];
+	}
+
+	/********** initialization of current solution value ***********/
+	/**************** and matrix of cost of moves *****************/
+	public void initDeltas(int[] s) {
+		//s[2] = location of facility 2
+		
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				//current_cost = current_cost + flow[i][j] * distance[s[i]][s[j]];
+				if (i < j) {
+					delta[i][j] = compute_delta(s, i, j);
+				}
+			}
+		}
+
+		//Tools.printMatrix(delta, "Deltas");
+
+	}
+
+	public int compute_delta(int[] s, int i, int j) {
+
+		int d = 0; // (flow[i][i] - flow[j][j]) * (distance[s[j]][s[j]] - distance[s[i]][s[i]]) +
+					 //(flow[i][j] - flow[j][i]) * (distance[s[j]][s[i]] - distance[s[i]][s[j]]);
+		
+		//System.out.println("d = " + d);
+
+		for (int k = 0; k < size; k++) {
+			if (k != i && k != j) {
+				//asi estaba antes
+				//d = d + (flow[j][k] - flow[i][k]) * (distance[s[j]][s[k]] - distance[s[i]][s[k]]);
+				d += (flow[j][k] - flow[i][k]) * (distance[s[j]][s[k]] - distance[s[i]][s[k]]) + 
+						(flow[k][j] - flow[k][i] ) * (distance[s[k]][s[j]] - distance[s[k]][s[i]]) ;
+				//d+= (flow[k][i] - flow[k][j]) * (distance[s[k]][s[j]] - distance[s[k]][s[i]]) +
+	              //      (flow[i][k] - flow[j][k]) * (distance[s[j]][s[k]] - distance[s[i]][s[k]]);
+			}
+		}
+
+		/*
+		 * for (int k = 0; k < size; k++) if (k != i && k != j) d += (flow[k][i] -
+		 * flow[k][j]) * (distance[s[k]][s[j]] - distance[s[k]][s[i]]) + (flow[i][k] -
+		 * flow[j][k]) * (distance[s[j]][s[k]] - distance[s[i]][s[k]]);
+		 */
+
+		return d;
 	}
 
 	// cost function
@@ -39,18 +85,44 @@ public class QAPData {
 	// article A novel multistart hyper-heuristic algorithm on the grid for the
 	// quadratic assignment problem
 	public int evalMovement(int[] solution, int f1, int f2) {
-		int delta = 0;
-		for (int k = 0; k < size; k++) {
-			if (k != f1 && k != f2) {
-				delta = delta + (flow[f2][k] - flow[f1][k])
-						* (distance[solution[f2]][solution[k]] - distance[solution[f1]][solution[k]]);
-			}
-		}
 
-		return delta;
+		//int delta = 0;
+		//for (int k = 0; k < size; k++) {
+		//	if (k != f1 && k != f2) {
+		//		delta = delta + (flow[f2][k] - flow[f1][k])
+		//				* (distance[solution[f2]][solution[k]] - distance[solution[f1]][solution[k]]);
+		//	}
+		//}
+
+		return delta[f1][f2];
 	}
 
-	//TODO revisar esta funcion  
+	public void updateDeltas(int[] s, int i_selected, int j_selected) {
+		//current_cost = current_cost - 2 * delta[i_selected][j_selected];
+		// System.out.println("costo actualizado "+ current_cost);
+
+		for (int i = 0; i < size - 1; i++) {
+			for (int j = i + 1; j < size; j++)
+				if (i != i_selected && i != j_selected && j != i_selected && j != j_selected) {
+					delta[i][j] = compute_delta_part(s, i, j, i_selected, j_selected);
+				} else {
+					delta[i][j] = compute_delta(s, i, j);
+				}
+		}
+		//Tools.printMatrix(delta, "Update");
+
+	}
+
+	public int compute_delta_part(int[] p, int i, int j, int i_selected, int j_selected) {
+		return delta[i][j] - ((flow[i_selected][i] - flow[i_selected][j] + flow[j_selected][j] - flow[j_selected][i])
+				* (distance[p[j_selected]][p[i]] - distance[p[j_selected]][p[j]] + distance[p[i_selected]][p[j]]
+						- distance[p[i_selected]][p[i]])
+				+ (flow[i][i_selected] - flow[j][i_selected] + flow[j][j_selected] - flow[i][j_selected])
+						* (distance[p[i]][p[j_selected]] - distance[p[j]][p[j_selected]] + distance[p[j]][p[i_selected]]
+								- distance[p[i]][p[i_selected]]));
+	}
+
+	// TODO revisar esta funcion
 	// function for look the location of any facility
 	public int getLocationOfFacility(int[] permutation, int facility) {
 		for (int i = 0; i < permutation.length; i++)
@@ -71,37 +143,35 @@ public class QAPData {
 	}
 
 	public void showData() {
-		System.out.println("Matriz de Distancias");
-		printMatrix(distance);
-		System.out.println("\nMatriz de Flujos");
-		printMatrix(flow);
+		Tools.printMatrix(distance, "Matriz de Distancias");
+		Tools.printMatrix(flow, "\nMatriz de Flujos");
 	}
 
-	public void printMatrix(int[][] matrix) {
-		for (int[] row : matrix) {
-			for (int i : row) {
-				System.out.print(i + "\t");
-			}
-			System.out.println("\n");
-		}
-	}
+	public void printSolution(int[] array) {
 
-	public void printSolutionWithCost(int[] array, String cost) {
+		System.out.println("Costo: " + evalSolution(array));
+		String facilities = "Facilidades: ", locations = "Ubicaciones: ";
+		//for (int i = 0; i < array.length; i++) {
+			//facilities = facilities + ((i + 1) + " ");
+		//}
+		
+		//System.out.println(facilities);
 		for (int i : array) {
-			System.out.print(i + ", ");// +1 because the index in java start with 0
+			locations = locations + ((i + 1) + " ");// +1 because the index in java start with 0
 		}
-		System.out.println("Costo: " + cost);
+		System.out.println(locations);
+
 	}
 
 	// para imorimir solucion en formato ubicaciones - facilidades
-	public void printSolutionInReadFormat(int[] array) {
+	public void printSolution2(int[] array) {
 		String facilities = "Facilidades: ", locations = "Ubicaciones: ";
 		for (int i = 0; i < array.length; i++) {
-			locations = locations + ((i + 0) + " ");
+			locations = locations + ((i + 1) + " ");
 		}
 		System.out.println("\n" + locations);
 		for (int l = 0; l < array.length; l++) {
-			facilities = facilities + ((getFacilityOfLocation(array, l) + 0) + " ");// +1 because the index in java
+			facilities = facilities + ((getFacilityOfLocation(array, l) + 1) + " ");// +1 because the index in java
 																					// start with 0
 		}
 

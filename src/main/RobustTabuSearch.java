@@ -18,20 +18,19 @@ public class RobustTabuSearch {
 		int aspiration_factor = 8;
 		tabuDuration = aspiration_factor * n;// this 8 is a factor, is possible to change
 		aspiration = aspiration_factor * n * n;
-		int currentIteration = 1, iterationsWithoutImprove = 0;
+		int currentIteration = 1;
 		random = new Random(1);// set the seed, 1 in this case
 
-		System.out.println("Total iteraciones: " + totalIterations);
-		System.out.println("Iteraciones Tabu para un movimiento: " + tabuDuration);
+		//System.out.println("Total iteraciones: " + totalIterations);
+		//System.out.println("Iteraciones Tabu para un movimiento: " + tabuDuration);
 
-		initTabuMatrix(n);
-		// showMemories();
+		initTabuMatrix(n);		
 
 		int[] bestNeighbor, currentSolution, bestSolution;
 		currentSolution = Arrays.copyOf(initSolution, n);
 		bestSolution = Arrays.copyOf(initSolution, n);
 		int bestCost = qap.evalSolution(initSolution), bestNeighborCost;
-		int updateSolutionCounter = 0; // this counter has the value where the best was found
+		int bestFoundCounter = 0; // this counter has the value where the best was found
 
 		System.out.println("\n\n/*********** DATOS DURANTE LA EJECUCIÓN DEL ALGORITMO **********/");
 
@@ -40,27 +39,22 @@ public class RobustTabuSearch {
 
 			bestNeighbor = getBestNeighbor(currentSolution, currentIteration, bestCost);
 			bestNeighborCost = qap.evalSolution(bestNeighbor);
+			//qap.printSolution(bestNeighbor);
 
 			// update the best solution found if is the best of the moment
 			// at the end this block help to save the best of the best
 			if (bestNeighborCost < bestCost) {
 				bestSolution = bestNeighbor;
 				bestCost = bestNeighborCost;
-				updateSolutionCounter = currentIteration;// save this iterations for show late
-				//System.out.println("Pasaron " + iterationsWithoutImprove + " iteraciones sin mejora. Mejor: " + bestCost);
-
-				//iterationsWithoutImprove = 0;
+				bestFoundCounter = currentIteration;
 			}
 
 			// always update the current solution
 			currentSolution = bestNeighbor;
-
-			//iterationsWithoutImprove++;
 			currentIteration++;
 		}
 
-		System.out.println("Iteración donde se encontro el mejor: " + updateSolutionCounter);
-
+		//System.out.println("Iteración donde se encontro el mejor: " + bestFoundCounter);
 		return bestSolution;
 	}
 
@@ -105,7 +99,9 @@ public class RobustTabuSearch {
 			}
 		}
 
+		//System.out.println("i_s "+ i_selected + " j_s " + j_selected);
 		selectedSolution = makeSwap(currentSolution, i_selected, j_selected);
+		qap.updateDeltas(selectedSolution, i_selected, j_selected);
 
 		// update tabu matrix with values of the solution selected
 		// random.nextDouble() give decimal between 0 and 1
@@ -115,6 +111,7 @@ public class RobustTabuSearch {
 		// make tabu this facilities during certain iterations
 		tabuMemory[i_selected][selectedSolution[j_selected]] = currentIteration + t1;
 		tabuMemory[j_selected][selectedSolution[i_selected]] = currentIteration + t2;
+		//Tools.printMatrix(tabuMemory, "Tabu Matriz");
 
 		return selectedSolution;
 	}
@@ -149,11 +146,5 @@ public class RobustTabuSearch {
 
 	public boolean satisfyAspitarionCriteria(int actualCost, int bestCostFound) {
 		return (actualCost < bestCostFound) ? true : false;
-	}
-
-	public void showMemories() {
-		System.out.println("\nMatriz tabu:");
-		qap.printMatrix(tabuMemory);
-
 	}
 }

@@ -3,6 +3,8 @@ package main;
 import java.util.Arrays;
 
 public class Constructive {
+	
+	//TODO generate random solution
 
 	// constructive algorithm for create init solution
 	public int[] createInitSolution(QAPData qap) {

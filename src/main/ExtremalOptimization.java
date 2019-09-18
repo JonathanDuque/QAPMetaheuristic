@@ -33,7 +33,7 @@ public class ExtremalOptimization {
 		initPdf(qap.getSize(), tau);
 
 		System.out.println("Solución inicial: ");
-		MainActivity.printSolution(initSolution);
+		qap.printSolution(initSolution);
 		// qap.printSolutionInReadFormat(initSolution);
 		currentCost = qap.evalSolution(initSolution);
 		bestCost = currentCost;
