@@ -44,23 +44,17 @@ public class MainActivity {
 			break;
 
 		case 2:
-			TabuSearch tabuSearch = new TabuSearch();
-			bestSolutionFound = tabuSearch.solve(10000, initSolution, qap, false);
-			// tabuSearch.showMemories();
-			break;
-
-		case 3:
 			RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
 			bestSolutionFound = robustTabuSearch.solve(100000, initSolution, qap);
 			// robustTabuSearch.showMemories();
 			break;
 
-		case 4:
+		case 3:
 			ExtremalOptimization extremalOptimization = new ExtremalOptimization();
 			bestSolutionFound = extremalOptimization.solve(100 * qap.getSize(), initSolution, qap, -0.4);
 			break;
 
-		case 5:
+		case 4:
 			GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
 			// pop_size, generations, mutation_probability, QAPData
 			geneticAlgorithm.solve(10 * qap.getSize(), 40 * qap.getSize(), 0.5, qap);

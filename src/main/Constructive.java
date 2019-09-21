@@ -6,7 +6,7 @@ public class Constructive {
 	
 	//TODO generate random solution
 
-	// constructive algorithm for create init solution
+	// constructive algorithm for create init solution intelligently
 	public int[] createInitSolution(QAPData qap) {
 		// this initial block define the variable needed
 		int size = qap.getSize(), minor, major;
@@ -90,7 +90,7 @@ public class Constructive {
 		if (size % 2 != 0) {
 			int the_last_location = -1;
 			for (int l = 0; l < size; l++) {
-				if (getFacilityOfLocation(solution, l) == -1) {
+				if (qap.getFacilityOfLocation(solution, l) == -1) {
 					the_last_location = l;// this is the location that remains to be assigned.
 					break;
 				}
@@ -107,12 +107,11 @@ public class Constructive {
 		return solution;
 	}
 
-	// function for look the location of any facility
-	private int getFacilityOfLocation(int[] permutation, int location) {
-		for (int i = 0; i < permutation.length; i++)
-			if (permutation[i] == location)
-				return i;
-		return -1;
+	
+	public int[] createRandomSolution(QAPData qap){
+		
+		return null;
 	}
+	
 
 }

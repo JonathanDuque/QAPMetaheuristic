@@ -43,8 +43,6 @@ public class QAPData {
 
 		int d = ( flow[j][j]-flow[i][i]) * (distance[s[j]][s[j]] - distance[s[i]][s[i]]) +
 					( flow[j][i]-flow[i][j] ) * (distance[s[j]][s[i]] - distance[s[i]][s[j]]);
-		
-		//System.out.println("d = " + d);
 
 		for (int k = 0; k < size; k++) {
 			if (k != i && k != j) {
@@ -56,13 +54,6 @@ public class QAPData {
 	              //      (flow[i][k] - flow[j][k]) * (distance[s[j]][s[k]] - distance[s[i]][s[k]]);
 			}
 		}
-
-		/*
-		 * for (int k = 0; k < size; k++) if (k != i && k != j) d += (flow[k][i] -
-		 * flow[k][j]) * (distance[s[k]][s[j]] - distance[s[k]][s[i]]) + (flow[i][k] -
-		 * flow[j][k]) * (distance[s[j]][s[k]] - distance[s[i]][s[k]]);
-		 */
-
 		return d;
 	}
 
@@ -95,9 +86,6 @@ public class QAPData {
 	}
 
 	public void updateDeltas(int[] s, int i_selected, int j_selected) {
-		//current_cost = current_cost - 2 * delta[i_selected][j_selected];
-		// System.out.println("costo actualizado "+ current_cost);
-
 		for (int i = 0; i < size - 1; i++) {
 			for (int j = i + 1; j < size; j++)
 				if (i != i_selected && i != j_selected && j != i_selected && j != j_selected) {
@@ -106,8 +94,6 @@ public class QAPData {
 					delta[i][j]  = compute_delta(s, i, j);
 				}
 		}
-		//Tools.printMatrix(delta, "Update");
-
 	}
 
 	public int compute_delta_part(int[] p, int i, int j, int i_selected, int j_selected) {
@@ -119,16 +105,8 @@ public class QAPData {
 								- distance[p[i]][p[i_selected]]));
 	}
 
-	// TODO revisar esta funcion
-	// function for look the location of any facility
-	public int getLocationOfFacility(int[] permutation, int facility) {
-		for (int i = 0; i < permutation.length; i++)
-			if (permutation[i] == facility)
-				return i;
-		return -1;
-	}
-
-	private int getFacilityOfLocation(int[] permutation, int location) {
+	// function for look the facility of any location
+	public int getFacilityOfLocation(int[] permutation, int location) {
 		for (int i = 0; i < permutation.length; i++)
 			if (permutation[i] == location)
 				return i;
