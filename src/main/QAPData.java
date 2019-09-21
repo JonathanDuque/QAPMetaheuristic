@@ -35,14 +35,14 @@ public class QAPData {
 			}
 		}
 
-		//Tools.printMatrix(delta, "Deltas");
+		//Tools.printMatrix(delta, "Init Deltas");
 
 	}
 
 	public int compute_delta(int[] s, int i, int j) {
 
-		int d = 0; // (flow[i][i] - flow[j][j]) * (distance[s[j]][s[j]] - distance[s[i]][s[i]]) +
-					 //(flow[i][j] - flow[j][i]) * (distance[s[j]][s[i]] - distance[s[i]][s[j]]);
+		int d = ( flow[j][j]-flow[i][i]) * (distance[s[j]][s[j]] - distance[s[i]][s[i]]) +
+					( flow[j][i]-flow[i][j] ) * (distance[s[j]][s[i]] - distance[s[i]][s[j]]);
 		
 		//System.out.println("d = " + d);
 
@@ -73,10 +73,8 @@ public class QAPData {
 
 		// run the matrix only upside
 		for (int row = 0; row < size; row++) {
-			for (int col = 0; col < size; col++) {
-				if (flow[row][col] != 0) {
-					cost = cost + flow[row][col] * distance[s[row]][s[col]];
-				}
+			for (int col = 0; col < size; col++) {	
+					cost = cost + flow[row][col] * distance[s[row]][s[col]];	
 			}
 		}
 		return cost;
@@ -86,13 +84,12 @@ public class QAPData {
 	// quadratic assignment problem
 	public int evalMovement(int[] solution, int f1, int f2) {
 
-		//int delta = 0;
-		//for (int k = 0; k < size; k++) {
-		//	if (k != f1 && k != f2) {
-		//		delta = delta + (flow[f2][k] - flow[f1][k])
-		//				* (distance[solution[f2]][solution[k]] - distance[solution[f1]][solution[k]]);
-		//	}
-		//}
+		/*int delta = 0;
+		for (int k = 0; k < size; k++) {
+			if (k != f1 && k != f2) {
+				delta = delta + (flow[f2][k] - flow[f1][k])* (distance[solution[f2]][solution[k]] - distance[solution[f1]][solution[k]]);
+			}
+		}*/
 
 		return delta[f1][f2];
 	}
@@ -104,9 +101,9 @@ public class QAPData {
 		for (int i = 0; i < size - 1; i++) {
 			for (int j = i + 1; j < size; j++)
 				if (i != i_selected && i != j_selected && j != i_selected && j != j_selected) {
-					delta[i][j] = compute_delta_part(s, i, j, i_selected, j_selected);
+					delta[i][j] =  compute_delta_part(s, i, j, i_selected, j_selected);
 				} else {
-					delta[i][j] = compute_delta(s, i, j);
+					delta[i][j]  = compute_delta(s, i, j);
 				}
 		}
 		//Tools.printMatrix(delta, "Update");
@@ -159,7 +156,7 @@ public class QAPData {
 		for (int i : array) {
 			locations = locations + ((i + 1) + " ");// +1 because the index in java start with 0
 		}
-		System.out.println(locations);
+		//System.out.println(locations);
 
 	}
 

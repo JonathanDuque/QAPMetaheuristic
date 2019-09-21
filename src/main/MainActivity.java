@@ -9,12 +9,12 @@ public class MainActivity {
 
 	public static void main(String[] args) {
 		
-		//int problem = 3;// showMenu(); 
+		//int problem = 4;// showMenu(); 
 
 		System.out.println("\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
-		String problem = getProblemName();
+		//String problem = getProblemName();
 
-		ReadFile readFile = new ReadFile("qapdata/"+problem+ ".dat");
+		ReadFile readFile = new ReadFile("qapdata/bur26a.dat");
 		long start = System.currentTimeMillis();
 
 		int[][] flow, distance;
@@ -31,12 +31,12 @@ public class MainActivity {
 		int[] initSolution = constructive.createInitSolution(qap);
 		int[] bestSolutionFound = initSolution;// for now this is the best solution
 		//System.out.println("Solución inicial");
-		//qap.printSolution(initSolution);
+		qap.printSolution(initSolution);
 		//qap.printSolution2(initSolution);
 				
 		qap.initDeltas(initSolution);
 		
-		int method = 3;// showMenuMethod();
+		int method = 1;// showMenuMethod();
 		switch (method) {
 		case 1:
 			LocalSearch localSearch = new LocalSearch();

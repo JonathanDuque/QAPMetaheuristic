@@ -54,7 +54,7 @@ public class RobustTabuSearch {
 			currentIteration++;
 		}
 
-		//System.out.println("Iteración donde se encontro el mejor: " + bestFoundCounter);
+		System.out.println("Iteración donde se encontro el mejor: " + bestFoundCounter);
 		return bestSolution;
 	}
 
@@ -102,6 +102,7 @@ public class RobustTabuSearch {
 		//System.out.println("i_s "+ i_selected + " j_s " + j_selected);
 		selectedSolution = makeSwap(currentSolution, i_selected, j_selected);
 		qap.updateDeltas(selectedSolution, i_selected, j_selected);
+		
 
 		// update tabu matrix with values of the solution selected
 		// random.nextDouble() give decimal between 0 and 1

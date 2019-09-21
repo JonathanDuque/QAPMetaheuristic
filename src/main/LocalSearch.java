@@ -11,28 +11,33 @@ public class LocalSearch {
 
 		System.out.println("Solución inicial: ");
 		qap.printSolution(initSolution);
-		System.out.println("costo: " + cost);
+		
 
 		int n = qap.getSize();
 		int[] improveSolution = Arrays.copyOf(initSolution, n), bestSolution = Arrays.copyOf(initSolution, n);
 		boolean improve = false; // this flag control when the solution no improve and we are in an optimo local
 		int neighboor = 1;
-		int temporalDelta = 0, bestDelta = 0;
+		int temporalDelta, bestDelta;
 
 		// here find the best solution from de initSolution
 		do {
-			System.out.println("\nVecindario: " + neighboor);
+			System.out.println("\niteración: " + neighboor);
 
 			improve = false;
 			bestDelta = 0;
+			
+			int i_selected=-1, j_selected=-1;
 			// here evaluate all the neighboorhood
-			for (int position1 = 0; position1 < (n - 1); position1++) {
-				for (int position2 = position1 + 1; position2 < n; position2++) {
-					temporalDelta = qap.evalMovement(bestSolution, position1, position2);
+			for (int i = 0; i < (n - 1); i++) {
+				for (int j = i + 1; j < n; j++) {
+					temporalDelta = qap.evalMovement(bestSolution, i, j);
 
 					// if improve
 					if (temporalDelta > bestDelta) {
-						improveSolution = makeSwap(bestSolution, position1, position2);
+						//System.out.println( "Delta " + temporalDelta);
+
+						i_selected = i;
+						j_selected = j;
 						bestDelta = temporalDelta;
 						improve = true;
 					}
@@ -40,16 +45,23 @@ public class LocalSearch {
 			}
 
 			if (improve) {
-				cost = cost - bestDelta;
-				bestSolution = improveSolution;
-				System.out.println("Mejoró: " + cost);
+				cost -= bestDelta;
+				System.out.println("Costo: " + cost + " Delta " + bestDelta);
+				
+				System.out.println( "Delta " + qap.evalMovement(bestSolution, i_selected, j_selected));
+
+				bestSolution = makeSwap(bestSolution, i_selected, j_selected);
 				qap.printSolution(bestSolution);
+				qap.updateDeltas(bestSolution, i_selected, j_selected);
+				//qap.printSolution(bestSolution);
+				//qap.initDeltas(bestSolution);
+
+				
 			} else {
 				improve = false;
 			}
 
 			neighboor++;
-
 		} while (improve);
 
 		return bestSolution;
@@ -71,15 +83,3 @@ public class LocalSearch {
 	}
 }
 
-/*
-  temporalSolution = makeSwap(bestSolution, position1, position2); 
-  temporalCost = qap.evalSolution(temporalSolution); //temporalCost =
- * 
- * 
- * //System.out.println("Costo: " + cost + " Costo Vecino: " + temporalCost); //
-  decide if take the new solution 
-  if (temporalCost < cost ) { // 
-  cost =temporalCost; 
-  improveSolution = temporalSolution; 
-  improve = true; }
- */
