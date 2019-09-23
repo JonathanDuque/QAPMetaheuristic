@@ -1,5 +1,7 @@
 package main;
 
+import java.util.Arrays;
+
 public class QAPData {
 
 	private int[][] flow, distance, delta;
@@ -19,6 +21,17 @@ public class QAPData {
 
 	public int getFlowBetween(int facility1, int facility2) {
 		return flow[facility1][facility2];
+	}
+	
+	public int[] makeSwap(int[] permutation, int i, int j) {
+		int temp;
+
+		// change the values
+		temp = permutation[i];
+		permutation[i] = permutation[j];
+		permutation[j] = temp;
+
+		return permutation;
 	}
 
 	/********** initialization of current solution value ***********/
@@ -134,7 +147,7 @@ public class QAPData {
 		for (int i : array) {
 			locations = locations + ((i + 1) + " ");// +1 because the index in java start with 0
 		}
-		//System.out.println(locations);
+		System.out.println(locations);
 
 	}
 

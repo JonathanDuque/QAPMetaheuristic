@@ -14,7 +14,7 @@ public class MainActivity {
 		System.out.println("\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 		//String problem = getProblemName();
 
-		ReadFile readFile = new ReadFile("qapdata/bur26a.dat");
+		ReadFile readFile = new ReadFile("qapdata/chr22b.dat");
 		long start = System.currentTimeMillis();
 
 		int[][] flow, distance;
@@ -28,19 +28,18 @@ public class MainActivity {
 
 		// get init solution with constructive method
 		Constructive constructive = new Constructive();
-		int[] initSolution = constructive.createInitSolution(qap);
+		int[] initSolution = constructive.createRandomSolution(qap.getSize(), 1);
 		int[] bestSolutionFound = initSolution;// for now this is the best solution
-		//System.out.println("Solución inicial");
+		System.out.println("Solución inicial: ");
 		qap.printSolution(initSolution);
-		//qap.printSolution2(initSolution);
 				
 		qap.initDeltas(initSolution);
 		
 		int method = 1;// showMenuMethod();
 		switch (method) {
 		case 1:
-			LocalSearch localSearch = new LocalSearch();
-			bestSolutionFound = localSearch.solve(initSolution, qap);
+			MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
+			bestSolutionFound = mutiStartLocalSearch.solve(100000,initSolution, qap, constructive);
 			break;
 
 		case 2:

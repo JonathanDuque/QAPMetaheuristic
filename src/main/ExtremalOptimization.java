@@ -32,13 +32,12 @@ public class ExtremalOptimization {
 		// TODO implement lambda functions , receive tau parameter
 		initPdf(qap.getSize(), tau);
 
-		System.out.println("Solución inicial: ");
-		qap.printSolution(initSolution);
+		
 		// qap.printSolutionInReadFormat(initSolution);
 		currentCost = qap.evalSolution(initSolution);
 		bestCost = currentCost;
 		bestSolution = initSolution;
-		System.out.println("costo: " + currentCost);
+		
 		int counterBest = 0;
 
 		while (currentIteration <= totalIterations) {

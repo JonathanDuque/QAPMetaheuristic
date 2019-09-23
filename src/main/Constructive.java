@@ -1,10 +1,9 @@
 package main;
 
 import java.util.Arrays;
+import java.util.Random;
 
 public class Constructive {
-	
-	//TODO generate random solution
 
 	// constructive algorithm for create init solution intelligently
 	public int[] createInitSolution(QAPData qap) {
@@ -107,11 +106,31 @@ public class Constructive {
 		return solution;
 	}
 
-	
-	public int[] createRandomSolution(QAPData qap){
+	public int[] createRandomSolution(int size, int seed) {
+		int[] s = new int[size];
+		Random random = new Random(seed);
+
+		s[0] = random.nextInt(size);
 		
-		return null;
+		for (int i = 1; i < size; i++) {
+			boolean isEqual = true;
+			while (isEqual) {
+				isEqual = false;
+				int x = random.nextInt(size);
+				for (int j = 0; j <i; j++) {
+					if (x == s[j]) {
+						isEqual = true;
+						break;
+					}
+				}
+				if (!isEqual) {
+					s[i]=x; 
+				}
+			}
+
+		}
+
+		return s;
 	}
-	
 
 }
