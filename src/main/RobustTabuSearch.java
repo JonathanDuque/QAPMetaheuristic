@@ -62,7 +62,7 @@ public class RobustTabuSearch {
 	// unless it satisfies the aspiration criteria.
 	public int[] getBestNeighbor(int[] currentSolution, int currentIteration, int bestCost) {
 		int n = qap.getSize();
-		int[] selectedSolution = makeSwap(currentSolution, 0, 1);
+		int[] selectedSolution;
 		int i_selected = Integer.MAX_VALUE, j_selected = Integer.MAX_VALUE, maxDelta = Integer.MIN_VALUE;
 		int currentCost = qap.evalSolution(currentSolution);
 
@@ -99,10 +99,8 @@ public class RobustTabuSearch {
 			}
 		}
 
-		//System.out.println("i_s "+ i_selected + " j_s " + j_selected);
-		selectedSolution = makeSwap(currentSolution, i_selected, j_selected);
+		selectedSolution = qap.makeSwap(currentSolution, i_selected, j_selected);
 		qap.updateDeltas(selectedSolution, i_selected, j_selected);
-		
 
 		// update tabu matrix with values of the solution selected
 		// random.nextDouble() give decimal between 0 and 1
@@ -128,21 +126,6 @@ public class RobustTabuSearch {
 		for (int[] row : tabuMemory) {
 			Arrays.fill(row, 0);
 		}
-	}
-
-	public int[] makeSwap(int[] permutation, int position1, int position2) {
-
-		int size = permutation.length;
-		int[] newPermutation = Arrays.copyOf(permutation, size); // is necessary make a copy because java pass the
-																	// arrays by referencia like c
-		int temp;
-
-		// change the values
-		temp = newPermutation[position1];
-		newPermutation[position1] = newPermutation[position2];
-		newPermutation[position2] = temp;
-
-		return newPermutation;
 	}
 
 	public boolean satisfyAspitarionCriteria(int actualCost, int bestCostFound) {

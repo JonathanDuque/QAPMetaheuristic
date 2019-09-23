@@ -14,7 +14,7 @@ public class MainActivity {
 		System.out.println("\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
 		//String problem = getProblemName();
 
-		ReadFile readFile = new ReadFile("qapdata/chr22b.dat");
+		ReadFile readFile = new ReadFile("qapdata/chr12a.dat");
 		long start = System.currentTimeMillis();
 
 		int[][] flow, distance;
@@ -31,11 +31,10 @@ public class MainActivity {
 		int[] initSolution = constructive.createRandomSolution(qap.getSize(), 1);
 		int[] bestSolutionFound = initSolution;// for now this is the best solution
 		System.out.println("Solución inicial: ");
-		qap.printSolution(initSolution);
-				
+		qap.printSolution(initSolution);	
 		qap.initDeltas(initSolution);
 		
-		int method = 1;// showMenuMethod();
+		int method = 3;// showMenuMethod();
 		switch (method) {
 		case 1:
 			MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
@@ -45,12 +44,11 @@ public class MainActivity {
 		case 2:
 			RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
 			bestSolutionFound = robustTabuSearch.solve(100000, initSolution, qap);
-			// robustTabuSearch.showMemories();
 			break;
 
 		case 3:
 			ExtremalOptimization extremalOptimization = new ExtremalOptimization();
-			bestSolutionFound = extremalOptimization.solve(100 * qap.getSize(), initSolution, qap, -0.4);
+			bestSolutionFound = extremalOptimization.solve(100000, initSolution, qap, -0.5);
 			break;
 
 		case 4:

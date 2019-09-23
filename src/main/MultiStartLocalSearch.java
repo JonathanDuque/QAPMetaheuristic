@@ -60,5 +60,5 @@ public class MultiStartLocalSearch {
 		
 		return bestSolution;
 	}
-
+	
 }

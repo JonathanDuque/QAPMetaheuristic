@@ -10,13 +10,13 @@ import java.util.Random;
 public class ExtremalOptimization {
 
 	public class Delta {
-		public Delta(int cost, int index, int change) {
+		public Delta(int cost, int index, int bestMove) {
 			this.cost = cost;
 			this.index = index;
-			this.change = change;
+			this.bestMove = bestMove;
 		}
 
-		int cost, index, change;
+		int cost, index, bestMove;
 	}
 
 	float[] pdf;
@@ -32,52 +32,44 @@ public class ExtremalOptimization {
 		// TODO implement lambda functions , receive tau parameter
 		initPdf(qap.getSize(), tau);
 
-		
 		// qap.printSolutionInReadFormat(initSolution);
 		currentCost = qap.evalSolution(initSolution);
 		bestCost = currentCost;
 		bestSolution = initSolution;
-		
+
 		int counterBest = 0;
 
 		while (currentIteration <= totalIterations) {
-			// System.out.println("\niter: " + iterationsCounter);
-
-			for (int f1 = 0; f1 < n; f1++) {
-				int change = 0;
+			
+			for (int i = 0; i < n; i++) {
+				int bestMove = 0;
 				bestDelta = negative_infinity;
 
-				for (int f2 = 0; f2 < n; f2++) {
-					if (f1 == f2) {
+				for (int j = 0; j < n; j++) {
+					if (i == j) {
 						continue;
 					}
-					tempDelta = qap.evalMovement(currentSolution, f1, f2);
-					// System.out.println("delta: " + tempDelta);
+					tempDelta = qap.evalMovement(currentSolution, i, j);
 
 					// if improve
 					if (tempDelta > bestDelta) {
-						change = f2;
+						bestMove = j;
 						bestDelta = tempDelta;
 						counterBest = 1;
 					} else if (tempDelta == bestDelta && random.nextInt(++counterBest) == 0) {
-						change = f2;
+						bestMove = j;
 						bestDelta = tempDelta;
-						// System.out.println(" entro");
-
 					}
 				}
-				deltaList.add(new Delta(bestDelta, f1, change));
-				// System.out.println(f1 + " mejor: " + bestDelta + " con " + change +"\n");
+				deltaList.add(new Delta(bestDelta, i, bestMove));
 			}
 
-			// printDeltas(deltaList);
 			Collections.sort(deltaList, compareByCost);
-			// printDeltas(deltaList);
 			Delta delta = deltaList.get(pdfPick()); // pdf pick gets the index recommended
 
-			nextSolution = makeSwap(currentSolution, delta.index, delta.change);
+			nextSolution = qap.makeSwap(currentSolution, delta.index, delta.bestMove);
 			nextSolutionCost = currentCost - delta.cost;
-			// System.out.println("costo next: " + nextSolutionCost);
+			qap.updateDeltas(nextSolution, delta.index, delta.bestMove);
 
 			// update the best solution found if is the best of the moment
 			// at the end this block help to save the best of the best
@@ -98,20 +90,6 @@ public class ExtremalOptimization {
 		return bestSolution;
 	}
 
-	public int[] makeSwap(int[] permutation, int position1, int position2) {
-
-		int size = permutation.length;
-		int[] newPermutation = Arrays.copyOf(permutation, size); // is necessary make a copy because java pass the
-																	// arrays by referencia like c
-		int temp;
-
-		// change the values
-		temp = newPermutation[position1];
-		newPermutation[position1] = newPermutation[position2];
-		newPermutation[position2] = temp;
-
-		return newPermutation;
-	}
 
 	public void initPdf(int size, double tau) {
 		pdf = new float[size];
@@ -128,9 +106,9 @@ public class ExtremalOptimization {
 			pdf[i] /= sum;
 		}
 
-		//for (int i = 0; i < size; i++) {
-		//	System.out.println("f(" + i + ") = " + pdf[i]);
-		//}
+		// for (int i = 0; i < size; i++) {
+		// System.out.println("f(" + i + ") = " + pdf[i]);
+		// }
 
 		// System.out.println("total " + sum);
 	}
@@ -147,13 +125,13 @@ public class ExtremalOptimization {
 
 		// System.out.println("index " + index);
 
-		return index-1;
+		return index - 1;
 	}
 
 	private void printDeltas(List<Delta> listDelta) {
 		for (int i = 0; i < listDelta.size(); i++) {
 			System.out.println("costo " + i + " " + listDelta.get(i).cost + " cambiar " + listDelta.get(i).index
-					+ " por " + listDelta.get(i).change);
+					+ " por " + listDelta.get(i).bestMove);
 		}
 	}
 
