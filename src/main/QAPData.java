@@ -24,8 +24,6 @@ public class QAPData {
 	}
 	
 	public int[] makeSwap(int[] permutation, int i, int j) {
-		//int size = permutation.length;
-		//int[] newPermutation = Arrays.copyOf(permutation, size); // is necessary make a copy because java pass the															// arrays by referencia like c
 		int temp;
 
 		// change the values
@@ -137,8 +135,9 @@ public class QAPData {
 		Tools.printMatrix(flow, "\nMatriz de Flujos");
 	}
 
-	public void printSolution(int[] array) {
-
+	public void printSolution(int[] array, String label) {
+		
+		System.out.println(label);
 		System.out.println("Costo: " + evalSolution(array));
 		String facilities = "Facilidades: ", locations = "Ubicaciones: ";
 		//for (int i = 0; i < array.length; i++) {

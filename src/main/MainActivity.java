@@ -8,17 +8,12 @@ import main.GeneticAlgorithm.Results;
 public class MainActivity {
 
 	public static void main(String[] args) {
-
-		//String problem = args[0];
-		// String two = args[1];
-		// String three = args[2];
-
+		final int totalIterations = 100000;
+		final String problem = "chr12a.dat";//args[0];
+		
 		// int problem = 4;// showMenu();
-
-		System.out.println("\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
-		// String problem = getProblemName();
-
-		ReadFile readFile = new ReadFile("qapdata/chr12a.dat");
+		System.out.println("\nProblema: " + problem);
+		ReadFile readFile = new ReadFile("qapdata/"+problem);
 		long start = System.currentTimeMillis();
 
 		int[][] flow, distance;
@@ -34,25 +29,24 @@ public class MainActivity {
 		Constructive constructive = new Constructive();
 		int[] initSolution = constructive.createRandomSolution(qap.getSize(), 1);
 		int[] bestSolutionFound = initSolution;// for now this is the best solution
-		System.out.println("Solución inicial: ");
-		qap.printSolution(initSolution);
+		qap.printSolution(initSolution, "Solución inicial");
 		qap.initDeltas(initSolution);
 
 		int method = 3;// showMenuMethod();
 		switch (method) {
 		case 1:
 			MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
-			bestSolutionFound = mutiStartLocalSearch.solve(100000, initSolution, qap, constructive);
+			bestSolutionFound = mutiStartLocalSearch.solve(totalIterations, initSolution, qap, constructive);
 			break;
 
 		case 2:
 			RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
-			bestSolutionFound = robustTabuSearch.solve(100000, initSolution, qap);
+			bestSolutionFound = robustTabuSearch.solve(totalIterations, initSolution, qap);
 			break;
 
 		case 3:
 			ExtremalOptimization extremalOptimization = new ExtremalOptimization();
-			bestSolutionFound = extremalOptimization.solve(100000, initSolution, qap, -0.5);
+			bestSolutionFound = extremalOptimization.solve(totalIterations, initSolution, qap, -0.5);
 			break;
 
 		case 4:
@@ -73,8 +67,7 @@ public class MainActivity {
 
 		}
 
-		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
-		qap.printSolution(bestSolutionFound);
+		qap.printSolution(bestSolutionFound, "\nMejor Solución");
 
 		printTotalTime(start);
 
@@ -108,20 +101,6 @@ public class MainActivity {
 		return op;
 	}
 
-	public static int memoryType() {
-		int op;
-		do {
-			System.out.print("/****** ELIJA EL TIPO DE MEMORIA A USAR ******/\n");
-			System.out.print("\t1. Memoria Corta\n\t2. Memoria Larga\n");
-			System.out.print("Escriba la opción y presione ENTER: ");
-			Scanner in = new Scanner(System.in);
-
-			op = in.nextInt();
-		} while (op < 1 || op > 2);
-
-		return op;
-	}
-
 	public static String getProblemName() {
 		String op;
 		do {
@@ -139,6 +118,6 @@ public class MainActivity {
 		// show the total time
 		double time = (System.currentTimeMillis() - start);
 		time /= 1000;
-		System.out.println("\n" + time + " sec");
+		System.out.println("\n" + time + " seg");
 	}
 }

@@ -72,8 +72,7 @@ public class ExtremalOptimization {
 			currentCost = currentCost - delta.cost;
 			qap.updateDeltas(currentSolution, delta.index, delta.bestMove);
 
-			// update the best solution found if is the best of the moment
-			// at the end this block help to save the best of the best
+			// update the best solution found if is the best of the moment at the end this block help to save the best of the best
 			if (currentCost < bestCost) {
 				bestSolution = Arrays.copyOf(currentSolution, n);
 				bestCost = currentCost;
