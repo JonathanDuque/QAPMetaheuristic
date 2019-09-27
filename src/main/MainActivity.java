@@ -8,18 +8,22 @@ import main.GeneticAlgorithm.Results;
 public class MainActivity {
 
 	public static void main(String[] args) {
-		
-		//int problem = 4;// showMenu(); 
+
+		//String problem = args[0];
+		// String two = args[1];
+		// String three = args[2];
+
+		// int problem = 4;// showMenu();
 
 		System.out.println("\n/*********** DATOS DE EJECUCIÓN DEL ALGORITMO **********/");
-		//String problem = getProblemName();
+		// String problem = getProblemName();
 
 		ReadFile readFile = new ReadFile("qapdata/chr12a.dat");
 		long start = System.currentTimeMillis();
 
 		int[][] flow, distance;
-		//distance = Tools.getDataforDistance(problem);
-		//flow = Tools.getDataForFlow(problem);
+		// distance = Tools.getDataforDistance(problem);
+		// flow = Tools.getDataForFlow(problem);
 		distance = readFile.getDistance();
 		flow = readFile.getFlow();
 
@@ -31,14 +35,14 @@ public class MainActivity {
 		int[] initSolution = constructive.createRandomSolution(qap.getSize(), 1);
 		int[] bestSolutionFound = initSolution;// for now this is the best solution
 		System.out.println("Solución inicial: ");
-		qap.printSolution(initSolution);	
+		qap.printSolution(initSolution);
 		qap.initDeltas(initSolution);
-		
+
 		int method = 3;// showMenuMethod();
 		switch (method) {
 		case 1:
 			MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
-			bestSolutionFound = mutiStartLocalSearch.solve(100000,initSolution, qap, constructive);
+			bestSolutionFound = mutiStartLocalSearch.solve(100000, initSolution, qap, constructive);
 			break;
 
 		case 2:
@@ -71,12 +75,10 @@ public class MainActivity {
 
 		System.out.println("\n\n/*********** MEJOR SOLUCIÓN ENCONTRADA **********/");
 		qap.printSolution(bestSolutionFound);
-		
+
 		printTotalTime(start);
 
 	}
-
-	
 
 	public static int showMenu() {
 		int op;
@@ -119,11 +121,11 @@ public class MainActivity {
 
 		return op;
 	}
-	
+
 	public static String getProblemName() {
 		String op;
 		do {
-			
+
 			System.out.print("Escriba la opción y presione ENTER: ");
 			Scanner in = new Scanner(System.in);
 

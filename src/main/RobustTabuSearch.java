@@ -44,7 +44,7 @@ public class RobustTabuSearch {
 			// update the best solution found if is the best of the moment
 			// at the end this block help to save the best of the best
 			if (bestNeighborCost < bestCost) {
-				bestSolution = bestNeighbor;
+				bestSolution = Arrays.copyOf(bestNeighbor, n); 
 				bestCost = bestNeighborCost;
 				bestFoundCounter = currentIteration;
 			}
@@ -62,7 +62,7 @@ public class RobustTabuSearch {
 	// unless it satisfies the aspiration criteria.
 	public int[] getBestNeighbor(int[] currentSolution, int currentIteration, int bestCost) {
 		int n = qap.getSize();
-		int[] selectedSolution;
+		//int[] selectedSolution;
 		int i_selected = Integer.MAX_VALUE, j_selected = Integer.MAX_VALUE, maxDelta = Integer.MIN_VALUE;
 		int currentCost = qap.evalSolution(currentSolution);
 
@@ -99,8 +99,8 @@ public class RobustTabuSearch {
 			}
 		}
 
-		selectedSolution = qap.makeSwap(currentSolution, i_selected, j_selected);
-		qap.updateDeltas(selectedSolution, i_selected, j_selected);
+		currentSolution = qap.makeSwap(currentSolution, i_selected, j_selected);
+		qap.updateDeltas(currentSolution, i_selected, j_selected);
 
 		// update tabu matrix with values of the solution selected
 		// random.nextDouble() give decimal between 0 and 1
@@ -108,11 +108,12 @@ public class RobustTabuSearch {
 		int t2 = (int) (Math.pow(random.nextDouble(), 3) * tabuDuration);
 
 		// make tabu this facilities during certain iterations
-		tabuMemory[i_selected][selectedSolution[j_selected]] = currentIteration + t1;
-		tabuMemory[j_selected][selectedSolution[i_selected]] = currentIteration + t2;
+		tabuMemory[i_selected][currentSolution[j_selected]] = currentIteration + t1;
+		tabuMemory[j_selected][currentSolution[i_selected]] = currentIteration + t2;
 		//Tools.printMatrix(tabuMemory, "Tabu Matriz");
 
-		return selectedSolution;
+		return currentSolution; 
+
 	}
 
 	// init tabu matrix with 0

@@ -41,7 +41,7 @@ public class MultiStartLocalSearch {
 				currentSolution = qap.makeSwap(currentSolution, i_selected, j_selected);
 				if (cost < bestCost) {
 					bestCost = cost;
-					bestSolution = currentSolution;
+					bestSolution = Arrays.copyOf(currentSolution, n);
 				}
 
 				// qap.printSolution(bestSolution);

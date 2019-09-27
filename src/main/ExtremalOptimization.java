@@ -10,6 +10,7 @@ import java.util.Random;
 public class ExtremalOptimization {
 
 	public class Delta {
+		
 		public Delta(int cost, int index, int bestMove) {
 			this.cost = cost;
 			this.index = index;
@@ -23,8 +24,8 @@ public class ExtremalOptimization {
 	Random random;
 
 	public int[] solve(int totalIterations, int[] initSolution, QAPData qap, double tau) {
-		int currentIteration = 1, n = qap.getSize(), nextSolutionCost = 0, currentCost, bestCost;
-		int[] currentSolution = Arrays.copyOf(initSolution, n), bestSolution, nextSolution;
+		int currentIteration = 1, n = qap.getSize(), currentCost, bestCost;
+		int[] currentSolution = Arrays.copyOf(initSolution, n), bestSolution;
 		int tempDelta, bestDelta;
 		List<Delta> deltaList = new ArrayList<>();
 		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
@@ -32,10 +33,9 @@ public class ExtremalOptimization {
 		// TODO implement lambda functions , receive tau parameter
 		initPdf(qap.getSize(), tau);
 
-		// qap.printSolutionInReadFormat(initSolution);
 		currentCost = qap.evalSolution(initSolution);
 		bestCost = currentCost;
-		bestSolution = initSolution;
+		bestSolution = Arrays.copyOf(initSolution, n);
 
 		int counterBest = 0;
 
@@ -67,20 +67,17 @@ public class ExtremalOptimization {
 			Collections.sort(deltaList, compareByCost);
 			Delta delta = deltaList.get(pdfPick()); // pdf pick gets the index recommended
 
-			nextSolution = qap.makeSwap(currentSolution, delta.index, delta.bestMove);
-			nextSolutionCost = currentCost - delta.cost;
-			qap.updateDeltas(nextSolution, delta.index, delta.bestMove);
+			// always update the current solution and its cost
+			currentSolution = qap.makeSwap(currentSolution, delta.index, delta.bestMove);
+			currentCost = currentCost - delta.cost;
+			qap.updateDeltas(currentSolution, delta.index, delta.bestMove);
 
 			// update the best solution found if is the best of the moment
 			// at the end this block help to save the best of the best
-			if (nextSolutionCost < bestCost) {
-				bestSolution = nextSolution;
-				bestCost = nextSolutionCost;
+			if (currentCost < bestCost) {
+				bestSolution = Arrays.copyOf(currentSolution, n);
+				bestCost = currentCost;
 			}
-
-			// always update the current solution and its cost
-			currentSolution = nextSolution;
-			currentCost = nextSolutionCost;
 
 			currentIteration++;
 			deltaList.clear();// delete delta moves

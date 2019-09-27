@@ -24,16 +24,16 @@ public class QAPData {
 	}
 	
 	public int[] makeSwap(int[] permutation, int i, int j) {
-		int size = permutation.length;
-		int[] newPermutation = Arrays.copyOf(permutation, size); // is necessary make a copy because java pass the															// arrays by referencia like c
+		//int size = permutation.length;
+		//int[] newPermutation = Arrays.copyOf(permutation, size); // is necessary make a copy because java pass the															// arrays by referencia like c
 		int temp;
 
 		// change the values
-		temp = newPermutation[i];
-		newPermutation[i] = newPermutation[j];
-		newPermutation[j] = temp;
+		temp = permutation[i];
+		permutation[i] = permutation[j];
+		permutation[j] = temp;
 
-		return newPermutation;
+		return permutation;
 	}
 
 	/********** initialization of current solution value ***********/
