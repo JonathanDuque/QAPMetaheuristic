@@ -86,7 +86,6 @@ public class ExtremalOptimization {
 		return bestSolution;
 	}
 
-
 	public void initPdf(int size, double tau) {
 		pdf = new float[size];
 		float sum = 0;
