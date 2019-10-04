@@ -11,7 +11,7 @@ public class RobustTabuSearch {
 	Random random;
 	int aspiration;
 
-	public int[] solve(int totalIterations, int[] initSolution, QAPData qapData) {
+	public int[] solve(int totalIterations, int seed, int[] initSolution, QAPData qapData) {
 		// this initial block define the variable needed
 		qap = qapData;
 		int n = qap.getSize();
@@ -19,7 +19,7 @@ public class RobustTabuSearch {
 		tabuDuration = aspiration_factor * n;// this 8 is a factor, is possible to change
 		aspiration = aspiration_factor * n * n;
 		int currentIteration = 1;
-		random = new Random(1);// set the seed, 1 in this case
+		random = new Random(seed);// set the seed
 
 		//System.out.println("Total iteraciones: " + totalIterations);
 		//System.out.println("Iteraciones Tabu para un movimiento: " + tabuDuration);

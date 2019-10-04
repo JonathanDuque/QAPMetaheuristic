@@ -3,7 +3,7 @@ package main;
 public class Tools {
 	public static void printArray(int[] array) {
 		for (int i : array) {
-			System.out.print(i + 1 + " ");// +1 because the index in java start with 0
+			System.out.print(i  + " ");// +1 because the index in java start with 0
 		}
 		System.out.println("\n");
 	}

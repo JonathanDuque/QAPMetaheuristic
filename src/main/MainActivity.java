@@ -30,10 +30,10 @@ public class MainActivity {
 		Constructive constructive = new Constructive();
 		int[] s;
 
-		for (int i = 0; i < pop_size; i++) {
-			System.out.println("i " + i);
-			s = constructive.createRandomSolution(qap_size, i);
-			generation.add(new Gene(s, i, qap_size));
+		for (int k = 0; k < pop_size; k++) {
+			int[] p = { 100, k, 3, 4 };
+			s = constructive.createRandomSolution(qap_size, k);
+			generation.add(new Gene(s, k % 4, p, qap_size));
 		}
 
 		// qap.printSolution(initSolution, "Solución inicial");
