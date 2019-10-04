@@ -11,10 +11,9 @@ public class MainActivity {
 		final int totalIterations = 100000;
 		final String problem = "chr12a.dat";//args[0];
 		
-		// int problem = 4;// showMenu();
 		System.out.println("\nProblema: " + problem);
 		ReadFile readFile = new ReadFile("qapdata/"+problem);
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 
 		int[][] flow, distance;
 		// distance = Tools.getDataforDistance(problem);
@@ -22,7 +21,7 @@ public class MainActivity {
 		distance = readFile.getDistance();
 		flow = readFile.getFlow();
 
-		// initialize qap data, i.e matrix of flow and distance matix [row][col]
+		// initialize qap data, i.e matrix of flow and distance matrix [row][col]
 		QAPData qap = new QAPData(distance, flow);
 
 		// get init solution with constructive method
@@ -32,7 +31,7 @@ public class MainActivity {
 		qap.printSolution(initSolution, "Solución inicial");
 		qap.initDeltas(initSolution);
 
-		int method = 3;// showMenuMethod();
+		int method = 1;// showMenuMethod();
 		switch (method) {
 		case 1:
 			MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
@@ -73,46 +72,7 @@ public class MainActivity {
 
 	}
 
-	public static int showMenu() {
-		int op;
-		do {
-			System.out.print("/****** ELIJA EL PROBLEMA A SOLUCIONAR ******/\n");
-			System.out.print("\t1. QAP6\n\t2. QAP7\n\t3. QAP8\n\t4. QAP9\n");
-			System.out.print("Escriba la opción y presione ENTER: ");
-			Scanner in = new Scanner(System.in);
 
-			op = in.nextInt();
-		} while (op < 1 || op > 4);
-
-		return op;
-	}
-
-	public static int showMenuMethod() {
-		int op;
-		do {
-			System.out.print("/****** ELIJA EL MÉTODO  ******/\n");
-			System.out.print("\t1. Local Search\n\t2. Tabu Search\n\t3. Genetic Algorithm\n");
-			System.out.print("Escriba la opción y presione ENTER: ");
-			Scanner in = new Scanner(System.in);
-
-			op = in.nextInt();
-		} while (op < 1 || op > 3);
-
-		return op;
-	}
-
-	public static String getProblemName() {
-		String op;
-		do {
-
-			System.out.print("Escriba la opción y presione ENTER: ");
-			Scanner in = new Scanner(System.in);
-
-			op = in.next();
-		} while (op.isEmpty());
-
-		return op;
-	}
 
 	public static void printTotalTime(long start) {
 		// show the total time
