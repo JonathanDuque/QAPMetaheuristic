@@ -1,7 +1,5 @@
 package main;
 
-import java.util.Scanner;
-
 import main.GeneticAlgorithm.GeneticAlgorithm;
 import main.GeneticAlgorithm.Results;
 
