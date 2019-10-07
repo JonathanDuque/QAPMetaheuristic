@@ -5,15 +5,16 @@ import java.util.Random;
 
 public class MultiStartLocalSearch {
 
-	public int[] solve(int totalIterations, int[] initSolution, QAPData qap, Constructive constructive) {
+	public int[] solve(int[] initSolution, int[] params, QAPData qap, Constructive constructive) {
 		// this initial block define the variable needed
-
 		int n = qap.getSize();
 		int[] bestSolution = Arrays.copyOf(initSolution, n), currentSolution = Arrays.copyOf(initSolution, n);
 		boolean improve = false; // this flag control when the solution no improve and we are in an optimo local
 		int currentIteration = 1;
 		int temporalDelta, bestDelta, cost = qap.evalSolution(initSolution), bestCost;
 		bestCost = cost;
+		int totalIterations = params[0];
+		qap.initDeltas(initSolution);
 
 		// here find the best solution from de initSolution
 		while (currentIteration < totalIterations) {

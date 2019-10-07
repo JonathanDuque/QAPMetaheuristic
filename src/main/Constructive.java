@@ -107,6 +107,7 @@ public class Constructive {
 	}
 
 	public int[] createRandomSolution(int size, final int seed) {
+		//System.out.println("Seed: " + seed);
 		int[] s = new int[size];
 		Random random = new Random(seed);
 

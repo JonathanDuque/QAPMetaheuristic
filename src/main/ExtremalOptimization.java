@@ -23,19 +23,22 @@ public class ExtremalOptimization {
 	float[] pdf;
 	Random random;
 
-	public int[] solve(int totalIterations, int seed, int[] initSolution, QAPData qap, double tau) {
+	public int[] solve( int[] initSolution, int [] params,QAPData qap) {
 		int currentIteration = 1, n = qap.getSize(), currentCost, bestCost;
 		int[] currentSolution = Arrays.copyOf(initSolution, n), bestSolution;
 		int tempDelta, bestDelta;
 		List<Delta> deltaList = new ArrayList<>();
 		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
-		random = new Random(seed);// set the seed, 1 in this case
+		int totalIterations = params[0];
+		random = new Random(params[1]);// set the seed, 1 in this case
 		// TODO implement lambda functions , receive tau parameter
+		double tau = params[2]/1000;
 		initPdf(qap.getSize(), tau);
 
 		currentCost = qap.evalSolution(initSolution);
 		bestCost = currentCost;
 		bestSolution = Arrays.copyOf(initSolution, n);
+		qap.initDeltas(initSolution);
 
 		int counterBest = 0;
 

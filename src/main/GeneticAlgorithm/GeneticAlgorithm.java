@@ -14,7 +14,7 @@ public class GeneticAlgorithm {
 	Results results;
 	Random random;
 
-	public void solve(int pop_size, int generations, int seed, double mutation_probability, QAPData qapData) {
+	public void solve(int []params,  QAPData qapData) {
 		// first the variables necessary for the execution
 		Individual individual1, individual2, bestChild;
 		List<Individual> new_generation = new ArrayList<>();
@@ -22,7 +22,9 @@ public class GeneticAlgorithm {
 		int count_generations = 0;
 		qap = qapData;
 		qap_size = qap.getSize();
-		random = new Random(seed);
+		int pop_size = params[3],  generations= params[0];
+		double mutation_probability = params[2]/1000;
+		random = new Random(params[1]);
 
 		// printing the parameters for the execution
 		System.out.println("Tamaño de la población: " + pop_size);

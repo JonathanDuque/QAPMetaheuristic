@@ -11,15 +11,17 @@ public class RobustTabuSearch {
 	Random random;
 	int aspiration;
 
-	public int[] solve(int totalIterations, int seed, int[] initSolution, QAPData qapData) {
+	public int[] solve(int[] initSolution, int [] params, QAPData qapData) {
 		// this initial block define the variable needed
 		qap = qapData;
 		int n = qap.getSize();
-		int aspiration_factor = 8;
+		int aspiration_factor = params[3];
 		tabuDuration = aspiration_factor * n;// this 8 is a factor, is possible to change
 		aspiration = aspiration_factor * n * n;
 		int currentIteration = 1;
-		random = new Random(seed);// set the seed
+		int totalIterations = params[0];
+		random = new Random(params[1]);// set the seed
+		qap.initDeltas(initSolution);
 
 		//System.out.println("Total iteraciones: " + totalIterations);
 		//System.out.println("Iteraciones Tabu para un movimiento: " + tabuDuration);
@@ -31,8 +33,6 @@ public class RobustTabuSearch {
 		bestSolution = Arrays.copyOf(initSolution, n);
 		int bestCost = qap.evalSolution(initSolution), bestNeighborCost;
 		int bestFoundCounter = 0; // this counter has the value where the best was found
-
-		System.out.println("\n\n/*********** DATOS DURANTE LA EJECUCIÓN DEL ALGORITMO **********/");
 
 		// this while find the best solution during totalIterations
 		while (currentIteration <= totalIterations) {
@@ -54,7 +54,7 @@ public class RobustTabuSearch {
 			currentIteration++;
 		}
 
-		System.out.println("Iteración donde se encontro el mejor: " + bestFoundCounter);
+		//System.out.println("Iteración donde se encontro el mejor: " + bestFoundCounter);
 		return bestSolution;
 	}
 

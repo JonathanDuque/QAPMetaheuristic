@@ -1,23 +1,32 @@
 package main;
 
+import java.util.Arrays;
+
 public class Gene {
 	int[] chromosome;
+	int qap_size;
 
-	public Gene(int[] solution, final int metaheuristic, final int[] params, int qap_size) {
-		int size = qap_size + 5;
+	public Gene(int[] solution, final int[] params, int qap_size) {
+		int size = qap_size + 4;
 		chromosome = new int[size];
+		this.qap_size = qap_size;
+		
 		for (int i = 0; i < qap_size; i++) {
 			chromosome[i] = solution[i];
 		}
-		chromosome[qap_size] = metaheuristic;
+		//chromosome[qap_size] = metaheuristic;
 
-		for (int i = qap_size + 1; i < size; i++) {
-			chromosome[i] = params[i - qap_size - 1];
+		for (int i = qap_size; i < size; i++) {
+			chromosome[i] = params[i - qap_size ];
 		}
-
 		Tools.printArray(chromosome);
 	}
-
-	// int[] solution, params;
-	// byte metaheuristic;
+	
+	public int [] getSolution () {
+		return Arrays.copyOfRange(chromosome, 0, qap_size);
+	}
+	
+	public int [] getParams () {
+		return Arrays.copyOfRange(chromosome, qap_size, qap_size+4);
+	}
 }
