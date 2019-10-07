@@ -23,19 +23,19 @@ public class GeneticAlgorithm {
 		qap = qapData;
 		qap_size = qap.getSize();
 		int pop_size = params[3],  generations= params[0];
-		double mutation_probability = params[2]/1000;
+		//double mutation_probability = params[2]/1000;
 		random = new Random(params[1]);
 
 		// printing the parameters for the execution
-		System.out.println("Tamaño de la población: " + pop_size);
-		System.out.println("Número de generaciones: " + generations);
-		System.out.println("Probabilidad de mutación: " + mutation_probability);
+		//System.out.println("Tamaño de la población: " + pop_size);
+		//System.out.println("Número de generaciones: " + generations);
+		//System.out.println("Probabilidad de mutación: " + mutation_probability);
 
 		// creating the first generation
 		new_generation = createFirstGeneration(pop_size);
 		Collections.sort(new_generation, compareByFitness);
-		System.out.println("\nGeneración inicial");
-		printPopulation(new_generation);
+		//System.out.println("\nGeneración inicial");
+		//printPopulation(new_generation);
 
 		// this cicle finish when complete all generations
 		while (count_generations < generations) {
@@ -45,7 +45,7 @@ public class GeneticAlgorithm {
 
 				individual1 = selectIndividual(temp_generation);// select a random individual
 				individual2 = selectIndividual(temp_generation);
-				bestChild = getBestOffspring(individual1, individual2, mutation_probability);
+				bestChild = crossoverUX(individual1, individual2);
 
 				new_generation.remove(pop_size - 1);// delete the last one
 				// insert the best child and sure that is different, if not mutate until will be
@@ -58,8 +58,8 @@ public class GeneticAlgorithm {
 			Collections.sort(new_generation, compareByFitness);
 			count_generations++;
 		}
-		System.out.println("\nGeneración final");
-		printPopulation(new_generation);
+		//System.out.println("\nGeneración final");
+		//printPopulation(new_generation);
 		// save the results
 		results = populationResults(new_generation, pop_size);
 
@@ -67,21 +67,21 @@ public class GeneticAlgorithm {
 
 	private Individual getBestOffspring(Individual individual1, Individual individual2, double mp) {
 		// mp = mutation_probability
-		Random rand = new Random();
+		//Random rand = new Random();
 		// crossover from 1 until qap_size minus 1
-		int point_crossover = rand.nextInt(qap_size - 1) + 1;
+		//int point_crossover = rand.nextInt(qap_size - 1) + 1;
 
 		// generate two offspring
-		Individual child1 = crossover(individual1, individual2, point_crossover);
-		Individual child2 = crossover(individual2, individual1, point_crossover);
+		//Individual child1 = crossover(individual1, individual2, point_crossover);
+		//Individual child2 = crossover(individual2, individual1, point_crossover);
 
 		Individual childx = crossoverUX(individual1, individual2);
 
 		//child1.printIndividual();
 
 		// mutate two offspring
-		child1 = mutate(child1, mp);
-		child2 = mutate(child2, mp);
+		//child1 = mutate(child1, mp);
+		//child2 = mutate(child2, mp);
 
 		// return the best by fitness
 		//return getBestIndividual(child1, child2);

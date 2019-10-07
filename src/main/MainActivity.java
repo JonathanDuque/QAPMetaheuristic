@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import main.GeneticAlgorithm.GeneticAlgorithm;
+import main.GeneticAlgorithm.Results;
 
 public class MainActivity {
 	static int qap_size;
@@ -35,61 +36,63 @@ public class MainActivity {
 		Constructive constructive = new Constructive();
 		List<List<Gene>> generation = generateInitialPopulation(number_by_mh, constructive);
 
-		int generations = 0, count_generations = 0;
+		int generations = 1, count_generations = 0;
 
-		Gene g1, g2;
+		Gene i1, i2;
 		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
 		RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
 		ExtremalOptimization extremalOptimization = new ExtremalOptimization();
 		GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
 
+		int[] s = new int[qap_size];
+		int[] params = new int[4];
+
 		while (count_generations < generations) {
 			// System.out.println( count_generations );
 			Gene bestGene;
 			for (int i = 0; i < generation.size(); i++) {
-				List<Gene> g = generation.get(i);
-				g1 = selectIndividual(g);
-				g2 = selectIndividual(g);
+				List<Gene> g = new ArrayList<>(generation.get(i));
+				i1 = selectIndividual(g);
+				i2 = selectIndividual(g);
 				// crossover and mutation
-				bestGene = g1;
+				params = crossover(i1.getParams(), i2.getParams(), i); // crossover depending of method
+				bestGene = i1;
 
 				switch (i) {
 				case MTLS:
 					// System.out.println("MLTS");
-					// int[] s = mutiStartLocalSearch.solve(bestGene.getSolution(),
-					// bestGene.getParams(), qap, constructive);
+					s = mutiStartLocalSearch.solve(bestGene.getSolution(), params, qap, constructive);
 					break;
 				case ROTS:
 					// System.out.println("ROTS");
-					// robustTabuSearch.solve(bestGene.getSolution(), bestGene.getParams(), qap);
+					s = robustTabuSearch.solve(bestGene.getSolution(), params, qap);
 					break;
 				case EO:
 					// System.out.println("EO");
-					// extremalOptimization.solve(bestGene.getSolution(), bestGene.getParams(),
-					// qap);
+					s = extremalOptimization.solve(bestGene.getSolution(), params, qap);
 					break;
 				case GA:
 					// System.out.println("GA");
 					// pop_size, generations, mutation_probability, QAPData
-					// geneticAlgorithm.solve(bestGene.getParams(), qap);
+					geneticAlgorithm.solve(params, qap);
+					Results geneticAlgorithmResult = geneticAlgorithm.getResults();
+					s = geneticAlgorithmResult.getBestIndividual().getGenes();
 					break;
 				}
+				
+				Gene newGene = new Gene(s, params, qap_size);
+
+				//qap.printSolution(s, "MH " + i);
+				//Tools.printArray(bestGene.chromosome);
 
 			}
 
 			count_generations++;
 		}
 
-		// qap.printSolution(initSolution, "Solución inicial");
-
 		/*
-		 * 
-		 * case 3: ExtremalOptimization extremalOptimization = new
-		 * ExtremalOptimization(); bestSolutionFound =
 		 * extremalOptimization.solve(totalIterations, initSolution, qap, -0.5); break;
 		 * 
-		 * case 4: GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(); //
-		 * pop_size, generations, mutation_probability, QAPData
 		 * geneticAlgorithm.solve(10 * qap.getSize(), 40 * qap.getSize(), 0.5, qap);
 		 * 
 		 * // get the results for the algorithm Results geneticAlgorithmResult =
@@ -103,10 +106,7 @@ public class MainActivity {
 		 * System.out.println("El valor promedio de la población es: " +
 		 * geneticAlgorithmResult.getAvg_value()); break;
 		 * 
-		 * }
 		 */
-
-		// qap.printSolution(bestSolutionFound, "\nMejor Solución");
 
 		printTotalTime(start);
 
@@ -133,19 +133,22 @@ public class MainActivity {
 					p[2] = 4 * (i + 1); // aspiration factor
 					break;
 				case EO:
-					p[0] = 40 * qap_size * (1 + i);;// iterarions
+					p[0] = 40 * qap_size * (1 + i);// iterarions
 					p[1] = k * (i + 1);// seed
 					p[2] = -random.nextInt(1000); // tau*1000
 					break;
-				case GA: // Ga
+				case GA:
 					p[0] = 10 * qap_size * (1 + i);// iterarions - generations
 					p[1] = k * (i + 1);// seed
 					p[2] = random.nextInt(1000); // mutation *1000
-					p[3] = qap_size * (1 + i); // population size
+					p[3] = qap_size * (1 + i) / 2; // population size
+					if (qap_size > 60) {
+						p[3] = p[3] * 2 / 5;
+					}
 					break;
 				}
 
-				s = constructive.createRandomSolution(qap_size, random.nextInt());
+				s = constructive.createRandomSolution(qap_size, k);// random.nextInt()
 				g.add(new Gene(s, p, qap_size));
 			}
 
@@ -161,28 +164,37 @@ public class MainActivity {
 		// obtain a number between 0 - size population
 		int index = random.nextInt(g.size());
 		selected = g.get(index);
+		g.remove(index);// delete for no selecting later
+
 		return selected;
 	}
 
-	/*
-	 * public static List <Gene> createFirstGeneration( int pop_size) { final int
-	 * MTLS = 0, ROTS = 1, EO = 2, GA = 3; List<Gene> generation = new
-	 * ArrayList<>(pop_size);
-	 * 
-	 * Constructive constructive = new Constructive(); int[] s; for (int k = 0; k <
-	 * pop_size; k++) { int[] p = { 0, 0, 0, 0 };
-	 * 
-	 * switch (k % 4) { case MTLS: p[0] = 100;// iterations break; case ROTS: p[0] =
-	 * 1000;// iterarions p[1] = k;// seed p[2] = 8; // aspiration factor break;
-	 * case EO: p[0] = 10000;// iterarions p[1] = k;// seed p[2] = 5; // tau*10
-	 * break; case GA: // Ga p[0] = 10000;// iterarions - generations p[1] = k;//
-	 * seed p[2] = 8; // mutation *10 p[3] = 50; // population size break; }
-	 * 
-	 * s = constructive.createRandomSolution(qap_size, k); generation.add(new
-	 * Gene(s, k % 4, p, qap_size)); }
-	 * 
-	 * return generation; }
-	 */
+	public static int[] crossover(int[] params1, int[] params2, int mh_tyoe) {
+		int[] p = { 0, 0, 0, 0 };
+		switch (mh_tyoe) {
+		case MTLS:
+			p[0] = (params1[0] + params2[1]) / 2; // iterations
+			break;
+		case ROTS:
+			p[0] = params1[0];// iterarions
+			p[1] = params2[1];// seed
+			p[2] = params2[2]; // aspiration factor
+			break;
+		case EO:
+			p[0] = params1[0];// iterarions
+			p[1] = params2[1];// seed
+			p[2] = params2[2]; // tau*1000
+			break;
+		case GA:
+			p[0] = params1[0];// iterarions - generations
+			p[1] = params1[1];// seed
+			p[2] = params2[2]; // mutation *1000
+			p[3] = params2[3]; // population size
+			break;
+		}
+
+		return p;
+	}
 
 	public static void printTotalTime(long start) {
 		// show the total time
