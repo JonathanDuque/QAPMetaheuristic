@@ -55,13 +55,10 @@ public class MainActivity {
 				List<Gene> g = new ArrayList<>(generation.get(i));
 
 				/*
-				if (i == 3) {
-					System.out.println(i);
-					for (int l = 0; l < g.size(); l++) {
-						Tools.printArray(g.get(l).chromosome);
-						System.out.println( "costo "+ qap.evalSolution(g.get(l).getSolution()));
-					}
-				}*/
+				 * if (i == 3) { System.out.println(i); for (int l = 0; l < g.size(); l++) {
+				 * Tools.printArray(g.get(l).chromosome); System.out.println( "costo "+
+				 * qap.evalSolution(g.get(l).getSolution())); } }
+				 */
 
 				i1 = selectIndividual(g);
 				i2 = selectIndividual(g);
@@ -241,4 +238,46 @@ public class MainActivity {
 		time /= 1000;
 		System.out.println("\n" + time + " seg");
 	}
+
+	/*
+	 * // get init solution with constructive method Constructive constructive = new
+	 * Constructive(); int[] initSolution =
+	 * constructive.createRandomSolution(qap.getSize(), 1); int[] bestSolutionFound
+	 * = initSolution;// for now this is the best solution
+	 * qap.printSolution(initSolution, "Solución inicial");
+	 * 
+	 * int[] params = {380,1,500,80};
+	 * 
+	 * int method = 4;// showMenuMethod(); switch (method) { case 1:
+	 * MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
+	 * bestSolutionFound = mutiStartLocalSearch.solve( initSolution, params,qap,
+	 * constructive); break;
+	 * 
+	 * case 2: RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
+	 * bestSolutionFound = robustTabuSearch.solve( initSolution,params, qap); break;
+	 * 
+	 * case 3: ExtremalOptimization extremalOptimization = new
+	 * ExtremalOptimization(); bestSolutionFound = extremalOptimization.solve(
+	 * initSolution,params, qap); break;
+	 * 
+	 * case 4: GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(); //
+	 * pop_size, generations, mutation_probability, QAPData
+	 * geneticAlgorithm.solve(params, qap);
+	 * 
+	 * // get the results for the algorithm Results geneticAlgorithmResult =
+	 * geneticAlgorithm.getResults(); // print the results, the best, the worst and
+	 * the average population fitness
+	 * System.out.println("\nEl mejor individuo es: ");
+	 * geneticAlgorithmResult.getBestIndividual().printIndividualWithFitness(qap);
+	 * bestSolutionFound = geneticAlgorithmResult.getBestIndividual().getGenes();
+	 * System.out.println("El peor individuo es: ");
+	 * geneticAlgorithmResult.getWorstIndividual().printIndividualWithFitness(qap);
+	 * System.out.println("El valor promedio de la población es: " +
+	 * geneticAlgorithmResult.getAvg_value()); break;
+	 * 
+	 * }
+	 * 
+	 * qap.printSolution(bestSolutionFound, "\nMejor Solución");
+	 */
+
 }
