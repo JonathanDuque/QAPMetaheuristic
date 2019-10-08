@@ -2,10 +2,13 @@ package main;
 
 public class Tools {
 	public static void printArray(int[] array) {
+		String array_s="";
 		for (int i : array) {
-			System.out.print(i  + " ");// +1 because the index in java start with 0
+			array_s = array_s + i  + " ";
 		}
-		System.out.println("\n");
+		System.out.print(array_s+"\n");// +1 because the index in java start with 0
+
+		//System.out.println("\n");
 	}
 
 	public static void printMatrix(int [][] matrix , String label) {

@@ -11,6 +11,7 @@ public class MainActivity {
 	static int qap_size;
 	static Random random;
 	static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
+	static QAPData qap;
 
 	public static void main(String[] args) {
 
@@ -27,7 +28,7 @@ public class MainActivity {
 		flow = readFile.getFlow();
 
 		// initialize qap data, i.e matrix of flow and distance matrix [row][col]
-		QAPData qap = new QAPData(distance, flow);
+		qap = new QAPData(distance, flow);
 		qap_size = qap.getSize();
 		random = new Random(1);
 
@@ -36,7 +37,7 @@ public class MainActivity {
 		Constructive constructive = new Constructive();
 		List<List<Gene>> generation = generateInitialPopulation(number_by_mh, constructive);
 
-		int generations = 1, count_generations = 0;
+		int generations = 10, count_generations = 0;
 
 		Gene i1, i2;
 		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
@@ -52,10 +53,19 @@ public class MainActivity {
 			Gene bestGene;
 			for (int i = 0; i < generation.size(); i++) {
 				List<Gene> g = new ArrayList<>(generation.get(i));
+
+				// if (i==3) {
+				// System.out.println(i);
+				// for (int l=0; l<g.size(); l++) {
+				// Tools.printArray(g.get(l).chromosome);
+				// }
+				// }
+
 				i1 = selectIndividual(g);
 				i2 = selectIndividual(g);
 				// crossover and mutation
 				params = crossover(i1.getParams(), i2.getParams(), i); // crossover depending of method
+				// params = mutate (params,i,0.1);
 				bestGene = i1;
 
 				switch (i) {
@@ -79,34 +89,17 @@ public class MainActivity {
 					s = geneticAlgorithmResult.getBestIndividual().getGenes();
 					break;
 				}
-				
+
+				// insert new individual into generation
 				Gene newGene = new Gene(s, params, qap_size);
+				insertIndividual(generation.get(i), newGene);
 
-				//qap.printSolution(s, "MH " + i);
-				//Tools.printArray(bestGene.chromosome);
-
+				// qap.printSolution(s, "MH " + i);
+				// Tools.printArray(bestGene.chromosome);
 			}
 
 			count_generations++;
 		}
-
-		/*
-		 * extremalOptimization.solve(totalIterations, initSolution, qap, -0.5); break;
-		 * 
-		 * geneticAlgorithm.solve(10 * qap.getSize(), 40 * qap.getSize(), 0.5, qap);
-		 * 
-		 * // get the results for the algorithm Results geneticAlgorithmResult =
-		 * geneticAlgorithm.getResults(); // print the results, the best, the worst and
-		 * the average population fitness
-		 * System.out.println("\nEl mejor individuo es: ");
-		 * geneticAlgorithmResult.getBestIndividual().printIndividualWithFitness(qap);
-		 * bestSolutionFound = geneticAlgorithmResult.getBestIndividual().getGenes();
-		 * System.out.println("El peor individuo es: ");
-		 * geneticAlgorithmResult.getWorstIndividual().printIndividualWithFitness(qap);
-		 * System.out.println("El valor promedio de la población es: " +
-		 * geneticAlgorithmResult.getAvg_value()); break;
-		 * 
-		 */
 
 		printTotalTime(start);
 
@@ -169,9 +162,9 @@ public class MainActivity {
 		return selected;
 	}
 
-	public static int[] crossover(int[] params1, int[] params2, int mh_tyoe) {
+	public static int[] crossover(int[] params1, int[] params2, int mh_type) {
 		int[] p = { 0, 0, 0, 0 };
-		switch (mh_tyoe) {
+		switch (mh_type) {
 		case MTLS:
 			p[0] = (params1[0] + params2[1]) / 2; // iterations
 			break;
@@ -194,6 +187,50 @@ public class MainActivity {
 		}
 
 		return p;
+	}
+
+	public static int[] mutate(int[] params, int mh_type, double mp) {
+		double mutation_number = random.nextDouble();
+
+		int[] p = params.clone();
+		if (mutation_number <= mp) {
+			int param;
+			switch (mh_type) {
+			case MTLS:
+				p[0] = 1; // iterations
+				break;
+			case ROTS:
+				param = random.nextInt(3);
+				p[param] = 0;
+				break;
+			case EO:
+				param = random.nextInt(3);
+				p[param] = 0;
+				break;
+			case GA:
+				param = random.nextInt(4);
+				p[param] = 0;
+				break;
+			}
+		}
+		return p;
+
+	}
+
+	public static void insertIndividual(List<Gene> g, Gene newIndividual) {
+
+		int worst = -1;
+		int cost = Integer.MIN_VALUE;
+		int temp_cost = 0;
+		for (int i = 0; i < g.size(); i++) {
+			temp_cost = qap.evalSolution(g.get(i).getSolution());
+			if (temp_cost > cost) {
+				cost = temp_cost;
+				worst = i;
+			}
+		}
+		g.remove(worst);
+		g.add(newIndividual);
 	}
 
 	public static void printTotalTime(long start) {
