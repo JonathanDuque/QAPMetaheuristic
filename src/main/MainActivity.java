@@ -54,12 +54,14 @@ public class MainActivity {
 			for (int i = 0; i < generation.size(); i++) {
 				List<Gene> g = new ArrayList<>(generation.get(i));
 
-				// if (i==3) {
-				// System.out.println(i);
-				// for (int l=0; l<g.size(); l++) {
-				// Tools.printArray(g.get(l).chromosome);
-				// }
-				// }
+				/*
+				if (i == 3) {
+					System.out.println(i);
+					for (int l = 0; l < g.size(); l++) {
+						Tools.printArray(g.get(l).chromosome);
+						System.out.println( "costo "+ qap.evalSolution(g.get(l).getSolution()));
+					}
+				}*/
 
 				i1 = selectIndividual(g);
 				i2 = selectIndividual(g);

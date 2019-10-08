@@ -15,6 +15,7 @@ public class MultiStartLocalSearch {
 		bestCost = cost;
 		int totalIterations = params[0];
 		qap.initDeltas(initSolution);
+		//qap.showData();
 
 		// here find the best solution from de initSolution
 		while (currentIteration < totalIterations) {
@@ -58,8 +59,8 @@ public class MultiStartLocalSearch {
 			currentIteration++;
 
 		}
-		
+
 		return bestSolution;
 	}
-	
+
 }

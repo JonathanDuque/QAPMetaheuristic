@@ -23,7 +23,7 @@ public class GeneticAlgorithm {
 		qap = qapData;
 		qap_size = qap.getSize();
 		int pop_size = params[3],  generations= params[0];
-		//double mutation_probability = params[2]/1000;
+		//double mutation_probability = params[2]/1000.0;
 		random = new Random(params[1]);
 
 		// printing the parameters for the execution

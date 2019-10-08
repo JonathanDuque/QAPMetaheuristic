@@ -131,8 +131,9 @@ public class QAPData {
 	}
 
 	public void showData() {
-		Tools.printMatrix(distance, "Matriz de Distancias");
-		Tools.printMatrix(flow, "\nMatriz de Flujos");
+		//Tools.printMatrix(distance, "Matriz de Distancias");
+		//Tools.printMatrix(flow, "\nMatriz de Flujos");
+		Tools.printMatrix(delta, "\nMatriz de Deltas");
 	}
 
 	public void printSolution(int[] array, String label) {
