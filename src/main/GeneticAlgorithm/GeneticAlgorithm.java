@@ -6,13 +6,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
+import main.MainActivity;
 import main.QAPData;
 
 public class GeneticAlgorithm {
-	QAPData qap;
-	int qap_size;
-	Results results;
-	Random random;
+	private QAPData qap;
+	private int qap_size;
+	private Results results;
+	private Random random;
 
 	public void solve(int []params,  QAPData qapData) {
 		// first the variables necessary for the execution
@@ -22,9 +23,10 @@ public class GeneticAlgorithm {
 		int count_generations = 0;
 		qap = qapData;
 		qap_size = qap.getSize();
-		int pop_size = params[3],  generations= params[0];
-		//double mutation_probability = params[2]/1000.0;
-		random = new Random(params[1]);
+		final int pop_size = params[0],  generations= 120;
+		final double mutation_probability = params[1]/1000.0;
+		final int crossover_type = params[2];
+		random = new Random(MainActivity.getSeed());
 
 		// printing the parameters for the execution
 		//System.out.println("Tamaño de la población: " + pop_size);
@@ -37,7 +39,7 @@ public class GeneticAlgorithm {
 		//System.out.println("\nGeneración inicial");
 		//printPopulation(new_generation);
 
-		// this cicle finish when complete all generations
+		// this cycle finish when complete all generations
 		while (count_generations < generations) {
 			temp_generation = new ArrayList<>(new_generation);
 

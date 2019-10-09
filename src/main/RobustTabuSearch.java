@@ -8,22 +8,22 @@ import main.GeneticAlgorithm.Results;
 
 public class RobustTabuSearch {
 
-	int[][] tabuMemory; // this matrix will save the iteration number where a location change is denied
-	int tabuDuration;// iterations tabu for a move
-	QAPData qap;
-	Random random;
-	int aspiration;
+	private int[][] tabuMemory; // this matrix will save the iteration number where a location change is denied
+	private int tabuDuration;// iterations tabu for a move
+	private QAPData qap;
+	private Random random;
+	private int aspiration;
 
 	public int[] solve(int[] initSolution, int[] params, QAPData qapData) {
 		// this initial block define the variable needed
 		qap = qapData;
-		int n = qap.getSize();
-		int aspiration_factor = params[2];
-		tabuDuration = aspiration_factor * n;// this 8 is a factor, is possible to change
-		aspiration = aspiration_factor * n * n;
+		final int n = qap.getSize();
+		
+		tabuDuration = params[0] * n;// this 8 is a factor, is possible to change
+		aspiration = params[1] * n * n;
 		int currentIteration = 1;
-		int totalIterations = params[0];
-		random = new Random(params[1]);// set the seed
+		int totalIterations = 1000;
+		random = new Random(MainActivity.getSeed());// set the seed
 		qap.initDeltas(initSolution);
 		// qap.showData();
 

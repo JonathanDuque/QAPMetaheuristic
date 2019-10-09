@@ -29,10 +29,10 @@ public class ExtremalOptimization {
 		int tempDelta, bestDelta;
 		List<Delta> deltaList = new ArrayList<>();
 		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
-		int totalIterations = params[0];
-		random = new Random(1);// set the seed, 1 in this case
+		int totalIterations = 1000;
+		random = new Random(MainActivity.getSeed());// set the seed, 1 in this case
 		// TODO implement lambda functions , receive tau parameter
-		double tau = params[2]/1000.0; //necesario para que la division de decimal
+		double tau = params[0]/1000.0; //necesario para que la division de decimal
 		initPdf(qap.getSize(), tau);
 
 		currentCost = qap.evalSolution(initSolution);

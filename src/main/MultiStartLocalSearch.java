@@ -13,7 +13,7 @@ public class MultiStartLocalSearch {
 		int currentIteration = 1;
 		int temporalDelta, bestDelta, cost = qap.evalSolution(initSolution), bestCost;
 		bestCost = cost;
-		int totalIterations = params[0];
+		int totalIterations = 1000; //params[0];
 		qap.initDeltas(initSolution);
 		//qap.showData();
 
@@ -23,7 +23,7 @@ public class MultiStartLocalSearch {
 			bestDelta = 0;
 
 			int i_selected = -1, j_selected = -1;
-			// here evaluate all the neighboorhood
+			// here evaluate all the neighborhood
 			for (int i = 0; i < (n - 1); i++) {
 				for (int j = i + 1; j < n; j++) {
 					temporalDelta = qap.evalMovement(currentSolution, i, j);
@@ -52,7 +52,7 @@ public class MultiStartLocalSearch {
 			} else {
 				improve = false;
 				// start in a new point
-				currentSolution = constructive.createRandomSolution(n, currentIteration);
+				currentSolution = constructive.createRandomSolution(n, MainActivity.getSeed());
 				qap.initDeltas(currentSolution);
 				cost = qap.evalSolution(currentSolution);
 			}
