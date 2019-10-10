@@ -10,15 +10,17 @@ public class MultiStartLocalSearch {
 		int n = qap.getSize();
 		int[] bestSolution = Arrays.copyOf(initSolution, n), currentSolution = Arrays.copyOf(initSolution, n);
 		boolean improve = false; // this flag control when the solution no improve and we are in an optimo local
-		int currentIteration = 1;
+		int currentIteration = 0;
 		int temporalDelta, bestDelta, cost = qap.evalSolution(initSolution), bestCost;
 		bestCost = cost;
-		int totalIterations = 1000; //params[0];
+		// int totalIterations = 1000; //params[0];
 		qap.initDeltas(initSolution);
-		//qap.showData();
+		// qap.showData();
 
-		// here find the best solution from de initSolution
-		while (currentIteration < totalIterations) {
+		final long start = System.currentTimeMillis();
+		long time = 0;
+		// here find the best solution from the initSolution
+		while (time - start < MainActivity.getExecutionTime()) { // execution during 10 milliseconds = 0.01 seconds
 			improve = false;
 			bestDelta = 0;
 
@@ -57,8 +59,10 @@ public class MultiStartLocalSearch {
 				cost = qap.evalSolution(currentSolution);
 			}
 			currentIteration++;
+			time = System.currentTimeMillis();
 
 		}
+		//System.out.println("MSLS : " + currentIteration);
 
 		return bestSolution;
 	}

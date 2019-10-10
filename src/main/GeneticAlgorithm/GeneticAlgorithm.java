@@ -23,7 +23,7 @@ public class GeneticAlgorithm {
 		int count_generations = 0;
 		qap = qapData;
 		qap_size = qap.getSize();
-		final int pop_size = params[0],  generations= 120;
+		final int pop_size = params[0];
 		final double mutation_probability = params[1]/1000.0;
 		final int crossover_type = params[2];
 		random = new Random(MainActivity.getSeed());
@@ -39,8 +39,10 @@ public class GeneticAlgorithm {
 		//System.out.println("\nGeneración inicial");
 		//printPopulation(new_generation);
 
+		final long start = System.currentTimeMillis();
+		long time = 0;
 		// this cycle finish when complete all generations
-		while (count_generations < generations) {
+		while  (time - start < MainActivity.getExecutionTime()) { // execution during 10 milliseconds = 0.01 seconds
 			temp_generation = new ArrayList<>(new_generation);
 
 			for (int i = 0; i < pop_size / 2; i++) {
@@ -59,11 +61,14 @@ public class GeneticAlgorithm {
 			}
 			Collections.sort(new_generation, compareByFitness);
 			count_generations++;
+			time = System.currentTimeMillis();
+			
 		}
 		//System.out.println("\nGeneración final");
 		//printPopulation(new_generation);
 		// save the results
 		results = populationResults(new_generation, pop_size);
+		//System.out.println("GA : " + count_generations);
 
 	}
 

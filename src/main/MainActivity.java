@@ -12,9 +12,10 @@ public class MainActivity {
 	private static Random random;
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
 	private static QAPData qap;
+	private static final int  execution_time = 10; 
 
 	public static void main(String[] args) {
-		final String problem = "chr12a.dat";// args[0];
+		final String problem = "chr18a.dat";// args[0];
 		System.out.println("\nProblema: " + problem);
 		final ReadFile readFile = new ReadFile("qapdata/" + problem);
 		final long start = System.currentTimeMillis();
@@ -30,7 +31,7 @@ public class MainActivity {
 		final Constructive constructive = new Constructive();
 		List<List<Chromosome>> generation = generateInitialPopulation(number_by_mh, constructive);
 
-		int generations = 5, count_generations = 0;
+		int generations = 25, count_generations = 0;
 
 		Chromosome c1, c2;
 		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
@@ -48,14 +49,14 @@ public class MainActivity {
 				// get a list of metaheuristics of the same type
 				List<Chromosome> listChromosomes = new ArrayList<>(generation.get(i));
 
-				/*
-				if (i == 1) {
+				
+				if (i == -1) {
 					System.out.println(i);
 					for (int l = 0; l < listChromosomes.size(); l++) {
 						Tools.printArray(listChromosomes.get(l).genes);
 						System.out.println("costo " + qap.evalSolution(listChromosomes.get(l).getSolution()));
 					}
-				}*/
+				}
 
 				c1 = selectIndividual(listChromosomes);
 				c2 = selectIndividual(listChromosomes);
@@ -64,6 +65,7 @@ public class MainActivity {
 				params = mutate(params, i, 0.5);
 				bestGene = c1;
 
+				//long start1 = System.currentTimeMillis();
 				switch (i) {
 				case MTLS:
 					// System.out.println("MLTS");
@@ -84,10 +86,13 @@ public class MainActivity {
 					s = geneticAlgorithmResult.getBestIndividual().getGenes();
 					break;
 				}
+				
+				//printTotalTime(start1);
 
 				// insert new individual into generation
 				Chromosome newGene = new Chromosome(s, params, qap_size);
 				insertIndividual(generation.get(i), newGene);
+				
 				
 			}
 
@@ -266,6 +271,10 @@ public class MainActivity {
 
 	public static int getSeed() {
 		return random.nextInt();
+	}
+
+	public static int getExecutionTime() {
+		return execution_time;
 	}
 
 	/*

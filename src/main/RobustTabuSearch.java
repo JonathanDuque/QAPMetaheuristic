@@ -22,7 +22,7 @@ public class RobustTabuSearch {
 		tabuDuration = params[0];// 8*n, this 8 is a factor, is possible to change
 		aspiration = params[1]; // 5 * n * n
 		int currentIteration = 1;
-		int totalIterations = 1000;
+		//int totalIterations = 1000;
 		random = new Random(MainActivity.getSeed());// set the seed
 		qap.initDeltas(initSolution);
 		// qap.showData();
@@ -36,10 +36,12 @@ public class RobustTabuSearch {
 		currentSolution = Arrays.copyOf(initSolution, n);
 		bestSolution = Arrays.copyOf(initSolution, n);
 		int bestCost = qap.evalSolution(initSolution), bestNeighborCost;
-		int bestFoundCounter = 0; // this counter has the value where the best was found
+		//int bestFoundCounter = 0; // this counter has the value where the best was found
 
+		final long start = System.currentTimeMillis();
+		long time=0;
 		// this while find the best solution during totalIterations
-		while (currentIteration <= totalIterations) {
+		while ( time - start < MainActivity.getExecutionTime() ) {
 
 			bestNeighbor = getBestNeighbor(currentSolution, currentIteration, bestCost);
 			bestNeighborCost = qap.evalSolution(bestNeighbor);
@@ -50,13 +52,16 @@ public class RobustTabuSearch {
 			if (bestNeighborCost < bestCost) {
 				bestSolution = Arrays.copyOf(bestNeighbor, n);
 				bestCost = bestNeighborCost;
-				bestFoundCounter = currentIteration;
+				//bestFoundCounter = currentIteration;
 			}
 
 			// always update the current solution
 			currentSolution = bestNeighbor;
 			currentIteration++;
+			time = System.currentTimeMillis();
 		}
+		
+		//System.out.println("ROTS : " + currentIteration);
 
 		//System.out.println("Iteración donde se encontro el mejor: " + bestFoundCounter);
 		return bestSolution;

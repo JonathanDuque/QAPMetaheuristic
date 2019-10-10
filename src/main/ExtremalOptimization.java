@@ -24,12 +24,13 @@ public class ExtremalOptimization {
 	Random random;
 
 	public int[] solve( int[] initSolution, int [] params,QAPData qap) {
-		int currentIteration = 1, n = qap.getSize(), currentCost, bestCost;
+		int  n = qap.getSize(), currentCost, bestCost;
+		int currentIteration = 1;
 		int[] currentSolution = Arrays.copyOf(initSolution, n), bestSolution;
 		int tempDelta, bestDelta;
 		List<Delta> deltaList = new ArrayList<>();
 		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
-		int totalIterations = 1000;
+		//int totalIterations = 1000;
 		random = new Random(MainActivity.getSeed());// set the seed, 1 in this case
 		// TODO implement lambda functions , receive tau parameter
 		double tau = params[0]/1000.0; //necesario para que la division de decimal
@@ -42,7 +43,9 @@ public class ExtremalOptimization {
 
 		int counterBest = 0;
 
-		while (currentIteration <= totalIterations) {
+		final long start = System.currentTimeMillis();
+		long time = 0;
+		while (time - start < MainActivity.getExecutionTime()) { // execution during 10 milliseconds = 0.01 seconds
 			
 			for (int i = 0; i < n; i++) {
 				int bestMove = 0;
@@ -83,8 +86,11 @@ public class ExtremalOptimization {
 
 			currentIteration++;
 			deltaList.clear();// delete delta moves
+			time = System.currentTimeMillis();
 
 		}
+		//System.out.println("EO : " + currentIteration);
+
 
 		return bestSolution;
 	}
