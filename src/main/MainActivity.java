@@ -26,11 +26,11 @@ public class MainActivity {
 		random = new Random(1);
 
 		// List<Gene> generation = createFirstGeneration(8);
-		final int number_by_mh = 6;
+		final int number_by_mh = 4;
 		final Constructive constructive = new Constructive();
 		List<List<Chromosome>> generation = generateInitialPopulation(number_by_mh, constructive);
 
-		int generations = 0, count_generations = 0;
+		int generations = 5, count_generations = 0;
 
 		Chromosome c1, c2;
 		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
@@ -48,19 +48,20 @@ public class MainActivity {
 				// get a list of metaheuristics of the same type
 				List<Chromosome> listChromosomes = new ArrayList<>(generation.get(i));
 
-				if (i >= 0) {
+				/*
+				if (i == 1) {
 					System.out.println(i);
 					for (int l = 0; l < listChromosomes.size(); l++) {
 						Tools.printArray(listChromosomes.get(l).genes);
-						// System.out.println("costo " + qap.evalSolution(g.get(l).getSolution()));
+						System.out.println("costo " + qap.evalSolution(listChromosomes.get(l).getSolution()));
 					}
-				}
+				}*/
 
 				c1 = selectIndividual(listChromosomes);
 				c2 = selectIndividual(listChromosomes);
 				// crossover and mutation
 				params = crossover(c1.getParams(), c2.getParams(), i); // crossover depending of method
-				// params = mutate(params, i, 0.1);
+				params = mutate(params, i, 0.5);
 				bestGene = c1;
 
 				switch (i) {
@@ -87,9 +88,7 @@ public class MainActivity {
 				// insert new individual into generation
 				Chromosome newGene = new Chromosome(s, params, qap_size);
 				insertIndividual(generation.get(i), newGene);
-
-				// qap.printSolution(s, "MH " + i);
-				// Tools.printArray(bestGene.chromosome);
+				
 			}
 
 			count_generations++;
@@ -149,7 +148,7 @@ public class MainActivity {
 		int index = random.nextInt(g.size());
 		selected = g.get(index);
 		g.remove(index);// delete for no selecting later
-		// System.out.println("selected : " + index);
+		//System.out.println("selected : " + index);
 
 		return selected;
 	}
@@ -175,7 +174,7 @@ public class MainActivity {
 			break;
 		}
 
-		// Tools.printArray(p);
+		//Tools.printArray(p);
 
 		return p;
 	}
@@ -193,6 +192,7 @@ public class MainActivity {
 			case ROTS:
 				// getting what parameter to mutate
 				param = random.nextInt(2);
+				//System.out.println("param:" +param);
 				switch (param) {
 				case 0:
 					p[param] = random.nextInt(16 * qap_size ) + 4*qap_size ; //4n to 20n
@@ -204,6 +204,7 @@ public class MainActivity {
 				break;
 			case EO:
 				param = random.nextInt(2);
+				//System.out.println("param:" +param);
 				switch (param) {
 				case 0:
 					p[param] = -random.nextInt(1000); // tau*1000
@@ -216,6 +217,7 @@ public class MainActivity {
 				break;
 			case GA:
 				param = random.nextInt(3);
+				//System.out.println("param:" +param);
 				switch (param) {
 				case 0:
 					p[param] = qap_size + qap_size * random.nextInt(5) / 2;// population size
@@ -233,6 +235,8 @@ public class MainActivity {
 				break;
 			}
 		}
+		
+		//Tools.printArray(p);
 		return p;
 
 	}
