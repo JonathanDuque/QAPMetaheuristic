@@ -15,7 +15,7 @@ public class MainActivity {
 	private static final int  execution_time = 10; 
 
 	public static void main(String[] args) {
-		final String problem = "chr18a.dat";// args[0];
+		final String problem = "chr12a.dat";// args[0];
 		System.out.println("\nProblema: " + problem);
 		final ReadFile readFile = new ReadFile("qapdata/" + problem);
 		final long start = System.currentTimeMillis();
@@ -31,10 +31,10 @@ public class MainActivity {
 		final Constructive constructive = new Constructive();
 		List<List<Chromosome>> generation = generateInitialPopulation(number_by_mh, constructive);
 
-		int generations = 25, count_generations = 0;
+		int generations = 5, count_generations = 0;
 
 		Chromosome c1, c2;
-		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
+		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch(random.nextInt());
 		RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
 		ExtremalOptimization extremalOptimization = new ExtremalOptimization();
 		GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
@@ -54,7 +54,7 @@ public class MainActivity {
 					System.out.println(i);
 					for (int l = 0; l < listChromosomes.size(); l++) {
 						Tools.printArray(listChromosomes.get(l).genes);
-						System.out.println("costo " + qap.evalSolution(listChromosomes.get(l).getSolution()));
+						//System.out.println("costo " + qap.evalSolution(listChromosomes.get(l).getSolution()));
 					}
 				}
 
@@ -117,7 +117,7 @@ public class MainActivity {
 
 				switch (k) {
 				case MTLS:
-					p[0] = random.nextInt(2); // restart type
+					p[0] = random.nextInt(2); // restart type 0: random restart, 1: swaps
 					break;
 				case ROTS:
 					p[0] = (random.nextInt(16)+4)*qap_size;//4 * (i + 1) * qap_size;// tabu duration factor
@@ -186,8 +186,10 @@ public class MainActivity {
 
 	public static int[] mutate(int[] params, int mh_type, double mp) {
 		double mutation_number = random.nextDouble();
+		
 
 		int[] p = params.clone();
+		//Tools.printArray(p);
 		if (mutation_number <= mp) {
 			final int param;
 			switch (mh_type) {

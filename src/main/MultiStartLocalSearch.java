@@ -4,16 +4,25 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class MultiStartLocalSearch {
+	
+	Random random;
+	int n;
+
+	public MultiStartLocalSearch(int seed) {
+		super();
+		this.random = new Random(seed);
+	}
 
 	public int[] solve(int[] initSolution, int[] params, QAPData qap, Constructive constructive) {
 		// this initial block define the variable needed
-		int n = qap.getSize();
+		n = qap.getSize();
 		int[] bestSolution = Arrays.copyOf(initSolution, n), currentSolution = Arrays.copyOf(initSolution, n);
 		boolean improve = false; // this flag control when the solution no improve and we are in an optimo local
 		int currentIteration = 0;
 		int temporalDelta, bestDelta, cost = qap.evalSolution(initSolution), bestCost;
 		bestCost = cost;
-		// int totalIterations = 1000; //params[0];
+		final boolean random_restart = params[0]==0? true: false; //restart type 0: random restart, 1: swaps
+		//System.out.println(params[0] + " " +random_restart);
 		qap.initDeltas(initSolution);
 		// qap.showData();
 
@@ -53,8 +62,15 @@ public class MultiStartLocalSearch {
 
 			} else {
 				improve = false;
-				// start in a new point
-				currentSolution = constructive.createRandomSolution(n, MainActivity.getSeed());
+				if (random_restart) {
+					//System.out.println("restart");
+					// start in a new point
+					currentSolution = constructive.createRandomSolution(n, MainActivity.getSeed());
+				}else {
+					//System.out.println("many swaps");
+					currentSolution = makeManySwaps(currentSolution, qap);
+				}
+			
 				qap.initDeltas(currentSolution);
 				cost = qap.evalSolution(currentSolution);
 			}
@@ -65,6 +81,42 @@ public class MultiStartLocalSearch {
 		//System.out.println("MSLS : " + currentIteration);
 
 		return bestSolution;
+	}
+	
+	public int [] makeManySwaps(int [] currentSolution, QAPData qap) {
+		int max_swaps = Math.floorDiv(n, 2); //maybe n is no pair
+		int num_swaps = 2 * (random.nextInt(max_swaps-1)+1);
+		
+		int [] order_swaps = new int [num_swaps];
+		
+		order_swaps[0] = random.nextInt(n);
+		
+		for (int i = 1; i < num_swaps; i++) {
+			boolean isEqual = true;
+			while (isEqual) {
+				isEqual = false;
+				int x = random.nextInt(n);
+				for (int j = 0; j <i; j++) {
+					if (x == order_swaps[j]) {
+						isEqual = true;
+						break;
+					}
+				}
+				if (!isEqual) {
+					order_swaps[i]=x; 
+				}
+			}
+		}
+		//Tools.printArray(currentSolution);
+		//Tools.printArray(order_swaps);
+		
+		for (int i = 0; i < num_swaps; i+=2) {
+			currentSolution = qap.makeSwap(currentSolution, order_swaps[i], order_swaps[i+1]);
+		}
+		
+		//Tools.printArray(currentSolution);
+		
+		return currentSolution;
 	}
 
 }
