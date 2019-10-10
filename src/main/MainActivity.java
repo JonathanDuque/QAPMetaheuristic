@@ -20,19 +20,19 @@ public class MainActivity {
 		final long start = System.currentTimeMillis();
 
 		// initialize qap data, i.e matrix of flow and distance matrix [row][col]
-		int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
+		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
 		qap = new QAPData(distance, flow);
 		qap_size = qap.getSize();
 		random = new Random(1);
 
 		// List<Gene> generation = createFirstGeneration(8);
-		final int number_by_mh = 4;
+		final int number_by_mh = 6;
 		final Constructive constructive = new Constructive();
 		List<List<Chromosome>> generation = generateInitialPopulation(number_by_mh, constructive);
 
-		int generations = 5, count_generations = 0;
+		int generations = 0, count_generations = 0;
 
-		Chromosome i1, i2;
+		Chromosome c1, c2;
 		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
 		RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
 		ExtremalOptimization extremalOptimization = new ExtremalOptimization();
@@ -45,22 +45,23 @@ public class MainActivity {
 			// System.out.println( count_generations );
 			Chromosome bestGene;
 			for (int i = 0; i < generation.size(); i++) {
-				List<Chromosome> g = new ArrayList<>(generation.get(i));
+				// get a list of metaheuristics of the same type
+				List<Chromosome> listChromosomes = new ArrayList<>(generation.get(i));
 
 				if (i >= 0) {
 					System.out.println(i);
-					for (int l = 0; l < g.size(); l++) {
-						Tools.printArray(g.get(l).genes);
-						//System.out.println("costo " + qap.evalSolution(g.get(l).getSolution()));
+					for (int l = 0; l < listChromosomes.size(); l++) {
+						Tools.printArray(listChromosomes.get(l).genes);
+						// System.out.println("costo " + qap.evalSolution(g.get(l).getSolution()));
 					}
 				}
 
-				i1 = selectIndividual(g);
-				i2 = selectIndividual(g);
+				c1 = selectIndividual(listChromosomes);
+				c2 = selectIndividual(listChromosomes);
 				// crossover and mutation
-				params = crossover(i1.getParams(), i2.getParams(), i); // crossover depending of method
+				params = crossover(c1.getParams(), c2.getParams(), i); // crossover depending of method
 				// params = mutate(params, i, 0.1);
-				bestGene = i1;
+				bestGene = c1;
 
 				switch (i) {
 				case MTLS:
@@ -115,20 +116,20 @@ public class MainActivity {
 					p[0] = random.nextInt(2); // restart type
 					break;
 				case ROTS:
-					p[0] = 4 * (i + 1);// tabu duration factor
-					p[1] = 2 * (i + 1); // aspiration factor
+					p[0] = (random.nextInt(16)+4)*qap_size;//4 * (i + 1) * qap_size;// tabu duration factor
+					p[1] = (random.nextInt(10)+1)*qap_size*qap_size;//2 * (i + 1) * qap_size * qap_size; // aspiration factor
 					break;
 				case EO:
 					p[0] = -random.nextInt(1000); // tau*1000
-					p[1] = random.nextInt(3); // pdf function
+					p[1] = random.nextInt(3); // pdf function type
 					break;
 				case GA:
-					p[0] = qap_size + qap_size * i / 2;// population size
+					p[0] = qap_size + qap_size * random.nextInt(5) / 2;// population size
 					if (qap_size > 60) {
 						p[0] = p[0] * 2 / 5;
 					}
 					p[1] = random.nextInt(1000); // mutation *1000
-					p[2] = random.nextInt(2);// crossover type
+					p[2] = random.nextInt(2);// crossover operator type
 
 					break;
 				}
@@ -148,16 +149,16 @@ public class MainActivity {
 		int index = random.nextInt(g.size());
 		selected = g.get(index);
 		g.remove(index);// delete for no selecting later
-		//System.out.println("selected : " + index);
+		// System.out.println("selected : " + index);
 
 		return selected;
 	}
 
 	public static int[] crossover(int[] params1, int[] params2, int mh_type) {
-		int[] p = { 0, 0, 0};
+		int[] p = { 0, 0, 0 };
 		switch (mh_type) {
 		case MTLS:
-			p[0] = params1[0]; // restart typecurrentIteration
+			p[0] = params1[0]; // restart type
 			break;
 		case ROTS:
 			p[0] = params1[0];// tabu duration factor
@@ -174,7 +175,7 @@ public class MainActivity {
 			break;
 		}
 
-		//Tools.printArray(p);
+		// Tools.printArray(p);
 
 		return p;
 	}
@@ -184,22 +185,51 @@ public class MainActivity {
 
 		int[] p = params.clone();
 		if (mutation_number <= mp) {
-			int param;
+			final int param;
 			switch (mh_type) {
 			case MTLS:
-				p[0] = 1; // iterations
+				p[0] = random.nextInt(2); // restart type
 				break;
 			case ROTS:
-				param = random.nextInt(3);
-				p[param] = 0;
+				// getting what parameter to mutate
+				param = random.nextInt(2);
+				switch (param) {
+				case 0:
+					p[param] = random.nextInt(16 * qap_size ) + 4*qap_size ; //4n to 20n
+					break;
+				case 1:
+					p[param] = random.nextInt(9 * qap_size * qap_size) + qap_size * qap_size; //n*n to 10*n*n same range dokeroglu article
+					break;
+				}
 				break;
 			case EO:
-				param = random.nextInt(3);
-				p[param] = 0;
+				param = random.nextInt(2);
+				switch (param) {
+				case 0:
+					p[param] = -random.nextInt(1000); // tau*1000
+					break;
+				case 1:
+					p[param] = random.nextInt(3); // pdf function type
+					break;
+				}
+
 				break;
 			case GA:
-				param = random.nextInt(4);
-				p[param] = 0;
+				param = random.nextInt(3);
+				switch (param) {
+				case 0:
+					p[param] = qap_size + qap_size * random.nextInt(5) / 2;// population size
+					if (qap_size > 60) {
+						p[param] = p[param] * 2 / 5;
+					}
+					break;
+				case 1:
+					p[param] = random.nextInt(1000); // mutation *1000
+					break;
+				case 2:
+					p[param] = random.nextInt(2);// crossover operator type
+					break;
+				}
 				break;
 			}
 		}

@@ -19,8 +19,8 @@ public class RobustTabuSearch {
 		qap = qapData;
 		final int n = qap.getSize();
 		
-		tabuDuration = params[0] * n;// this 8 is a factor, is possible to change
-		aspiration = params[1] * n * n;
+		tabuDuration = params[0];// 8*n, this 8 is a factor, is possible to change
+		aspiration = params[1]; // 5 * n * n
 		int currentIteration = 1;
 		int totalIterations = 1000;
 		random = new Random(MainActivity.getSeed());// set the seed

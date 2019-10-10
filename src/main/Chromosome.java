@@ -19,7 +19,7 @@ public class Chromosome {
 		for (int i = qap_size; i < size; i++) {
 			genes[i] = params[i - qap_size];
 		}
-		//Tools.printArray(genes);
+		Tools.printArray(genes);
 	}
 
 	public int[] getSolution() {
