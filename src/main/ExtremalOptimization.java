@@ -35,8 +35,10 @@ public class ExtremalOptimization {
 		random = new Random(MainActivity.getSeed());// set the seed, 1 in this case
 
 		// receive tau parameter
-		final double tau = params[0] / 1000.0; // necesario para que la division de decimal
+		final double tau = params[0] / 100.0; // necesario para que la division de decimal
+		
 		final int pdf_function_type = params[1];
+		//System.out.println("\ntau: " + tau + " pfd type: "+ pdf_function_type);
 
 		switch (pdf_function_type) {
 		case 0:
@@ -110,12 +112,12 @@ public class ExtremalOptimization {
 	}
 
 	public void initPdfExp(int n, double tau) {
-		
+
 		float sum = 0;
 		double y = 0;
 		for (int i = 0; i < n; i++) {
 			y = Math.exp(-tau * (i + 1));
-			// System.out.println("f(" + i + ") = " + (float) y);
+			//System.out.println("f(" + i + ") = " + (float) y);
 
 			pdf[i] = (float) y; // cast because don't need so much decimals
 			sum += y;
@@ -123,12 +125,12 @@ public class ExtremalOptimization {
 		for (int i = 0; i < n; i++) {
 			pdf[i] /= sum;
 		}
+		//System.out.println("total " + sum + "\n");
 
-		// for (int i = 0; i < size; i++) {
-		// System.out.println("f(" + i + ") = " + pdf[i]);
-		// }
+		//for (int i = 0; i < n; i++) {
+			//System.out.println("f(" + i + ") = " + pdf[i]);
+		//}
 
-		// System.out.println("total " + sum);
 	}
 
 	public void initPdfPow(int n, double tau) {
@@ -136,16 +138,53 @@ public class ExtremalOptimization {
 		double y = 0;
 		for (int i = 0; i < n; i++) {
 			y = Math.pow((i + 1), -tau);
+			//System.out.println("f(" + i + ") = " + (float) y);
 			pdf[i] = (float) y; // cast because don't need so much decimals
 			sum += y;
 		}
+		
 		for (int i = 0; i < n; i++) {
 			pdf[i] /= sum;
 		}
+		
+		//System.out.println("total " + sum + "\n");
+
+		//for (int i = 0; i < n; i++) {
+			//System.out.println("f(" + i + ") = " + pdf[i]);
+		//}
 	}
 
 	public void initPdfGamma(int n, double tau) {
 
+		float sum = 0;
+		double y = 0;
+		// double k = tau;
+		double theta = Math.exp(tau);
+		double constk = Math.pow(theta, tau) * gamma(tau);
+		for (int i = 0; i < n; i++) {
+			y = Math.pow(i + 1, tau - 1) * Math.exp(-(i + 1) / theta) / constk;
+			//System.out.println("f(" + i + ") = " + (float) y);
+			pdf[i] = (float) y; // cast because don't need so much decimals
+			sum += y;
+		}
+
+		for (int i = 0; i < n; i++) {
+			pdf[i] /= sum;
+		}
+		
+		//System.out.println("total " + sum + "\n");
+
+		//for (int i = 0; i < n; i++) {
+			//System.out.println("f(" + i + ") = " + pdf[i]);
+		//}
+	}
+
+	public double gamma(double n) {
+		double invn = 1.0 / n;
+		double g = (2.506628274631 * Math.sqrt(invn) + 0.208885689552583 * Math.pow(invn, 1.5)
+				+ 0.00870357039802431 * Math.pow(invn, 2.5) - (174.210665086855 * Math.pow(invn, 3.5)) / 25920.0
+				- (715.642372407151 * Math.pow(invn, 4.5)) / 1244160.0) * Math.exp((-Math.log(invn) - 1) * n);
+		return g;
 	}
 
 	public int pdfPick() {

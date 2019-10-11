@@ -31,7 +31,7 @@ public class MainActivity {
 		final Constructive constructive = new Constructive();
 		List<List<Chromosome>> generation = generateInitialPopulation(number_by_mh, constructive);
 
-		int generations = 0, count_generations = 0;
+		int generations = 25, count_generations = 0;
 
 		Chromosome c1, c2;
 		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch(random.nextInt());
@@ -53,8 +53,8 @@ public class MainActivity {
 					System.out.println(i);
 					for (int l = 0; l < listChromosomes.size(); l++) {
 						Tools.printArray(listChromosomes.get(l).genes);
-						// System.out.println("costo " +
-						// qap.evalSolution(listChromosomes.get(l).getSolution()));
+						 System.out.println("costo " +
+						 qap.evalSolution(listChromosomes.get(l).getSolution()));
 					}
 				}
 
@@ -124,7 +124,7 @@ public class MainActivity {
 																			// aspiration factor
 					break;
 				case EO:
-					p[0] = random.nextInt(1000); // tau*1000
+					p[0] = random.nextInt(100); // tau*100
 					p[1] = random.nextInt(3); // pdf function type
 					break;
 				case GA:
@@ -169,7 +169,7 @@ public class MainActivity {
 			p[1] = params2[1]; // aspiration factor
 			break;
 		case EO:
-			p[0] = params1[0];// tau*1000
+			p[0] = params1[0];// tau*100
 			p[1] = params2[1];// type pdf
 			break;
 		case GA:
@@ -215,7 +215,7 @@ public class MainActivity {
 				// System.out.println("param:" +param);
 				switch (param) {
 				case 0:
-					p[param] = -random.nextInt(1000); // tau*1000
+					p[param] = random.nextInt(100); // tau*1000
 					break;
 				case 1:
 					p[param] = random.nextInt(3); // pdf function type
