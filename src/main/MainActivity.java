@@ -124,7 +124,7 @@ public class MainActivity {
 																			// aspiration factor
 					break;
 				case EO:
-					p[0] = -random.nextInt(1000); // tau*1000
+					p[0] = random.nextInt(1000); // tau*1000
 					p[1] = random.nextInt(3); // pdf function type
 					break;
 				case GA:
