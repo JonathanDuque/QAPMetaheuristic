@@ -12,7 +12,7 @@ public class MainActivity {
 	private static Random random;
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
 	private static QAPData qap;
-	private static final int  execution_time = 10; 
+	private static final int execution_time = 10;
 
 	public static void main(String[] args) {
 		final String problem = "chr12a.dat";// args[0];
@@ -31,7 +31,7 @@ public class MainActivity {
 		final Constructive constructive = new Constructive();
 		List<List<Chromosome>> generation = generateInitialPopulation(number_by_mh, constructive);
 
-		int generations = 25, count_generations = 0;
+		int generations = 0, count_generations = 0;
 
 		Chromosome c1, c2;
 		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch(random.nextInt());
@@ -49,12 +49,12 @@ public class MainActivity {
 				// get a list of metaheuristics of the same type
 				List<Chromosome> listChromosomes = new ArrayList<>(generation.get(i));
 
-				
 				if (i == -1) {
 					System.out.println(i);
 					for (int l = 0; l < listChromosomes.size(); l++) {
 						Tools.printArray(listChromosomes.get(l).genes);
-						//System.out.println("costo " + qap.evalSolution(listChromosomes.get(l).getSolution()));
+						// System.out.println("costo " +
+						// qap.evalSolution(listChromosomes.get(l).getSolution()));
 					}
 				}
 
@@ -65,7 +65,7 @@ public class MainActivity {
 				params = mutate(params, i, 0.5);
 				bestGene = c1;
 
-				//long start1 = System.currentTimeMillis();
+				// long start1 = System.currentTimeMillis();
 				switch (i) {
 				case MTLS:
 					// System.out.println("MLTS");
@@ -86,14 +86,13 @@ public class MainActivity {
 					s = geneticAlgorithmResult.getBestIndividual().getGenes();
 					break;
 				}
-				
-				//printTotalTime(start1);
+
+				// printTotalTime(start1);
 
 				// insert new individual into generation
 				Chromosome newGene = new Chromosome(s, params, qap_size);
 				insertIndividual(generation.get(i), newGene);
-				
-				
+
 			}
 
 			count_generations++;
@@ -120,8 +119,9 @@ public class MainActivity {
 					p[0] = random.nextInt(2); // restart type 0: random restart, 1: swaps
 					break;
 				case ROTS:
-					p[0] = (random.nextInt(16)+4)*qap_size;//4 * (i + 1) * qap_size;// tabu duration factor
-					p[1] = (random.nextInt(10)+1)*qap_size*qap_size;//2 * (i + 1) * qap_size * qap_size; // aspiration factor
+					p[0] = (random.nextInt(16) + 4) * qap_size;// 4 * (i + 1) * qap_size;// tabu duration factor
+					p[1] = (random.nextInt(10) + 1) * qap_size * qap_size;// 2 * (i + 1) * qap_size * qap_size; //
+																			// aspiration factor
 					break;
 				case EO:
 					p[0] = -random.nextInt(1000); // tau*1000
@@ -153,7 +153,7 @@ public class MainActivity {
 		int index = random.nextInt(g.size());
 		selected = g.get(index);
 		g.remove(index);// delete for no selecting later
-		//System.out.println("selected : " + index);
+		// System.out.println("selected : " + index);
 
 		return selected;
 	}
@@ -179,17 +179,16 @@ public class MainActivity {
 			break;
 		}
 
-		//Tools.printArray(p);
+		// Tools.printArray(p);
 
 		return p;
 	}
 
 	public static int[] mutate(int[] params, int mh_type, double mp) {
 		double mutation_number = random.nextDouble();
-		
 
 		int[] p = params.clone();
-		//Tools.printArray(p);
+		// Tools.printArray(p);
 		if (mutation_number <= mp) {
 			final int param;
 			switch (mh_type) {
@@ -199,19 +198,21 @@ public class MainActivity {
 			case ROTS:
 				// getting what parameter to mutate
 				param = random.nextInt(2);
-				//System.out.println("param:" +param);
+				// System.out.println("param:" +param);
 				switch (param) {
 				case 0:
-					p[param] = random.nextInt(16 * qap_size ) + 4*qap_size ; //4n to 20n
+					p[param] = random.nextInt(16 * qap_size) + 4 * qap_size; // 4n to 20n
 					break;
 				case 1:
-					p[param] = random.nextInt(9 * qap_size * qap_size) + qap_size * qap_size; //n*n to 10*n*n same range dokeroglu article
+					p[param] = random.nextInt(9 * qap_size * qap_size) + qap_size * qap_size; // n*n to 10*n*n same
+																								// range dokeroglu
+																								// article
 					break;
 				}
 				break;
 			case EO:
 				param = random.nextInt(2);
-				//System.out.println("param:" +param);
+				// System.out.println("param:" +param);
 				switch (param) {
 				case 0:
 					p[param] = -random.nextInt(1000); // tau*1000
@@ -224,7 +225,7 @@ public class MainActivity {
 				break;
 			case GA:
 				param = random.nextInt(3);
-				//System.out.println("param:" +param);
+				// System.out.println("param:" +param);
 				switch (param) {
 				case 0:
 					p[param] = qap_size + qap_size * random.nextInt(5) / 2;// population size
@@ -242,8 +243,8 @@ public class MainActivity {
 				break;
 			}
 		}
-		
-		//Tools.printArray(p);
+
+		// Tools.printArray(p);
 		return p;
 
 	}

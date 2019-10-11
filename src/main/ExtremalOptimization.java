@@ -10,7 +10,7 @@ import java.util.Random;
 public class ExtremalOptimization {
 
 	public class Delta {
-		
+
 		public Delta(int cost, int index, int bestMove) {
 			this.cost = cost;
 			this.index = index;
@@ -23,18 +23,32 @@ public class ExtremalOptimization {
 	float[] pdf;
 	Random random;
 
-	public int[] solve( int[] initSolution, int [] params,QAPData qap) {
-		int  n = qap.getSize(), currentCost, bestCost;
-		int currentIteration = 1;
+	public int[] solve(int[] initSolution, int[] params, QAPData qap) {
+		int n = qap.getSize(), currentCost, bestCost;
+		pdf = new float[n];
+		// int currentIteration = 1;
+		// int totalIterations = 1000;
 		int[] currentSolution = Arrays.copyOf(initSolution, n), bestSolution;
 		int tempDelta, bestDelta;
 		List<Delta> deltaList = new ArrayList<>();
 		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
-		//int totalIterations = 1000;
 		random = new Random(MainActivity.getSeed());// set the seed, 1 in this case
-		// TODO implement lambda functions , receive tau parameter
-		double tau = params[0]/1000.0; //necesario para que la division de decimal
-		initPdf(qap.getSize(), tau);
+
+		// receive tau parameter
+		final double tau = params[0] / 1000.0; // necesario para que la division de decimal
+		final int pdf_function_type = params[1];
+
+		switch (pdf_function_type) {
+		case 0:
+			initPdfExp(n, tau);
+			break;
+		case 1:
+			initPdfPow(n, tau);
+			break;
+		case 2:
+			initPdfGamma(n, tau);
+			break;
+		}
 
 		currentCost = qap.evalSolution(initSolution);
 		bestCost = currentCost;
@@ -46,7 +60,7 @@ public class ExtremalOptimization {
 		final long start = System.currentTimeMillis();
 		long time = 0;
 		while (time - start < MainActivity.getExecutionTime()) { // execution during 10 milliseconds = 0.01 seconds
-			
+
 			for (int i = 0; i < n; i++) {
 				int bestMove = 0;
 				bestDelta = negative_infinity;
@@ -78,35 +92,35 @@ public class ExtremalOptimization {
 			currentCost = currentCost - delta.cost;
 			qap.updateDeltas(currentSolution, delta.index, delta.bestMove);
 
-			// update the best solution found if is the best of the moment at the end this block help to save the best of the best
+			// update the best solution found if is the best of the moment at the end this
+			// block help to save the best of the best
 			if (currentCost < bestCost) {
 				bestSolution = Arrays.copyOf(currentSolution, n);
 				bestCost = currentCost;
 			}
 
-			currentIteration++;
+			// currentIteration++;
 			deltaList.clear();// delete delta moves
 			time = System.currentTimeMillis();
 
 		}
-		//System.out.println("EO : " + currentIteration);
-
+		// System.out.println("EO : " + currentIteration);
 
 		return bestSolution;
 	}
 
-	public void initPdf(int size, double tau) {
-		pdf = new float[size];
+	public void initPdfExp(int n, double tau) {
+		
 		float sum = 0;
 		double y = 0;
-		for (int i = 0; i < size; i++) {
-			y = Math.exp(tau * (i + 1));
+		for (int i = 0; i < n; i++) {
+			y = Math.exp(-tau * (i + 1));
 			// System.out.println("f(" + i + ") = " + (float) y);
 
 			pdf[i] = (float) y; // cast because don't need so much decimals
 			sum += y;
 		}
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < n; i++) {
 			pdf[i] /= sum;
 		}
 
@@ -115,6 +129,23 @@ public class ExtremalOptimization {
 		// }
 
 		// System.out.println("total " + sum);
+	}
+
+	public void initPdfPow(int n, double tau) {
+		float sum = 0;
+		double y = 0;
+		for (int i = 0; i < n; i++) {
+			y = Math.pow((i + 1), -tau);
+			pdf[i] = (float) y; // cast because don't need so much decimals
+			sum += y;
+		}
+		for (int i = 0; i < n; i++) {
+			pdf[i] /= sum;
+		}
+	}
+
+	public void initPdfGamma(int n, double tau) {
+
 	}
 
 	public int pdfPick() {
