@@ -18,11 +18,11 @@ public class RobustTabuSearch {
 		// this initial block define the variable needed
 		qap = qapData;
 		final int n = qap.getSize();
-		
+
 		tabuDuration = params[0];// 8*n, this 8 is a factor, is possible to change
 		aspiration = params[1]; // 5 * n * n
 		int currentIteration = 1;
-		//int totalIterations = 1000;
+		// int totalIterations = 1000;
 		random = new Random(MainActivity.getSeed());// set the seed
 		qap.initDeltas(initSolution);
 		// qap.showData();
@@ -36,12 +36,13 @@ public class RobustTabuSearch {
 		currentSolution = Arrays.copyOf(initSolution, n);
 		bestSolution = Arrays.copyOf(initSolution, n);
 		int bestCost = qap.evalSolution(initSolution), bestNeighborCost;
-		//int bestFoundCounter = 0; // this counter has the value where the best was found
+		// int bestFoundCounter = 0; // this counter has the value where the best was
+		// found
 
 		final long start = System.currentTimeMillis();
-		long time=0;
+		long time = 0;
 		// this while find the best solution during totalIterations
-		while ( time - start < MainActivity.getExecutionTime() ) {
+		while (time - start < MainActivity.getExecutionTime()) {
 
 			bestNeighbor = getBestNeighbor(currentSolution, currentIteration, bestCost);
 			bestNeighborCost = qap.evalSolution(bestNeighbor);
@@ -52,7 +53,7 @@ public class RobustTabuSearch {
 			if (bestNeighborCost < bestCost) {
 				bestSolution = Arrays.copyOf(bestNeighbor, n);
 				bestCost = bestNeighborCost;
-				//bestFoundCounter = currentIteration;
+				// bestFoundCounter = currentIteration;
 			}
 
 			// always update the current solution
@@ -60,10 +61,11 @@ public class RobustTabuSearch {
 			currentIteration++;
 			time = System.currentTimeMillis();
 		}
-		
-		//System.out.println("ROTS : " + currentIteration);
 
-		//System.out.println("Iteración donde se encontro el mejor: " + bestFoundCounter);
+		// System.out.println("ROTS : " + currentIteration);
+
+		// System.out.println("Iteración donde se encontro el mejor: " +
+		// bestFoundCounter);
 		return bestSolution;
 	}
 
@@ -141,53 +143,46 @@ public class RobustTabuSearch {
 	public boolean satisfyAspitarionCriteria(int actualCost, int bestCostFound) {
 		return (actualCost < bestCostFound) ? true : false;
 	}
-	
-	
+
 	/*
-	 // get init solution with constructive method
-		Constructive constructive = new Constructive();
-		int[] initSolution = constructive.createRandomSolution(qap.getSize(), 1);
-		int[] bestSolutionFound = initSolution;// for now this is the best solution
-		qap.printSolution(initSolution, "Solución inicial");
-
-		int[] params = {380,1,500,80};
-
-		int method = 4;// showMenuMethod();
-		switch (method) {
-		case 1:
-			MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
-			bestSolutionFound = mutiStartLocalSearch.solve( initSolution, params,qap, constructive);
-			break;
-
-		case 2:
-			RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
-			bestSolutionFound = robustTabuSearch.solve( initSolution,params, qap);
-			break;
-
-		case 3:
-			ExtremalOptimization extremalOptimization = new ExtremalOptimization();
-			bestSolutionFound = extremalOptimization.solve( initSolution,params, qap);
-			break;
-
-		case 4:
-			GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
-			// pop_size, generations, mutation_probability, QAPData
-			geneticAlgorithm.solve(params, qap);
-
-			// get the results for the algorithm
-			Results geneticAlgorithmResult = geneticAlgorithm.getResults();
-			// print the results, the best, the worst and the average population fitness
-			System.out.println("\nEl mejor individuo es: ");
-			geneticAlgorithmResult.getBestIndividual().printIndividualWithFitness(qap);
-			bestSolutionFound = geneticAlgorithmResult.getBestIndividual().getGenes();
-			System.out.println("El peor individuo es: ");
-			geneticAlgorithmResult.getWorstIndividual().printIndividualWithFitness(qap);
-			System.out.println("El valor promedio de la población es: " + geneticAlgorithmResult.getAvg_value());
-			break;
-
-		}
-
-		qap.printSolution(bestSolutionFound, "\nMejor Solución");
-	 
+	 * // get init solution with constructive method Constructive constructive = new
+	 * Constructive(); int[] initSolution =
+	 * constructive.createRandomSolution(qap.getSize(), 1); int[] bestSolutionFound
+	 * = initSolution;// for now this is the best solution
+	 * qap.printSolution(initSolution, "Solución inicial");
+	 * 
+	 * int[] params = {380,1,500,80};
+	 * 
+	 * int method = 4;// showMenuMethod(); switch (method) { case 1:
+	 * MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
+	 * bestSolutionFound = mutiStartLocalSearch.solve( initSolution, params,qap,
+	 * constructive); break;
+	 * 
+	 * case 2: RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
+	 * bestSolutionFound = robustTabuSearch.solve( initSolution,params, qap); break;
+	 * 
+	 * case 3: ExtremalOptimization extremalOptimization = new
+	 * ExtremalOptimization(); bestSolutionFound = extremalOptimization.solve(
+	 * initSolution,params, qap); break;
+	 * 
+	 * case 4: GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(); //
+	 * pop_size, generations, mutation_probability, QAPData
+	 * geneticAlgorithm.solve(params, qap);
+	 * 
+	 * // get the results for the algorithm Results geneticAlgorithmResult =
+	 * geneticAlgorithm.getResults(); // print the results, the best, the worst and
+	 * the average population fitness
+	 * System.out.println("\nEl mejor individuo es: ");
+	 * geneticAlgorithmResult.getBestIndividual().printIndividualWithFitness(qap);
+	 * bestSolutionFound = geneticAlgorithmResult.getBestIndividual().getGenes();
+	 * System.out.println("El peor individuo es: ");
+	 * geneticAlgorithmResult.getWorstIndividual().printIndividualWithFitness(qap);
+	 * System.out.println("El valor promedio de la población es: " +
+	 * geneticAlgorithmResult.getAvg_value()); break;
+	 * 
+	 * }
+	 * 
+	 * qap.printSolution(bestSolutionFound, "\nMejor Solución");
+	 * 
 	 */
 }

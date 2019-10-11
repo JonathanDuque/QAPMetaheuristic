@@ -31,7 +31,7 @@ public class MainActivity {
 		final Constructive constructive = new Constructive();
 		List<List<Chromosome>> generation = generateInitialPopulation(number_by_mh, constructive);
 
-		int generations = 5, count_generations = 0;
+		int generations = 25, count_generations = 0;
 
 		Chromosome c1, c2;
 		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch(random.nextInt());
@@ -133,7 +133,7 @@ public class MainActivity {
 						p[0] = p[0] * 2 / 5;
 					}
 					p[1] = random.nextInt(1000); // mutation *1000
-					p[2] = random.nextInt(2);// crossover operator type
+					p[2] = random.nextInt(2);// crossover operator type 0:crossover UX, 1:crossover in a random point
 
 					break;
 				}
