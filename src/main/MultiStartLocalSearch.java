@@ -12,7 +12,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 	private int[] solution, initSolution;
 	private int[] params;
 
-	public MultiStartLocalSearch( QAPData qap, int seed) {
+	public MultiStartLocalSearch(QAPData qap, int seed) {
 		super();
 		this.random = new Random(seed);
 		n = qap.getSize();

@@ -12,7 +12,7 @@ public class MainActivity {
 	private static Random random;
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
 	private static QAPData qap;
-	private static final int execution_time = 10;
+	private static final int execution_time = 20;
 
 	public static void main(String[] args) {
 		final String problem = "chr12a.dat";// args[0];
@@ -31,14 +31,13 @@ public class MainActivity {
 		final Constructive constructive = new Constructive();
 		List<List<Chromosome>> generation = generateInitialPopulation(number_by_mh, constructive);
 
-
 		int generations = 25, count_generations = 0;
 
 		Chromosome c1, c2;
-		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch( );
-		RobustTabuSearch robustTabuSearch = new RobustTabuSearch( );
-		ExtremalOptimization extremalOptimization = new ExtremalOptimization();
-		GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
+		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch(qap, random.nextInt());
+		RobustTabuSearch robustTabuSearch = new RobustTabuSearch(qap, random.nextInt());
+		ExtremalOptimization extremalOptimization = new ExtremalOptimization(qap, random.nextInt());
+		GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(qap, random.nextInt());
 
 		int[] s = new int[qap_size];
 		int[] params = new int[3];
@@ -54,8 +53,7 @@ public class MainActivity {
 					System.out.println(i);
 					for (int l = 0; l < listChromosomes.size(); l++) {
 						Tools.printArray(listChromosomes.get(l).genes);
-						 System.out.println("costo " +
-						 qap.evalSolution(listChromosomes.get(l).getSolution()));
+						System.out.println("costo " + qap.evalSolution(listChromosomes.get(l).getSolution()));
 					}
 				}
 

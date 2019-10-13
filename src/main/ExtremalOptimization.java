@@ -6,8 +6,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.RecursiveAction;
 
-public class ExtremalOptimization {
+public class ExtremalOptimization extends RecursiveAction {
 
 	public class Delta {
 
@@ -22,6 +23,119 @@ public class ExtremalOptimization {
 
 	float[] pdf;
 	Random random;
+	private final int n;
+	QAPData qap;
+	private int[] solution, initSolution;
+	private int[] params;
+
+	public ExtremalOptimization(QAPData qap, int seed) {
+		super();
+		this.random = new Random(seed);
+		n = qap.getSize();
+		try {
+			this.qap = (QAPData) qap.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	// always before compute function, is neccesary set the enviroment
+	public void setEnviroment(int[] initSolution, int[] params) {
+		this.params = params.clone();
+		this.initSolution = initSolution.clone();
+	}
+
+	public int[] getSolution() {
+		return solution;
+	}
+
+	@Override
+	protected void compute() {
+		int currentCost, bestCost;
+		pdf = new float[n];
+		// int currentIteration = 1;
+		// int totalIterations = 1000;
+		int[] currentSolution = Arrays.copyOf(initSolution, n);
+		int tempDelta, bestDelta;
+		List<Delta> deltaList = new ArrayList<>();
+		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
+
+		// receive tau parameter
+		final double tau = params[0] / 100.0; // necesario para que la division de decimal
+
+		final int pdf_function_type = params[1];
+		// System.out.println("\ntau: " + tau + " pfd type: "+ pdf_function_type);
+
+		switch (pdf_function_type) {
+		case 0:
+			initPdfExp(n, tau);
+			break;
+		case 1:
+			initPdfPow(n, tau);
+			break;
+		case 2:
+			initPdfGamma(n, tau);
+			break;
+		}
+
+		currentCost = qap.evalSolution(initSolution);
+		bestCost = currentCost;
+		solution = Arrays.copyOf(initSolution, n);
+		qap.initDeltas(initSolution);
+
+		int counterBest = 0;
+
+		final long start = System.currentTimeMillis();
+		long time = 0;
+		while (time - start < MainActivity.getExecutionTime()) { // execution during 10 milliseconds = 0.01 seconds
+
+			for (int i = 0; i < n; i++) {
+				int bestMove = 0;
+				bestDelta = negative_infinity;
+
+				for (int j = 0; j < n; j++) {
+					if (i == j) {
+						continue;
+					}
+					tempDelta = qap.evalMovement(currentSolution, i, j);
+
+					// if improve
+					if (tempDelta > bestDelta) {
+						bestMove = j;
+						bestDelta = tempDelta;
+						counterBest = 1;
+					} else if (tempDelta == bestDelta && random.nextInt(++counterBest) == 0) {
+						bestMove = j;
+						bestDelta = tempDelta;
+					}
+				}
+				deltaList.add(new Delta(bestDelta, i, bestMove));
+			}
+
+			Collections.sort(deltaList, compareByCost);
+			Delta delta = deltaList.get(pdfPick()); // pdf pick gets the index recommended
+
+			// always update the current solution and its cost
+			currentSolution = qap.makeSwap(currentSolution, delta.index, delta.bestMove);
+			currentCost = currentCost - delta.cost;
+			qap.updateDeltas(currentSolution, delta.index, delta.bestMove);
+
+			// update the best solution found if is the best of the moment at the end this
+			// block help to save the best of the best
+			if (currentCost < bestCost) {
+				solution = Arrays.copyOf(currentSolution, n);
+				bestCost = currentCost;
+			}
+
+			// currentIteration++;
+			deltaList.clear();// delete delta moves
+			time = System.currentTimeMillis();
+
+		}
+		// System.out.println("EO : " + currentIteration);
+
+	}
 
 	public int[] solve(int[] initSolution, int[] params, QAPData qap) {
 		int n = qap.getSize(), currentCost, bestCost;
@@ -36,9 +150,9 @@ public class ExtremalOptimization {
 
 		// receive tau parameter
 		final double tau = params[0] / 100.0; // necesario para que la division de decimal
-		
+
 		final int pdf_function_type = params[1];
-		//System.out.println("\ntau: " + tau + " pfd type: "+ pdf_function_type);
+		// System.out.println("\ntau: " + tau + " pfd type: "+ pdf_function_type);
 
 		switch (pdf_function_type) {
 		case 0:
@@ -117,7 +231,7 @@ public class ExtremalOptimization {
 		double y = 0;
 		for (int i = 0; i < n; i++) {
 			y = Math.exp(-tau * (i + 1));
-			//System.out.println("f(" + i + ") = " + (float) y);
+			// System.out.println("f(" + i + ") = " + (float) y);
 
 			pdf[i] = (float) y; // cast because don't need so much decimals
 			sum += y;
@@ -125,11 +239,11 @@ public class ExtremalOptimization {
 		for (int i = 0; i < n; i++) {
 			pdf[i] /= sum;
 		}
-		//System.out.println("total " + sum + "\n");
+		// System.out.println("total " + sum + "\n");
 
-		//for (int i = 0; i < n; i++) {
-			//System.out.println("f(" + i + ") = " + pdf[i]);
-		//}
+		// for (int i = 0; i < n; i++) {
+		// System.out.println("f(" + i + ") = " + pdf[i]);
+		// }
 
 	}
 
@@ -138,20 +252,20 @@ public class ExtremalOptimization {
 		double y = 0;
 		for (int i = 0; i < n; i++) {
 			y = Math.pow((i + 1), -tau);
-			//System.out.println("f(" + i + ") = " + (float) y);
+			// System.out.println("f(" + i + ") = " + (float) y);
 			pdf[i] = (float) y; // cast because don't need so much decimals
 			sum += y;
 		}
-		
+
 		for (int i = 0; i < n; i++) {
 			pdf[i] /= sum;
 		}
-		
-		//System.out.println("total " + sum + "\n");
 
-		//for (int i = 0; i < n; i++) {
-			//System.out.println("f(" + i + ") = " + pdf[i]);
-		//}
+		// System.out.println("total " + sum + "\n");
+
+		// for (int i = 0; i < n; i++) {
+		// System.out.println("f(" + i + ") = " + pdf[i]);
+		// }
 	}
 
 	public void initPdfGamma(int n, double tau) {
@@ -163,7 +277,7 @@ public class ExtremalOptimization {
 		double constk = Math.pow(theta, tau) * gamma(tau);
 		for (int i = 0; i < n; i++) {
 			y = Math.pow(i + 1, tau - 1) * Math.exp(-(i + 1) / theta) / constk;
-			//System.out.println("f(" + i + ") = " + (float) y);
+			// System.out.println("f(" + i + ") = " + (float) y);
 			pdf[i] = (float) y; // cast because don't need so much decimals
 			sum += y;
 		}
@@ -171,12 +285,12 @@ public class ExtremalOptimization {
 		for (int i = 0; i < n; i++) {
 			pdf[i] /= sum;
 		}
-		
-		//System.out.println("total " + sum + "\n");
 
-		//for (int i = 0; i < n; i++) {
-			//System.out.println("f(" + i + ") = " + pdf[i]);
-		//}
+		// System.out.println("total " + sum + "\n");
+
+		// for (int i = 0; i < n; i++) {
+		// System.out.println("f(" + i + ") = " + pdf[i]);
+		// }
 	}
 
 	public double gamma(double n) {

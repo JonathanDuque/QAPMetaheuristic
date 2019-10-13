@@ -5,15 +5,87 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.RecursiveAction;
 
 import main.MainActivity;
 import main.QAPData;
 
-public class GeneticAlgorithm {
+public class GeneticAlgorithm  extends RecursiveAction{
 	private QAPData qap;
-	private int qap_size;
+	final private int n;
 	private Results results;
 	private Random random;
+	private int[] params;
+	
+	
+	public GeneticAlgorithm( QAPData qap, int seed) {
+		super();
+		this.random = new Random(seed);
+		n = qap.getSize();
+		try {
+			this.qap = (QAPData) qap.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	// always before compute function, is neccesary set the enviroment
+	public void setEnviroment(int[] initSolution, int[] params) {
+		this.params = params.clone();
+	}
+	
+	@Override
+	protected void compute() {
+		// first the variables necessary for the execution
+		Individual individual1, individual2, bestChild;
+		List<Individual> new_generation = new ArrayList<>();
+		List<Individual> temp_generation = new ArrayList<>();// temporal generation
+		int count_generations = 0;
+		final int pop_size = params[0];
+		final double mutation_probability = params[1] / 1000.0;
+		final boolean crossover_ux = params[2] == 0 ? true : false;
+		//random = new Random(MainActivity.getSeed());
+
+
+		// creating the first generation
+		new_generation = createFirstGeneration(pop_size);
+		Collections.sort(new_generation, compareByFitness);
+		//System.out.println("\nGeneración inicial");
+		// printPopulation(new_generation);
+
+		final long start = System.currentTimeMillis();
+		long time = 0;
+		// this cycle finish when complete all generations
+		while (time - start < MainActivity.getExecutionTime()) { // execution during 10 milliseconds = 0.01 seconds
+			temp_generation = new ArrayList<>(new_generation);
+
+			for (int i = 0; i < pop_size / 2; i++) {
+
+				individual1 = selectIndividual(temp_generation);// select a random individual
+				individual2 = selectIndividual(temp_generation);
+				bestChild = getBestOffspring(individual1, individual2, mutation_probability, crossover_ux);
+
+				new_generation.remove(pop_size - 1);// delete the last one
+				// insert the best child and sure that is different, if not mutate until will be
+				insertIndividualIntoPoblation(new_generation, bestChild);
+
+				// order the population by fitness
+				Collections.sort(new_generation, compareByFitness);
+
+			}
+			Collections.sort(new_generation, compareByFitness);
+			count_generations++;
+			time = System.currentTimeMillis();
+
+		}
+		// System.out.println("\nGeneración final");
+		// printPopulation(new_generation);
+		// save the results
+		results = populationResults(new_generation, pop_size);
+		// System.out.println("GA : " + count_generations);
+		
+	}
 
 	public void solve(int[] params, QAPData qapData) {
 		// first the variables necessary for the execution
@@ -22,7 +94,6 @@ public class GeneticAlgorithm {
 		List<Individual> temp_generation = new ArrayList<>();// temporal generation
 		int count_generations = 0;
 		qap = qapData;
-		qap_size = qap.getSize();
 		final int pop_size = params[0];
 		final double mutation_probability = params[1] / 1000.0;
 		final boolean crossover_ux = params[2] == 0 ? true : false;
@@ -82,7 +153,7 @@ public class GeneticAlgorithm {
 
 			// mp = mutation_probability
 			// crossover from 1 until qap_size minus 1
-			int point_crossover = random.nextInt(qap_size - 1) + 1;
+			int point_crossover = random.nextInt(n - 1) + 1;
 
 			// generate two offspring
 			Individual child1 = crossover(individual1, individual2, point_crossover);
@@ -103,7 +174,7 @@ public class GeneticAlgorithm {
 	private Individual crossover(Individual father, Individual mother, int point_crossover) {
 
 		// create individual empty
-		Individual child = new Individual(qap_size);
+		Individual child = new Individual(n);
 
 		// fill with genes of father until point_crossover
 		for (int i = 0; i < point_crossover; i++) {
@@ -111,7 +182,7 @@ public class GeneticAlgorithm {
 		}
 
 		// fill with genes of mother from point_crossover
-		for (int i = point_crossover; i < qap_size; i++) {
+		for (int i = point_crossover; i < n; i++) {
 			child.setGene(i, mother.getGene(i));
 		}
 
@@ -121,14 +192,14 @@ public class GeneticAlgorithm {
 
 	private Individual crossoverUX(Individual i1, Individual i2) {
 		// create individual empty
-		Individual child = new Individual(qap_size);
+		Individual child = new Individual(n);
 
 		// System.out.println("\nPadres");
 		// i1.printIndividual();
 		// i2.printIndividual();
 		// child.printIndividual();
 
-		for (int i = 0; i < qap_size; i++) {
+		for (int i = 0; i < n; i++) {
 			switch ((i + 1) % 4) {
 			case 1:
 				child.setGene(i, i1.getGene(i));
@@ -163,9 +234,9 @@ public class GeneticAlgorithm {
 			int pos_geneX, pos_geneY, temp_gene;
 
 			// first decide what genes change randonly
-			pos_geneX = random.nextInt(qap_size);// with this value we put the range of number
+			pos_geneX = random.nextInt(n);// with this value we put the range of number
 			do {
-				pos_geneY = random.nextInt(qap_size);// check that the position to change are diferent
+				pos_geneY = random.nextInt(n);// check that the position to change are diferent
 			} while (pos_geneX == pos_geneY);
 
 			// swapping - making the mutation
@@ -182,8 +253,8 @@ public class GeneticAlgorithm {
 		boolean missing = true;
 
 		// this block identify facilities missing for fix
-		for (int facility = 0; facility < qap_size; facility++) {
-			for (int i = 0; i < qap_size; i++) {
+		for (int facility = 0; facility < n; facility++) {
+			for (int i = 0; i < n; i++) {
 				if (facility == individual.getGene(i)) {
 					missing = false;
 					break;
@@ -197,8 +268,8 @@ public class GeneticAlgorithm {
 		}
 
 		// this block replace genes repeated for the missing
-		for (int i = 0; i < qap_size; i++) {
-			for (int j = 0; j < qap_size; j++) {
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
 				if (i != j && individual.getGene(i) == individual.getGene(j)) {
 					Integer tmp = missing_genes.get(missing_genes.size() - 1);
 					individual.setGene(j, tmp);
@@ -319,10 +390,10 @@ public class GeneticAlgorithm {
 			// disorder the array
 			// Collections.shuffle(seed);
 
-			int[] new_genes = new int[qap_size];
+			int[] new_genes = new int[n];
 
-			for (int k = 0; k < qap_size; k++) {
-				new_genes[k] = random.nextInt(qap_size);
+			for (int k = 0; k < n; k++) {
+				new_genes[k] = random.nextInt(n);
 				;
 			}
 
@@ -347,4 +418,6 @@ public class GeneticAlgorithm {
 			return Integer.compare(qap.evalSolution(i1.getGenes()), qap.evalSolution(i2.getGenes()));
 		}
 	};
+
+
 }
