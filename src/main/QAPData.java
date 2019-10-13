@@ -2,7 +2,7 @@ package main;
 
 import java.util.Arrays;
 
-public class QAPData {
+public class QAPData implements Cloneable {
 
 	private int[][] flow, distance, delta;
 	private int size;
@@ -167,4 +167,8 @@ public class QAPData {
 
 		System.out.println(facilities);
 	}
+	
+	public Object clone() throws CloneNotSupportedException {
+		return  super.clone();
+		}
 }

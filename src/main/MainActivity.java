@@ -31,11 +31,11 @@ public class MainActivity {
 		final Constructive constructive = new Constructive();
 		List<List<Chromosome>> generation = generateInitialPopulation(number_by_mh, constructive);
 
-		int generations = 0, count_generations = 0;
+		int generations = 10, count_generations = 0;
 
 		Chromosome c1, c2;
-		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch(random.nextInt());
-		RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
+		MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch(qap, random.nextInt() );
+		RobustTabuSearch robustTabuSearch = new RobustTabuSearch( qap, random.nextInt());
 		ExtremalOptimization extremalOptimization = new ExtremalOptimization();
 		GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
 
