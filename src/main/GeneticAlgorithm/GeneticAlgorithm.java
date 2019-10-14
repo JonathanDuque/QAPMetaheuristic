@@ -35,12 +35,13 @@ public class GeneticAlgorithm  extends RecursiveAction{
 	}
 
 	// always before compute function, is neccesary set the enviroment
-	public void setEnviroment(int[] initSolution, int[] params) {
+	public void setEnviroment(int[] params) {
 		this.params = params.clone();
 	}
 	
 	@Override
 	protected void compute() {
+		//System.out.println("GA");
 		// first the variables necessary for the execution
 		Individual individual1, individual2, bestChild;
 		List<Individual> new_generation = new ArrayList<>();
@@ -88,7 +89,7 @@ public class GeneticAlgorithm  extends RecursiveAction{
 		// save the results
 		results = populationResults(new_generation, pop_size);
 		// System.out.println("GA : " + count_generations);
-		
+		//System.out.println("Fin GA");	
 	}
 
 	public void solve(int[] params, QAPData qapData) {

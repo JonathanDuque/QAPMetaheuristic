@@ -57,6 +57,7 @@ public class ExtremalOptimization extends RecursiveAction {
 
 	@Override
 	protected void compute() {
+		//System.out.println(" EO");
 		int currentCost, bestCost;
 		pdf = new float[n];
 		// int currentIteration = 1;
@@ -139,6 +140,7 @@ public class ExtremalOptimization extends RecursiveAction {
 
 		}
 		// System.out.println("EO : " + currentIteration);
+		//System.out.println("Fin EO");
 
 	}
 

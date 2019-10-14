@@ -41,7 +41,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 	@Override
 	protected void compute() {
 		// this initial block define the variable needed
-		System.out.println("MTLS");
+		//System.out.println("MTLS");
 
 
 		solution = Arrays.copyOf(initSolution, n);
@@ -107,6 +107,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 
 		}
 		// System.out.println("MSLS : " + currentIteration);
+		//System.out.println("Fin MTLS");
 	}
 
 	public int[] solve(int[] initSolution, int[] params, QAPData qap, Constructive constructive) {

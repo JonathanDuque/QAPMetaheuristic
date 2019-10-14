@@ -47,6 +47,7 @@ public class RobustTabuSearch extends RecursiveAction {
 	@Override
 	protected void compute() {
 		// this initial block define the variable needed
+		//System.out.println("ROTS");
 
 		tabuDuration = params[0];// 8*n, this 8 is a factor, is possible to change
 		aspiration = params[1]; // 5 * n * n
@@ -91,6 +92,7 @@ public class RobustTabuSearch extends RecursiveAction {
 			time = System.currentTimeMillis();
 		}
 
+		//System.out.println("Fin ROTS");
 	}
 
 	public int[] solve(int[] initSolution, int[] params, QAPData qapData) {
