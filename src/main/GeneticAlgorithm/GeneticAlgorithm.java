@@ -11,6 +11,10 @@ import main.MainActivity;
 import main.QAPData;
 
 public class GeneticAlgorithm  extends RecursiveAction{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private QAPData qap;
 	final private int n;
 	private Results results;

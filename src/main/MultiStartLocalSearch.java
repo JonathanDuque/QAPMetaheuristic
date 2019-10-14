@@ -6,6 +6,10 @@ import java.util.concurrent.RecursiveAction;
 
 public class MultiStartLocalSearch extends RecursiveAction {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Random random;
 	private final int n;
 	QAPData qap;
@@ -37,6 +41,8 @@ public class MultiStartLocalSearch extends RecursiveAction {
 	@Override
 	protected void compute() {
 		// this initial block define the variable needed
+		System.out.println("MTLS");
+
 
 		solution = Arrays.copyOf(initSolution, n);
 		int[] currentSolution = Arrays.copyOf(initSolution, n);

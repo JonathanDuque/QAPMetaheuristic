@@ -10,6 +10,11 @@ import java.util.concurrent.RecursiveAction;
 
 public class ExtremalOptimization extends RecursiveAction {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public class Delta {
 
 		public Delta(int cost, int index, int bestMove) {
