@@ -22,16 +22,12 @@ public class RobustTabuSearch extends RecursiveAction {
 	private int[] solution, initSolution;
 	private int[] params;
 
-	public RobustTabuSearch(QAPData qap, int seed) {
+	public RobustTabuSearch(QAPData qapData, int seed) {
 		super();
-		try {
-			this.qap = (QAPData) qap.clone();
-		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		this.random = new Random(seed);
-		this.n = qap.getSize();
+
+		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow());
+		n = qap.getSize();
 	}
 
 	// always before compute function, is neccesary set the enviroment

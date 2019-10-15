@@ -13,10 +13,10 @@ public class MainActivity {
 	private static Random random;
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
 	private static QAPData qap;
-	private static final int execution_time = 2000;
+	private static final int execution_time = 500;
 
 	public static void main(String[] args) {
-		final String problem = "tai20a.dat";// args[0];
+		final String problem = "tai40a.dat";// args[0];
 		System.out.println("\nProblema: " + problem);
 		final ReadFile readFile = new ReadFile("qapdata/" + problem);
 		final long start = System.currentTimeMillis();
@@ -37,9 +37,7 @@ public class MainActivity {
 
 		int generations = 30, count_generations = 0;
 
-		// Chromosome c1, c2;
-		// int[] s = new int[qap_size];
-		// int[] params = new int[3];
+		int[] s = new int[qap_size];
 
 		Chromosome c_MTLS_1, c_MTLS_2;
 		Chromosome c_ROTS_1, c_ROTS_2;
@@ -50,6 +48,7 @@ public class MainActivity {
 		int[] paramsROTS = new int[3];
 		int[] paramsEO = new int[3];
 		int[] paramsGA = new int[3];
+		boolean sequential = false;
 
 		while (count_generations < generations) {
 			MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch(qap, random.nextInt());
@@ -58,7 +57,6 @@ public class MainActivity {
 			GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(qap, random.nextInt());
 
 			// System.out.println( count_generations );
-
 			List<Chromosome> listMTLS = new ArrayList<>(generation.get(0));
 			List<Chromosome> listROST = new ArrayList<>(generation.get(1));
 			List<Chromosome> listEO = new ArrayList<>(generation.get(2));
@@ -89,58 +87,61 @@ public class MainActivity {
 			paramsGA = crossover(c_GA_1.getParams(), c_GA_2.getParams(), GA); // crossover depending of method
 			paramsGA = mutate(paramsGA, GA, 0.5);
 
-			// s = mutiStartLocalSearch.solve(c_MTLS_1.getSolution(), paramsMTLS, qap,
-			// constructive);
-			// Chromosome newGene = new Chromosome(s, paramsMTLS, qap_size);
-			// insertIndividual(generation.get(MTLS), newGene);
+			if (sequential) {
+				s = mutiStartLocalSearch.solve(c_MTLS_1.getSolution(), paramsMTLS, qap, constructive);
+				Chromosome newGene = new Chromosome(s, paramsMTLS, qap_size);
+				insertIndividual(generation.get(MTLS), newGene);
 
-			// s = robustTabuSearch.solve(c_ROTS_1.getSolution(), paramsROTS, qap);
-			// newGene = new Chromosome(s, paramsROTS, qap_size);
-			// insertIndividual(generation.get(ROTS), newGene);
+				s = robustTabuSearch.solve(c_ROTS_1.getSolution(), paramsROTS, qap);
+				newGene = new Chromosome(s, paramsROTS, qap_size);
+				insertIndividual(generation.get(ROTS), newGene);
 
-			// s = extremalOptimization.solve(c_EO_1.getSolution(), paramsEO, qap);
-			// newGene = new Chromosome(s, paramsEO, qap_size);
-			// insertIndividual(generation.get(EO), newGene);
+				s = extremalOptimization.solve(c_EO_1.getSolution(), paramsEO, qap);
+				newGene = new Chromosome(s, paramsEO, qap_size);
+				insertIndividual(generation.get(EO), newGene);
 
-			// geneticAlgorithm.solve(paramsGA, qap);
-			// Results geneticAlgorithmResult = geneticAlgorithm.getResults();
-			// s = geneticAlgorithmResult.getBestIndividual().getGenes();
-			// newGene = new Chromosome(s, paramsGA, qap_size);
-			// insertIndividual(generation.get(GA), newGene);
+				geneticAlgorithm.solve(paramsGA, qap);
+				Results geneticAlgorithmResult = geneticAlgorithm.getResults();
+				s = geneticAlgorithmResult.getBestIndividual().getGenes();
+				newGene = new Chromosome(s, paramsGA, qap_size);
+				insertIndividual(generation.get(GA), newGene);
+			} else {
 
-			// printValues(generation);
+				// printValues(generation);
 
-			// setting variables for each method
-			mutiStartLocalSearch.setEnviroment(c_MTLS_1.getSolution(), paramsMTLS);
-			robustTabuSearch.setEnviroment(c_ROTS_1.getSolution(), paramsROTS);
-			extremalOptimization.setEnviroment(c_EO_1.getSolution(), paramsEO);
-			geneticAlgorithm.setEnviroment(paramsGA);
+				// setting variables for each method
+				mutiStartLocalSearch.setEnviroment(c_MTLS_1.getSolution(), paramsMTLS);
+				robustTabuSearch.setEnviroment(c_ROTS_1.getSolution(), paramsROTS);
+				extremalOptimization.setEnviroment(c_EO_1.getSolution(), paramsEO);
+				geneticAlgorithm.setEnviroment(paramsGA);
 
-			// execution in parallel
-			pool.submit(mutiStartLocalSearch);
-			pool.submit(robustTabuSearch);
-			pool.submit(extremalOptimization);
-			pool.submit(geneticAlgorithm);
+				// execution in parallel
+				pool.submit(mutiStartLocalSearch);
+				pool.submit(robustTabuSearch);
+				pool.submit(extremalOptimization);
+				pool.submit(geneticAlgorithm);
 
-			mutiStartLocalSearch.join();
-			robustTabuSearch.join();
-			extremalOptimization.join();
-			geneticAlgorithm.join();
+				mutiStartLocalSearch.join();
+				robustTabuSearch.join();
+				extremalOptimization.join();
+				geneticAlgorithm.join();
 
-			// insert new individual into generation
-			Chromosome newChromosomeMTLS = new Chromosome(mutiStartLocalSearch.getSolution(), paramsMTLS, qap_size);
-			insertIndividual(generation.get(MTLS), newChromosomeMTLS);
+				// insert new individual into generation
+				Chromosome newChromosomeMTLS = new Chromosome(mutiStartLocalSearch.getSolution(), paramsMTLS, qap_size);
+				insertIndividual(generation.get(MTLS), newChromosomeMTLS);
 
-			Chromosome newChromosomeROTS = new Chromosome(robustTabuSearch.getSolution(), paramsROTS, qap_size);
-			insertIndividual(generation.get(ROTS), newChromosomeROTS);
+				Chromosome newChromosomeROTS = new Chromosome(robustTabuSearch.getSolution(), paramsROTS, qap_size);
+				insertIndividual(generation.get(ROTS), newChromosomeROTS);
 
-			Chromosome newChromosomeEO = new Chromosome(extremalOptimization.getSolution(), paramsEO, qap_size);
-			insertIndividual(generation.get(EO), newChromosomeEO);
+				Chromosome newChromosomeEO = new Chromosome(extremalOptimization.getSolution(), paramsEO, qap_size);
+				insertIndividual(generation.get(EO), newChromosomeEO);
 
-			Results geneticAlgorithmResult = geneticAlgorithm.getResults();
-			int[] s_GA = geneticAlgorithmResult.getBestIndividual().getGenes();
-			Chromosome newChromosomeGA = new Chromosome(s_GA, paramsGA, qap_size);
-			insertIndividual(generation.get(GA), newChromosomeGA);
+				Results geneticAlgorithmResult = geneticAlgorithm.getResults();
+				int[] s_GA = geneticAlgorithmResult.getBestIndividual().getGenes();
+				Chromosome newChromosomeGA = new Chromosome(s_GA, paramsGA, qap_size);
+				insertIndividual(generation.get(GA), newChromosomeGA);
+
+			}
 
 			count_generations++;
 		}

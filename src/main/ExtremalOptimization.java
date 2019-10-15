@@ -33,16 +33,12 @@ public class ExtremalOptimization extends RecursiveAction {
 	private int[] solution, initSolution;
 	private int[] params;
 
-	public ExtremalOptimization(QAPData qap, int seed) {
+	public ExtremalOptimization(QAPData qapData, int seed) {
 		super();
 		this.random = new Random(seed);
+		
+		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow());
 		n = qap.getSize();
-		try {
-			this.qap = (QAPData) qap.clone();
-		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	// always before compute function, is neccesary set the enviroment
