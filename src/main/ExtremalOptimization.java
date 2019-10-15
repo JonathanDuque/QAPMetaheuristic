@@ -13,7 +13,7 @@ public class ExtremalOptimization extends RecursiveAction {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 3L;
 
 	public class Delta {
 

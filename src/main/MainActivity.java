@@ -13,10 +13,10 @@ public class MainActivity {
 	private static Random random;
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
 	private static QAPData qap;
-	private static final int execution_time = 10;
+	private static final int execution_time = 2000;
 
 	public static void main(String[] args) {
-		final String problem = "chr12a.dat";// args[0];
+		final String problem = "tai20a.dat";// args[0];
 		System.out.println("\nProblema: " + problem);
 		final ReadFile readFile = new ReadFile("qapdata/" + problem);
 		final long start = System.currentTimeMillis();
@@ -35,11 +35,11 @@ public class MainActivity {
 		final Constructive constructive = new Constructive();
 		List<List<Chromosome>> generation = generateInitialPopulation(number_by_mh, constructive);
 
-		int generations = 1, count_generations = 0;
+		int generations = 30, count_generations = 0;
 
-		//Chromosome c1, c2;	
-		//int[] s = new int[qap_size];
-		//int[] params = new int[3];
+		// Chromosome c1, c2;
+		// int[] s = new int[qap_size];
+		// int[] params = new int[3];
 
 		Chromosome c_MTLS_1, c_MTLS_2;
 		Chromosome c_ROTS_1, c_ROTS_2;
@@ -56,7 +56,8 @@ public class MainActivity {
 			RobustTabuSearch robustTabuSearch = new RobustTabuSearch(qap, random.nextInt());
 			ExtremalOptimization extremalOptimization = new ExtremalOptimization(qap, random.nextInt());
 			GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(qap, random.nextInt());
-			//System.out.println( count_generations );
+
+			// System.out.println( count_generations );
 
 			List<Chromosome> listMTLS = new ArrayList<>(generation.get(0));
 			List<Chromosome> listROST = new ArrayList<>(generation.get(1));
@@ -106,8 +107,8 @@ public class MainActivity {
 			// s = geneticAlgorithmResult.getBestIndividual().getGenes();
 			// newGene = new Chromosome(s, paramsGA, qap_size);
 			// insertIndividual(generation.get(GA), newGene);
-			
-			//printValues(generation);
+
+			// printValues(generation);
 
 			// setting variables for each method
 			mutiStartLocalSearch.setEnviroment(c_MTLS_1.getSolution(), paramsMTLS);
@@ -116,11 +117,11 @@ public class MainActivity {
 			geneticAlgorithm.setEnviroment(paramsGA);
 
 			// execution in parallel
-			mutiStartLocalSearch.fork();
-			robustTabuSearch.fork();
-			extremalOptimization.fork();
-			geneticAlgorithm.fork();
-			
+			pool.submit(mutiStartLocalSearch);
+			pool.submit(robustTabuSearch);
+			pool.submit(extremalOptimization);
+			pool.submit(geneticAlgorithm);
+
 			mutiStartLocalSearch.join();
 			robustTabuSearch.join();
 			extremalOptimization.join();

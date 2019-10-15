@@ -12,7 +12,7 @@ public class RobustTabuSearch extends RecursiveAction {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 	private int[][] tabuMemory; // this matrix will save the iteration number where a location change is denied
 	private int tabuDuration;// iterations tabu for a move
 	private QAPData qap;
