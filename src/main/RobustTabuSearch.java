@@ -26,7 +26,7 @@ public class RobustTabuSearch extends RecursiveAction {
 		super();
 		this.random = new Random(seed);
 
-		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow());
+		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getTarget());
 		n = qap.getSize();
 	}
 

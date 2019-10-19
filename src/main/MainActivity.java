@@ -16,14 +16,14 @@ public class MainActivity {
 	private static final int execution_time = 500;
 
 	public static void main(String[] args) {
-		final String problem = "tai40a.dat";// args[0];
+		final String problem = "bur26a.qap";// args[0];
 		System.out.println("\nProblema: " + problem);
-		final ReadFile readFile = new ReadFile("qapdata/" + problem);
+		final ReadFile readFile = new ReadFile("Data/" + problem);
 		final long start = System.currentTimeMillis();
 
 		// initialize qap data, i.e matrix of flow and distance matrix [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
-		qap = new QAPData(distance, flow);
+		qap = new QAPData(distance, flow, readFile.getTarget());
 		qap_size = qap.getSize();
 		random = new Random(1);
 
@@ -31,7 +31,7 @@ public class MainActivity {
 		ForkJoinPool pool = new ForkJoinPool(4);
 
 		// List<Gene> generation = createFirstGeneration(8);
-		final int number_by_mh = 4;
+		final int number_by_mh = 5;
 		final Constructive constructive = new Constructive();
 		List<List<Chromosome>> generation = generateInitialPopulation(number_by_mh, constructive);
 

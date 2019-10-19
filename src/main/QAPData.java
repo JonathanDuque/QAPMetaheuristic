@@ -2,15 +2,18 @@ package main;
 
 public class QAPData implements Cloneable {
 
-	private int[][] flow, distance, delta;
-	private int size;
+	final private int[][] flow, distance, delta;
+	final private int size;
+	final private int target;
+	
 
 	// constructor for init data
-	public QAPData(int[][] distance, int[][] flow) {
+	public QAPData(int[][] distance, int[][] flow, int target) {
 		this.distance = distance;
 		this.flow = flow;
 		size = distance.length;
 		delta = new int[size][size];
+		this.target = target;
 	}
 
 	public int[][] getFlow() {
@@ -19,6 +22,10 @@ public class QAPData implements Cloneable {
 
 	public int[][] getDistance() {
 		return distance;
+	}
+	
+	public int getTarget() {
+		return target;
 	}
 
 	public int getDistanceBetween(int location1, int location2) {

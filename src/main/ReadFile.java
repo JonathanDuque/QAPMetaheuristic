@@ -7,6 +7,7 @@ import java.util.Scanner;
 public class ReadFile {
 
 	private int[][] flow, distance;
+	private int target;
 
 	public ReadFile(String fileName) {
 		Scanner scanner;
@@ -15,7 +16,9 @@ public class ReadFile {
 			scanner = new Scanner(new File(fileName));
 
 			int n = Integer.parseInt(scanner.next());
-			// System.out.println(n);
+			scanner.next(); //skip a data no necessary
+			target = Integer.parseInt(scanner.next());
+			//System.out.println(target);
 
 			flow = new int[n][n];
 			distance = new int[n][n];
@@ -59,6 +62,10 @@ public class ReadFile {
 
 	public int[][] getDistance() {
 		return distance;
+	}
+	
+	public int getTarget() {
+		return target;
 	}
 
 }
