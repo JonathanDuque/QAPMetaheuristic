@@ -334,8 +334,8 @@ public class GeneticAlgorithm  extends RecursiveAction{
 		Individual worstIndividual = generation.get(0);
 		int avg_value;
 		// double standdev = 0;
-		int best_value = qap.evalSolution(bestIndividual.getGenes());
-		int worst_value = best_value;
+		int best_fitness = qap.evalSolution(bestIndividual.getGenes());
+		int worst_fitness = best_fitness;
 
 		int fitness_sum = 0;
 
@@ -343,14 +343,14 @@ public class GeneticAlgorithm  extends RecursiveAction{
 		for (Individual ind : generation) {
 			int fitness_val = qap.evalSolution(ind.getGenes());
 
-			if (fitness_val < best_value) {
+			if (fitness_val < best_fitness) {
 				bestIndividual = ind;
-				best_value = fitness_val;
+				best_fitness = fitness_val;
 			}
 
-			if (fitness_val > worst_value) {
+			if (fitness_val > worst_fitness) {
 				worstIndividual = ind;
-				worst_value = fitness_val;
+				worst_fitness = fitness_val;
 			}
 
 			fitness_sum += fitness_val;
@@ -366,7 +366,7 @@ public class GeneticAlgorithm  extends RecursiveAction{
 		// standdev /= pop_size;
 		// standdev = Math.sqrt(standdev);
 
-		return new Results(bestIndividual, worstIndividual, avg_value);
+		return new Results(bestIndividual, worstIndividual, avg_value, best_fitness);
 	}
 
 	private boolean areIquals(Individual individual1, Individual individual2) {

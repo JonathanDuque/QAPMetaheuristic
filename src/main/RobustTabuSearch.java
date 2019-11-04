@@ -67,8 +67,8 @@ public class RobustTabuSearch extends RecursiveAction {
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
-		// this while find the best solution during totalIterations
-		while (time - start < MainActivity.getExecutionTime()) {
+		// this while find the best solution during totalIterations or until BKS will be found
+		while (time - start < MainActivity.getExecutionTime() && bestCost != qap.getTarget()) {
 
 			bestNeighbor = getBestNeighbor(currentSolution, currentIteration, bestCost);
 			bestNeighborCost = qap.evalSolution(bestNeighbor);
@@ -80,6 +80,11 @@ public class RobustTabuSearch extends RecursiveAction {
 				solution = Arrays.copyOf(bestNeighbor, n);
 				bestCost = bestNeighborCost;
 				// bestFoundCounter = currentIteration;
+				
+				//if the new solution is the bks the MainActivity should be know
+				if (bestCost == qap.getTarget()) {
+					MainActivity.findBKS();
+				}
 			}
 
 			// always update the current solution

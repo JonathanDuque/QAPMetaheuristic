@@ -53,7 +53,7 @@ public class ExtremalOptimization extends RecursiveAction {
 
 	@Override
 	protected void compute() {
-		//System.out.println(" EO");
+		//System.out.println(" Hello EO");
 		int currentCost, bestCost;
 		pdf = new float[n];
 		// int currentIteration = 1;
@@ -90,7 +90,7 @@ public class ExtremalOptimization extends RecursiveAction {
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
-		while (time - start < MainActivity.getExecutionTime()) { // execution during 10 milliseconds = 0.01 seconds
+		while (time - start < MainActivity.getExecutionTime() && bestCost != qap.getTarget()) {
 
 			for (int i = 0; i < n; i++) {
 				int bestMove = 0;
@@ -128,6 +128,12 @@ public class ExtremalOptimization extends RecursiveAction {
 			if (currentCost < bestCost) {
 				solution = Arrays.copyOf(currentSolution, n);
 				bestCost = currentCost;
+				
+				//if the new solution is the bks the MainActivity should be know
+				if (bestCost == qap.getTarget()) {
+					MainActivity.findBKS();
+				}
+				
 			}
 
 			// currentIteration++;

@@ -13,10 +13,11 @@ public class MainActivity {
 	private static Random random;
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
 	private static QAPData qap;
-	private static final int execution_time = 500;
+	private static final int execution_time = 800;
+	private static boolean no_find_BKS = true;
 
 	public static void main(String[] args) {
-		final String problem = "bur26a.qap";// args[0];
+		final String problem = "chr12a.qap";// args[0];
 		System.out.println("\nProblema: " + problem);
 		final ReadFile readFile = new ReadFile("Data/" + problem);
 		final long start = System.currentTimeMillis();
@@ -35,22 +36,24 @@ public class MainActivity {
 		final Constructive constructive = new Constructive();
 		List<List<Chromosome>> generation = generateInitialPopulation(number_by_mh, constructive);
 
-		int generations = 30, count_generations = 0;
+		int generations = 20, count_generations = 0;
 
 		int[] s = new int[qap_size];
 
+		//create chromosome for each mh
 		Chromosome c_MTLS_1, c_MTLS_2;
 		Chromosome c_ROTS_1, c_ROTS_2;
 		Chromosome c_EO_1, c_EO_2;
 		Chromosome c_GA_1, c_GA_2;
 
+		//create params for each mh
 		int[] paramsMTLS = new int[3];
 		int[] paramsROTS = new int[3];
 		int[] paramsEO = new int[3];
 		int[] paramsGA = new int[3];
 		boolean sequential = false;
 
-		while (count_generations < generations) {
+		while (count_generations < generations && no_find_BKS ) {
 			MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch(qap, random.nextInt());
 			RobustTabuSearch robustTabuSearch = new RobustTabuSearch(qap, random.nextInt());
 			ExtremalOptimization extremalOptimization = new ExtremalOptimization(qap, random.nextInt());
@@ -140,6 +143,9 @@ public class MainActivity {
 				int[] s_GA = geneticAlgorithmResult.getBestIndividual().getGenes();
 				Chromosome newChromosomeGA = new Chromosome(s_GA, paramsGA, qap_size);
 				insertIndividual(generation.get(GA), newChromosomeGA);
+				if (geneticAlgorithmResult.getBestFitness() == qap.getTarget()) {
+					findBKS();
+				}
 
 			}
 
@@ -361,6 +367,10 @@ public class MainActivity {
 		}
 	}
 
+	public static void findBKS() {
+		//System.out.println(from);
+		no_find_BKS = false;
+	}
 	/*
 	 * // get init solution with constructive method Constructive constructive = new
 	 * Constructive(); int[] initSolution =
