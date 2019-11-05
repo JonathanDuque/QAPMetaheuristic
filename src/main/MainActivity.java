@@ -17,7 +17,7 @@ public class MainActivity {
 	private static boolean no_find_BKS = true;
 
 	public static void main(String[] args) {
-		final String problem = "chr12a.qap";// args[0];
+		final String problem = "bur26a.qap";// args[0];
 		System.out.println("\nProblema: " + problem);
 		final ReadFile readFile = new ReadFile("Data/" + problem);
 		final long start = System.currentTimeMillis();
@@ -40,20 +40,21 @@ public class MainActivity {
 
 		int[] s = new int[qap_size];
 
-		//create chromosome for each mh
+		// create chromosome for each mh
 		Chromosome c_MTLS_1, c_MTLS_2;
 		Chromosome c_ROTS_1, c_ROTS_2;
 		Chromosome c_EO_1, c_EO_2;
 		Chromosome c_GA_1, c_GA_2;
 
-		//create params for each mh
+		// create params for each mh
 		int[] paramsMTLS = new int[3];
 		int[] paramsROTS = new int[3];
 		int[] paramsEO = new int[3];
 		int[] paramsGA = new int[3];
 		boolean sequential = false;
 
-		while (count_generations < generations && no_find_BKS ) {
+		while (count_generations < generations && no_find_BKS) {
+
 			MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch(qap, random.nextInt());
 			RobustTabuSearch robustTabuSearch = new RobustTabuSearch(qap, random.nextInt());
 			ExtremalOptimization extremalOptimization = new ExtremalOptimization(qap, random.nextInt());
@@ -151,9 +152,24 @@ public class MainActivity {
 
 			count_generations++;
 		}
-		printValues(generation);
+		// printValues(generation);
 
 		printTotalTime(start);
+		System.out.println("Generaciones: " + count_generations );
+
+		for (int i = 0; i < generation.size(); i++) {
+			List<Chromosome> listChromosomes = generation.get(i);
+			int best = Integer.MAX_VALUE;
+			int c = -1;
+			for (int l = 0; l < listChromosomes.size(); l++) {
+				if (best > qap.evalSolution(listChromosomes.get(l).getSolution())) {
+					best = qap.evalSolution(listChromosomes.get(l).getSolution());
+					c = l;
+				}
+			}
+			
+			printMetaheuristic(i,listChromosomes.get(c).getSolution(),best, listChromosomes.get(c).getParams() );
+		}
 
 	}
 
@@ -324,7 +340,7 @@ public class MainActivity {
 		// show the total time
 		double time = (System.currentTimeMillis() - start);
 		time /= 1000;
-		System.out.println("\n" + time + " seg");
+		System.out.println("\nTiempo total: " + time + " seg");
 	}
 
 	public static int getSeed() {
@@ -368,8 +384,39 @@ public class MainActivity {
 	}
 
 	public static void findBKS() {
-		//System.out.println(from);
+		// System.out.println(from);
 		no_find_BKS = false;
+	}
+	
+	
+	public static void printMetaheuristic (final int type_mh, final int [] solution, final int cost , final int[]p) {
+		
+		String params_text = "";
+		switch (type_mh) {
+		case MTLS:
+			System.out.println("\nMultiStart LocalSearch Results:");
+			params_text = (p[0] == 0 ) ? "\nRandom Restart" : "\nRestart by swaps";
+			break;
+		case ROTS:
+			System.out.println("\nRobust TabuSearch Results:");
+			params_text = "\nTabu duration: " + p[0] + "\nAspiration factor: " + p[1];
+			break;
+		case EO:
+			System.out.println("\nExtremal Optimization Results:");
+			params_text = "\nTau: " + p[0]/100.0 + "\nPdf function: " + p[1];
+
+			break;
+		case GA:
+			System.out.println("\nGenetith Algorithm Results:");
+			break;
+		}
+		
+		System.out.println("Costo: " + cost);
+		Tools.printArray(solution);
+		System.out.println("Parámetros " + params_text);
+		
+		
+		
 	}
 	/*
 	 * // get init solution with constructive method Constructive constructive = new
