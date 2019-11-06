@@ -41,7 +41,7 @@ public class ExtremalOptimization extends RecursiveAction {
 		n = qap.getSize();
 	}
 
-	// always before compute function, is neccesary set the enviroment
+	// always before compute function, is necessary set the environment
 	public void setEnviroment(int[] initSolution, int[] params) {
 		this.params = params.clone();
 		this.initSolution = initSolution.clone();

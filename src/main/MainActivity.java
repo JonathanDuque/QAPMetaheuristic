@@ -1,5 +1,6 @@
 package main;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,7 +19,7 @@ public class MainActivity {
 
 	public static void main(String[] args) {
 		final String problem = "bur26a.qap";// args[0];
-		System.out.println("\nProblema: " + problem);
+		System.out.println("\nProblem: " + problem);
 		final ReadFile readFile = new ReadFile("Data/" + problem);
 		final long start = System.currentTimeMillis();
 
@@ -155,7 +156,8 @@ public class MainActivity {
 		// printValues(generation);
 
 		printTotalTime(start);
-		System.out.println("Generaciones: " + count_generations );
+		System.out.println("Generations: " + count_generations);
+		DecimalFormat df2 = new DecimalFormat("#.##");
 
 		for (int i = 0; i < generation.size(); i++) {
 			List<Chromosome> listChromosomes = generation.get(i);
@@ -167,8 +169,8 @@ public class MainActivity {
 					c = l;
 				}
 			}
-			
-			printMetaheuristic(i,listChromosomes.get(c).getSolution(),best, listChromosomes.get(c).getParams() );
+
+			printMetaheuristic(i, listChromosomes.get(c).getSolution(), best, listChromosomes.get(c).getParams(), df2);
 		}
 
 	}
@@ -340,7 +342,7 @@ public class MainActivity {
 		// show the total time
 		double time = (System.currentTimeMillis() - start);
 		time /= 1000;
-		System.out.println("\nTiempo total: " + time + " seg");
+		System.out.println("\nTotal time: " + time + " sec");
 	}
 
 	public static int getSeed() {
@@ -387,15 +389,16 @@ public class MainActivity {
 		// System.out.println(from);
 		no_find_BKS = false;
 	}
+
+	public static void printMetaheuristic(final int type_mh, final int[] solution, final int cost, final int[] p, DecimalFormat df2) {
+
 	
-	
-	public static void printMetaheuristic (final int type_mh, final int [] solution, final int cost , final int[]p) {
 		
 		String params_text = "";
 		switch (type_mh) {
 		case MTLS:
 			System.out.println("\nMultiStart LocalSearch Results:");
-			params_text = (p[0] == 0 ) ? "\nRandom Restart" : "\nRestart by swaps";
+			params_text = (p[0] == 0) ? "\nRandom Restart" : "\nRestart by swaps";
 			break;
 		case ROTS:
 			System.out.println("\nRobust TabuSearch Results:");
@@ -403,60 +406,34 @@ public class MainActivity {
 			break;
 		case EO:
 			System.out.println("\nExtremal Optimization Results:");
-			params_text = "\nTau: " + p[0]/100.0 + "\nPdf function: " + p[1];
+			params_text = "\nTau: " + p[0] / 100.0 + "\nPdf function: ";
+			switch (p[1]) {
+			case 0:
+				params_text += "Exponential";
+				break;
+			case 1:
+				params_text += "Power";
+				break;
+			case 2:
+				params_text += "Gamma";
+				break;
+			}
 
 			break;
 		case GA:
-			System.out.println("\nGenetith Algorithm Results:");
+			System.out.println("\nGenetic Algorithm Results:");
+			params_text = "\nPopulation: " + p[0] + "\nMutation rate: " +  p[1] / 1000.0;
+			params_text += (p[2] == 0) ? "\nCrossover UX" : "\nCrossover in random point";
+		
 			break;
 		}
-		
-		System.out.println("Costo: " + cost);
+
+		double std = cost*100.0/qap.getTarget()-100;
+		System.out.println("Cost: " + cost +" " + df2.format(std) + "%");
 		Tools.printArray(solution);
-		System.out.println("Parámetros " + params_text);
-		
-		
-		
+		System.out.println("Params " + params_text);
+	
+
 	}
-	/*
-	 * // get init solution with constructive method Constructive constructive = new
-	 * Constructive(); int[] initSolution =
-	 * constructive.createRandomSolution(qap.getSize(), 1); int[] bestSolutionFound
-	 * = initSolution;// for now this is the best solution
-	 * qap.printSolution(initSolution, "Solución inicial");
-	 * 
-	 * int[] params = {380,1,500,80};
-	 * 
-	 * int method = 4;// showMenuMethod(); switch (method) { case 1:
-	 * MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch();
-	 * bestSolutionFound = mutiStartLocalSearch.solve( initSolution, params,qap,
-	 * constructive); break;
-	 * 
-	 * case 2: RobustTabuSearch robustTabuSearch = new RobustTabuSearch();
-	 * bestSolutionFound = robustTabuSearch.solve( initSolution,params, qap); break;
-	 * 
-	 * case 3: ExtremalOptimization extremalOptimization = new
-	 * ExtremalOptimization(); bestSolutionFound = extremalOptimization.solve(
-	 * initSolution,params, qap); break;
-	 * 
-	 * case 4: GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(); //
-	 * pop_size, generations, mutation_probability, QAPData
-	 * geneticAlgorithm.solve(params, qap);
-	 * 
-	 * // get the results for the algorithm Results geneticAlgorithmResult =
-	 * geneticAlgorithm.getResults(); // print the results, the best, the worst and
-	 * the average population fitness
-	 * System.out.println("\nEl mejor individuo es: ");
-	 * geneticAlgorithmResult.getBestIndividual().printIndividualWithFitness(qap);
-	 * bestSolutionFound = geneticAlgorithmResult.getBestIndividual().getGenes();
-	 * System.out.println("El peor individuo es: ");
-	 * geneticAlgorithmResult.getWorstIndividual().printIndividualWithFitness(qap);
-	 * System.out.println("El valor promedio de la población es: " +
-	 * geneticAlgorithmResult.getAvg_value()); break;
-	 * 
-	 * }
-	 * 
-	 * qap.printSolution(bestSolutionFound, "\nMejor Solución");
-	 */
 
 }
