@@ -112,6 +112,8 @@ public class MultiStartLocalSearch extends RecursiveAction {
 			time = System.currentTimeMillis();
 
 		}
+		
+		//MainActivity.listCost.add(bestCost);
 		// qap.showData();
 		//System.out.println("MSLS : " + currentIteration + " time: " + (time - start));
 		// System.out.println("Fin MTLS");

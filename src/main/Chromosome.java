@@ -3,23 +3,22 @@ package main;
 import java.util.Arrays;
 
 public class Chromosome {
-	 int[] genes;
+	int[] genes;
 	private int qap_size;
 
 	public Chromosome(int[] solution, final int[] params, int qap_size) {
-		int size = qap_size + 3; //because maximum parameters are 3
+		int size = qap_size + 3; // because maximum parameters are 3
 		genes = new int[size];
 		this.qap_size = qap_size;
 
 		for (int i = 0; i < qap_size; i++) {
 			genes[i] = solution[i];
 		}
-		// chromosome[qap_size] = metaheuristic;
 
 		for (int i = qap_size; i < size; i++) {
 			genes[i] = params[i - qap_size];
 		}
-		//Tools.printArray(genes);
+		// Tools.printArray(genes);
 	}
 
 	public int[] getSolution() {
@@ -29,8 +28,4 @@ public class Chromosome {
 	public int[] getParams() {
 		return Arrays.copyOfRange(genes, qap_size, qap_size + 4);
 	}
-
-	//public Object clone() throws CloneNotSupportedException {
-	//	return super.clone();
-	//}
 }

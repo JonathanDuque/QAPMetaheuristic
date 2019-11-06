@@ -2,6 +2,7 @@ package main;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
@@ -14,11 +15,12 @@ public class MainActivity {
 	private static Random random;
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
 	private static QAPData qap;
-	private static final int execution_time = 800;
+	private static final int execution_time = 1000;
 	private static boolean no_find_BKS = true;
+	// static List <Integer> listCost = new ArrayList<>();
 
 	public static void main(String[] args) {
-		final String problem = "bur26a.qap";// args[0];
+		final String problem = "tai100a.qap";// args[0];
 		System.out.println("\nProblem: " + problem);
 		final ReadFile readFile = new ReadFile("Data/" + problem);
 		final long start = System.currentTimeMillis();
@@ -53,6 +55,8 @@ public class MainActivity {
 		int[] paramsEO = new int[3];
 		int[] paramsGA = new int[3];
 		boolean sequential = false;
+
+		// listCost.add(qap.evalSolution((generation.get(0).get(0).getSolution())));
 
 		while (count_generations < generations && no_find_BKS) {
 
@@ -154,6 +158,10 @@ public class MainActivity {
 			count_generations++;
 		}
 		// printValues(generation);
+		/*
+		 * for (int i = 0; i < listCost.size(); i++) { System.out.println( (i)+": " +
+		 * listCost.get(i)); }
+		 */
 
 		printTotalTime(start);
 		System.out.println("Generations: " + count_generations);
@@ -322,11 +330,30 @@ public class MainActivity {
 
 	}
 
-	public static void insertIndividual(List<Chromosome> g, Chromosome newIndividual) {
+	public static void insertIndividual(List<Chromosome> g, Chromosome new_individual) {
 
 		int worst = -1;
 		int cost = Integer.MIN_VALUE;
 		int temp_cost = 0;
+		boolean exist = false;
+
+		// this cycle finish until the new chromosome will be different
+		do {
+			exist = false;
+			// identify if the new individual is already in the generation
+			for (Chromosome temp : g) {
+				if (areIquals(temp, new_individual)) {
+					exist = true;
+					break;
+				}
+			}
+			// if exist is necessary mutate
+			if (exist) {
+				new_individual = mutate(new_individual);
+			}
+
+		} while (exist);
+
 		for (int i = 0; i < g.size(); i++) {
 			temp_cost = qap.evalSolution(g.get(i).getSolution());
 			if (temp_cost > cost) {
@@ -334,8 +361,39 @@ public class MainActivity {
 				worst = i;
 			}
 		}
+		
 		g.remove(worst);
-		g.add(newIndividual);
+		g.add(new_individual);
+	}
+
+	private static Chromosome mutate(Chromosome new_individual) {
+		int pos_geneX, pos_geneY, temp_gene;
+
+		// first decide what genes change randomly
+		pos_geneX = random.nextInt(qap_size);// with this value we put the range of number
+		do {
+			pos_geneY = random.nextInt(qap_size);// check that the position to change are different
+		} while (pos_geneX == pos_geneY);
+
+		// swapping - making the mutation
+		temp_gene = new_individual.genes[pos_geneX];
+		new_individual.genes[pos_geneX] = new_individual.genes[pos_geneY];
+		new_individual.genes[pos_geneY] = temp_gene;
+		return new_individual;
+	}
+
+	private static boolean areIquals(Chromosome individual1, Chromosome individual2) {
+		int[] array1 = individual1.getSolution();
+		int[] array2 = individual2.getSolution();
+		// check position by position if they are equals
+		/*for (int i = 0; i < qap.getSize(); i++) {
+			if (array1[i] != array2[i]) {
+				return false;
+			}
+		}*/
+		
+
+		return Arrays.equals(array1, array2);
 	}
 
 	public static void printTotalTime(long start) {
@@ -390,10 +448,9 @@ public class MainActivity {
 		no_find_BKS = false;
 	}
 
-	public static void printMetaheuristic(final int type_mh, final int[] solution, final int cost, final int[] p, DecimalFormat df2) {
+	public static void printMetaheuristic(final int type_mh, final int[] solution, final int cost, final int[] p,
+			DecimalFormat df2) {
 
-	
-		
 		String params_text = "";
 		switch (type_mh) {
 		case MTLS:
@@ -422,17 +479,16 @@ public class MainActivity {
 			break;
 		case GA:
 			System.out.println("\nGenetic Algorithm Results:");
-			params_text = "\nPopulation: " + p[0] + "\nMutation rate: " +  p[1] / 1000.0;
+			params_text = "\nPopulation: " + p[0] + "\nMutation rate: " + p[1] / 1000.0;
 			params_text += (p[2] == 0) ? "\nCrossover UX" : "\nCrossover in random point";
-		
+
 			break;
 		}
 
-		double std = cost*100.0/qap.getTarget()-100;
-		System.out.println("Cost: " + cost +" " + df2.format(std) + "%");
+		double std = cost * 100.0 / qap.getTarget() - 100;
+		System.out.println("Cost: " + cost + " " + df2.format(std) + "%");
 		Tools.printArray(solution);
 		System.out.println("Params " + params_text);
-	
 
 	}
 

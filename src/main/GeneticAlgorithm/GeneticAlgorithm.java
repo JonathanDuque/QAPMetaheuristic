@@ -10,7 +10,7 @@ import java.util.concurrent.RecursiveAction;
 import main.MainActivity;
 import main.QAPData;
 
-public class GeneticAlgorithm  extends RecursiveAction{
+public class GeneticAlgorithm extends RecursiveAction {
 	/**
 	 * 
 	 */
@@ -20,12 +20,11 @@ public class GeneticAlgorithm  extends RecursiveAction{
 	private Results results;
 	private Random random;
 	private int[] params;
-	
-	
-	public GeneticAlgorithm( QAPData qapData, int seed) {
+
+	public GeneticAlgorithm(QAPData qapData, int seed) {
 		super();
 		this.random = new Random(seed);
-		
+
 		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getTarget());
 		n = qap.getSize();
 	}
@@ -34,10 +33,10 @@ public class GeneticAlgorithm  extends RecursiveAction{
 	public void setEnviroment(int[] params) {
 		this.params = params.clone();
 	}
-	
+
 	@Override
 	protected void compute() {
-		//System.out.println("GA");
+		// System.out.println("GA");
 		// first the variables necessary for the execution
 		Individual individual1, individual2, bestChild;
 		List<Individual> new_generation = new ArrayList<>();
@@ -46,13 +45,12 @@ public class GeneticAlgorithm  extends RecursiveAction{
 		final int pop_size = params[0];
 		final double mutation_probability = params[1] / 1000.0;
 		final boolean crossover_ux = params[2] == 0 ? true : false;
-		//random = new Random(MainActivity.getSeed());
-
+		// random = new Random(MainActivity.getSeed());
 
 		// creating the first generation
 		new_generation = createFirstGeneration(pop_size);
 		Collections.sort(new_generation, compareByFitness);
-		//System.out.println("\nGeneración inicial");
+		// System.out.println("\nGeneración inicial");
 		// printPopulation(new_generation);
 
 		final long start = System.currentTimeMillis();
@@ -85,7 +83,7 @@ public class GeneticAlgorithm  extends RecursiveAction{
 		// save the results
 		results = populationResults(new_generation, pop_size);
 		// System.out.println("GA : " + count_generations);
-		//System.out.println("Fin GA");	
+		// System.out.println("Fin GA");
 	}
 
 	public void solve(int[] params, QAPData qapData) {
@@ -108,7 +106,7 @@ public class GeneticAlgorithm  extends RecursiveAction{
 		// creating the first generation
 		new_generation = createFirstGeneration(pop_size);
 		Collections.sort(new_generation, compareByFitness);
-		//System.out.println("\nGeneración inicial");
+		// System.out.println("\nGeneración inicial");
 		// printPopulation(new_generation);
 
 		final long start = System.currentTimeMillis();
@@ -234,10 +232,10 @@ public class GeneticAlgorithm  extends RecursiveAction{
 		if (mutation_number <= mp) {
 			int pos_geneX, pos_geneY, temp_gene;
 
-			// first decide what genes change randonly
+			// first decide what genes change randomly
 			pos_geneX = random.nextInt(n);// with this value we put the range of number
 			do {
-				pos_geneY = random.nextInt(n);// check that the position to change are diferent
+				pos_geneY = random.nextInt(n);// check that the position to change are different
 			} while (pos_geneX == pos_geneY);
 
 			// swapping - making the mutation
@@ -305,7 +303,7 @@ public class GeneticAlgorithm  extends RecursiveAction{
 	private void insertIndividualIntoPoblation(List<Individual> generation, Individual new_individual) {
 		boolean exist = false;
 
-		// this cicle finish until the new individual will be different
+		// this cycle finish until the new individual will be different
 		do {
 			exist = false;
 			// identify if the new individual is already in the generation
@@ -315,7 +313,7 @@ public class GeneticAlgorithm  extends RecursiveAction{
 					break;
 				}
 			}
-			// if exist is neccesary mutate
+			// if exist is necessary mutate
 			if (exist) {
 				new_individual = mutate(new_individual, 1);// mutation_probability = 1
 			} else {
@@ -419,6 +417,5 @@ public class GeneticAlgorithm  extends RecursiveAction{
 			return Integer.compare(qap.evalSolution(i1.getGenes()), qap.evalSolution(i2.getGenes()));
 		}
 	};
-
 
 }
