@@ -36,8 +36,8 @@ public class ExtremalOptimization extends RecursiveAction {
 	public ExtremalOptimization(QAPData qapData, int seed) {
 		super();
 		this.random = new Random(seed);
-		
-		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getTarget());
+
+		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getBKS());
 		n = qap.getSize();
 	}
 
@@ -90,17 +90,21 @@ public class ExtremalOptimization extends RecursiveAction {
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
-		while (time - start < MainActivity.getExecutionTime() && bestCost != qap.getTarget()) {
+		while (time - start < MainActivity.getExecutionTime() && bestCost != qap.getBKS()) {
 
 			for (int i = 0; i < n; i++) {
-				int bestMove = 0;
+				int bestMove = -1;
 				bestDelta = negative_infinity;
 
 				for (int j = 0; j < n; j++) {
 					if (i == j) {
 						continue;
 					}
-					tempDelta = qap.evalMovement(currentSolution, i, j);
+					if (j > i) {
+						tempDelta = qap.evalMovement(currentSolution, i, j);
+					} else {
+						tempDelta = qap.evalMovement(currentSolution, j, i);
+					}
 
 					// if improve
 					if (tempDelta > bestDelta) {
@@ -116,34 +120,41 @@ public class ExtremalOptimization extends RecursiveAction {
 			}
 
 			Collections.sort(deltaList, compareByCost);
+			//printDeltas(deltaList);
+
 			Delta delta = deltaList.get(pdfPick()); // pdf pick gets the index recommended
 
 			// always update the current solution and its cost
 			currentSolution = qap.makeSwap(currentSolution, delta.index, delta.bestMove);
-			currentCost = currentCost - delta.cost;
+			currentCost -= delta.cost;
 			qap.updateDeltas(currentSolution, delta.index, delta.bestMove);
 
 			// update the best solution found if is the best of the moment at the end this
 			// block help to save the best of the best
+			// System.out.println("best: " + bestCost);
+			// System.out.println("curr: " + currentCost );
+			//System.out.println("delta: " + delta.cost + "\n");
+
 			if (currentCost < bestCost) {
 				solution = Arrays.copyOf(currentSolution, n);
 				bestCost = currentCost;
-				
-				//if the new solution is the bks the MainActivity should be know
-				if (bestCost == qap.getTarget()) {
+
+				// if the new solution is the bks the MainActivity should be know
+				if (bestCost == qap.getBKS()) {
 					MainActivity.findBKS();
 				}
-				
+
 			}
 
 			// currentIteration++;
 			deltaList.clear();// delete delta moves
-			time = System.currentTimeMillis();
+			time = System.currentTimeMillis();	
 
 		}
-		// System.out.println("EO : " + currentIteration);
-		//System.out.println("Fin EO");
 
+		MainActivity.listCost.get(2).add(bestCost);
+		//System.out.println("bestCost: " + bestCost);
+		//System.out.println("solution: " + qap.evalSolution(solution) + "\n");
 	}
 
 	public int[] solve(int[] initSolution, int[] params, QAPData qap) {

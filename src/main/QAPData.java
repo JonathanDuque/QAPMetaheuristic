@@ -4,16 +4,15 @@ public class QAPData implements Cloneable {
 
 	final private int[][] flow, distance, delta;
 	final private int size;
-	final private int target;
-	
+	final private int bks;
 
 	// constructor for init data
-	public QAPData(int[][] distance, int[][] flow, int target) {
+	public QAPData(int[][] distance, int[][] flow, int bks) {
 		this.distance = distance;
 		this.flow = flow;
 		size = distance.length;
 		delta = new int[size][size];
-		this.target = target;
+		this.bks = bks;
 	}
 
 	public int[][] getFlow() {
@@ -23,9 +22,9 @@ public class QAPData implements Cloneable {
 	public int[][] getDistance() {
 		return distance;
 	}
-	
-	public int getTarget() {
-		return target;
+
+	public int getBKS() {
+		return bks;
 	}
 
 	public int getDistanceBetween(int location1, int location2) {
@@ -53,15 +52,15 @@ public class QAPData implements Cloneable {
 		// s[2] = location of facility 2
 
 		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
+			for (int j = i + 1; j < size; j++) {
 				// current_cost = current_cost + flow[i][j] * distance[s[i]][s[j]];
-				if (i < j) {
-					delta[i][j] = compute_delta(s, i, j);
-				}
+				// if (i < j) {
+				delta[i][j] = compute_delta(s, i, j);
+				// }
 			}
 		}
 
-		// Tools.printMatrix(delta, "Init Deltas");
+		//Tools.printMatrix(delta, "Init Deltas");
 
 	}
 
@@ -101,16 +100,22 @@ public class QAPData implements Cloneable {
 
 	// article A novel multistart hyper-heuristic algorithm on the grid for the
 	// quadratic assignment problem
-	public int evalMovement(int[] solution, int f1, int f2) {
+	public int evalMovement(int[] solution, int i, int j) {
 
-		/*
-		 * int delta = 0; for (int k = 0; k < size; k++) { if (k != f1 && k != f2) {
-		 * delta = delta + (flow[f2][k] - flow[f1][k])*
-		 * (distance[solution[f2]][solution[k]] - distance[solution[f1]][solution[k]]);
-		 * } }
-		 */
+		//int delta2 = 0;
+				/*(flow[j][j] - flow[i][i]) * (distance[solution[j]][solution[j]] - distance[solution[i]][solution[i]])
+		+ (flow[j][i] - flow[i][j]) * (distance[solution[j]][solution[i]] - distance[solution[i]][solution[j]]);*/
+		
+		/*for (int k = 0; k < size; k++) {
+			if (k != i && k != j) {
+				delta2 = delta2 + (flow[j][k] - flow[i][k])
+						* (distance[solution[j]][solution[k]] - distance[solution[i]][solution[k]]);
+			}
+		}*/
 
-		return delta[f1][f2];
+		//System.out.println(mh + " real  : " + delta2*2  + " matriz  " + delta[i][j]);
+
+		return delta[i][j];
 	}
 
 	public void updateDeltas(int[] s, int i_selected, int j_selected) {

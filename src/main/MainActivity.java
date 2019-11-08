@@ -1,5 +1,7 @@
 package main;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +19,7 @@ public class MainActivity {
 	private static QAPData qap;
 	private static final int execution_time = 1000;
 	private static boolean no_find_BKS = true;
-	// static List <Integer> listCost = new ArrayList<>();
+	static List<List<Integer>> listCost = new ArrayList<>(4);// 4 mh
 
 	public static void main(String[] args) {
 		final String problem = "tai100a.qap";// args[0];
@@ -56,8 +58,15 @@ public class MainActivity {
 		int[] paramsGA = new int[3];
 		boolean sequential = false;
 
-		// listCost.add(qap.evalSolution((generation.get(0).get(0).getSolution())));
-
+		for (int i=0; i<4; i++){
+			int initCost = qap.evalSolution((generation.get(i).get(0).getSolution()));
+			//System.out.println(""+initCost);
+			List<Integer> cost_by_mh = new ArrayList<>();
+			cost_by_mh.add(initCost);
+			listCost.add(cost_by_mh);
+		}
+		
+		
 		while (count_generations < generations && no_find_BKS) {
 
 			MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch(qap, random.nextInt());
@@ -149,7 +158,9 @@ public class MainActivity {
 				int[] s_GA = geneticAlgorithmResult.getBestIndividual().getGenes();
 				Chromosome newChromosomeGA = new Chromosome(s_GA, paramsGA, qap_size);
 				insertIndividual(generation.get(GA), newChromosomeGA);
-				if (geneticAlgorithmResult.getBestFitness() == qap.getTarget()) {
+				listCost.get(GA).add(geneticAlgorithmResult.getBestFitness());
+
+				if (geneticAlgorithmResult.getBestFitness() == qap.getBKS()) {
 					findBKS();
 				}
 
@@ -179,6 +190,40 @@ public class MainActivity {
 			}
 
 			printMetaheuristic(i, listChromosomes.get(c).getSolution(), best, listChromosomes.get(c).getParams(), df2);
+		}
+
+		
+		FileWriter fileWriter;
+		try {
+			fileWriter = new FileWriter("results.csv");
+			fileWriter.append("Generation");
+			fileWriter.append(";");
+			fileWriter.append("MultiStart LocalSearch");
+			fileWriter.append(";");
+			fileWriter.append("Robust TabuSearch ");
+			fileWriter.append(";");
+			fileWriter.append("Extremal Optimization");
+			fileWriter.append(";");
+			fileWriter.append("Genetic Algorithm");
+			fileWriter.append("\n");
+
+			for (int i = 0; i <= count_generations; i++) {
+				fileWriter.append(Integer.toString(i));
+				fileWriter.append(";");
+				fileWriter.append(Integer.toString(listCost.get(MTLS).get(i)));
+				fileWriter.append(";");
+				fileWriter.append(Integer.toString(listCost.get(ROTS).get(i)));
+				fileWriter.append(";");
+				fileWriter.append(Integer.toString(listCost.get(EO).get(i)));
+				fileWriter.append(";");
+				fileWriter.append(Integer.toString(listCost.get(GA).get(i)));
+				fileWriter.append("\n");
+			}
+
+			fileWriter.flush();
+			fileWriter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 	}
@@ -361,7 +406,7 @@ public class MainActivity {
 				worst = i;
 			}
 		}
-		
+
 		g.remove(worst);
 		g.add(new_individual);
 	}
@@ -386,12 +431,10 @@ public class MainActivity {
 		int[] array1 = individual1.getSolution();
 		int[] array2 = individual2.getSolution();
 		// check position by position if they are equals
-		/*for (int i = 0; i < qap.getSize(); i++) {
-			if (array1[i] != array2[i]) {
-				return false;
-			}
-		}*/
-		
+		/*
+		 * for (int i = 0; i < qap.getSize(); i++) { if (array1[i] != array2[i]) {
+		 * return false; } }
+		 */
 
 		return Arrays.equals(array1, array2);
 	}
@@ -485,7 +528,7 @@ public class MainActivity {
 			break;
 		}
 
-		double std = cost * 100.0 / qap.getTarget() - 100;
+		double std = cost * 100.0 / qap.getBKS() - 100;
 		System.out.println("Cost: " + cost + " " + df2.format(std) + "%");
 		Tools.printArray(solution);
 		System.out.println("Params " + params_text);

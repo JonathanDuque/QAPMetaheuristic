@@ -25,7 +25,7 @@ public class GeneticAlgorithm extends RecursiveAction {
 		super();
 		this.random = new Random(seed);
 
-		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getTarget());
+		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getBKS());
 		n = qap.getSize();
 	}
 
@@ -82,6 +82,7 @@ public class GeneticAlgorithm extends RecursiveAction {
 		// printPopulation(new_generation);
 		// save the results
 		results = populationResults(new_generation, pop_size);
+
 		// System.out.println("GA : " + count_generations);
 		// System.out.println("Fin GA");
 	}

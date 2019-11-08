@@ -21,7 +21,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 		super();
 		this.random = new Random(seed);
 
-		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(),qapData.getTarget());
+		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(),qapData.getBKS());
 		n = qap.getSize();
 
 	}
@@ -59,7 +59,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 		final int execution_time = MainActivity.getExecutionTime();
 
 		// here find the best solution from the initSolution
-		while (time - start < execution_time  && bestCost != qap.getTarget()) { // execution during 10 milliseconds = 0.01 seconds
+		while (time - start < execution_time  && bestCost != qap.getBKS()) { // execution during 10 milliseconds = 0.01 seconds
 			improve = false;
 			bestDelta = 0;
 
@@ -86,7 +86,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 					bestCost = cost;
 					solution = Arrays.copyOf(currentSolution, n);
 					//if the new solution is the bks the MainActivity should be know
-					if (bestCost == qap.getTarget()) {
+					if (bestCost == qap.getBKS()) {
 						MainActivity.findBKS();
 					}
 				}
@@ -113,7 +113,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 
 		}
 		
-		//MainActivity.listCost.add(bestCost);
+		MainActivity.listCost.get(0).add(bestCost);
 		// qap.showData();
 		//System.out.println("MSLS : " + currentIteration + " time: " + (time - start));
 		// System.out.println("Fin MTLS");

@@ -26,7 +26,7 @@ public class RobustTabuSearch extends RecursiveAction {
 		super();
 		this.random = new Random(seed);
 
-		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getTarget());
+		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getBKS());
 		n = qap.getSize();
 	}
 
@@ -68,7 +68,7 @@ public class RobustTabuSearch extends RecursiveAction {
 		final long start = System.currentTimeMillis();
 		long time = 0;
 		// this while find the best solution during totalIterations or until BKS will be found
-		while (time - start < MainActivity.getExecutionTime() && bestCost != qap.getTarget()) {
+		while (time - start < MainActivity.getExecutionTime() && bestCost != qap.getBKS()) {
 
 			bestNeighbor = getBestNeighbor(currentSolution, currentIteration, bestCost);
 			bestNeighborCost = qap.evalSolution(bestNeighbor);
@@ -82,7 +82,7 @@ public class RobustTabuSearch extends RecursiveAction {
 				// bestFoundCounter = currentIteration;
 				
 				//if the new solution is the bks the MainActivity should be know
-				if (bestCost == qap.getTarget()) {
+				if (bestCost == qap.getBKS()) {
 					MainActivity.findBKS();
 				}
 			}
@@ -92,8 +92,12 @@ public class RobustTabuSearch extends RecursiveAction {
 			currentIteration++;
 			time = System.currentTimeMillis();
 		}
+		
+		MainActivity.listCost.get(1).add(bestCost);
 
 		//System.out.println("Fin ROTS");
+		//System.out.println("ROTS : " + bestCost);
+		//System.out.println("ROTS2 : " + qap.evalSolution(solution));
 	}
 
 	public int[] solve(int[] initSolution, int[] params, QAPData qapData) {
