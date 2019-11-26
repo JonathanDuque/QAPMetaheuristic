@@ -22,8 +22,8 @@ public class MainActivity {
 	static List<List<Integer>> listCost = new ArrayList<>(4);// 4 mh
 
 	public static void main(String[] args) {
-		final String problem = "tai100a.qap";// args[0];
-		System.out.println("\nProblem: " + problem);
+		final String problem = args[0]; // "bur26a.qap";
+		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
 		final ReadFile readFile = new ReadFile("Data/" + problem);
 		final long start = System.currentTimeMillis();
 
