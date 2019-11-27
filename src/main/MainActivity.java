@@ -24,7 +24,14 @@ public class MainActivity {
 	private static List<Solution> diverse_population;
 
 	public static void main(String[] args) {
-		final String problem = "tai35a.qap";
+		final int workers = 4;// Integer.parseInt(args[1]);
+		if ((workers % 4) != 0) {
+			System.out.println(
+					"\n***************** Is necessary workes multiple of 4     ********************************");
+			return;
+		}
+
+		final String problem = "chr12a.qap";
 		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
 		final ReadFile readFile = new ReadFile("Data/" + problem);
 		final long start = System.currentTimeMillis();
@@ -36,9 +43,12 @@ public class MainActivity {
 		random = new Random(1);
 
 		// int numberOfProcessors = Runtime.getRuntime().availableProcessors();
+		// System.out.println("Processors : " + numberOfProcessors );
+
 		ForkJoinPool pool = new ForkJoinPool(4);
 
-		final int number_by_mh = 4;
+		final int total_by_mh = workers / 4;
+		final int number_by_mh = 2 * total_by_mh;
 		final Constructive constructive = new Constructive();
 		List<List<Params>> paramsPopulation = generateInitialPopulation(number_by_mh, constructive);
 
@@ -73,12 +83,25 @@ public class MainActivity {
 		// System.out.println("\n");
 		// printPopulation(diverse_population);
 
+		List<MultiStartLocalSearch> list_mtls = new ArrayList<>();
+		List<RobustTabuSearch> list_rots = new ArrayList<>();
+		List<ExtremalOptimization> list_eo = new ArrayList<>();
+		List<GeneticAlgorithm> list_ga = new ArrayList<>();
+		DecimalFormat df2 = new DecimalFormat("#.##");
+
 		while (count_generations < generations && no_find_BKS) {
 
-			MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
-			RobustTabuSearch rots = new RobustTabuSearch(qap, random.nextInt());
-			ExtremalOptimization eo = new ExtremalOptimization(qap, random.nextInt());
-			GeneticAlgorithm ga = new GeneticAlgorithm(qap, random.nextInt());
+			for (int i = 0; i < total_by_mh; i += 1) {
+				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt(), i);
+				RobustTabuSearch rots = new RobustTabuSearch(qap, random.nextInt());
+				ExtremalOptimization eo = new ExtremalOptimization(qap, random.nextInt());
+				GeneticAlgorithm ga = new GeneticAlgorithm(qap, random.nextInt());
+
+				list_mtls.add(mtls);
+				list_rots.add(rots);
+				list_eo.add(eo);
+				list_ga.add(ga);
+			}
 
 			// System.out.println( count_generations );
 			List<Params> list_params_MTLS = new ArrayList<>(paramsPopulation.get(MTLS));
@@ -86,82 +109,101 @@ public class MainActivity {
 			List<Params> list_params_EO = new ArrayList<>(paramsPopulation.get(EO));
 			List<Params> list_params_GA = new ArrayList<>(paramsPopulation.get(GA));
 
-			c_MTLS_1 = selectIndividual(list_params_MTLS);
-			c_MTLS_2 = selectIndividual(list_params_MTLS);
+			for (int i = 0; i < total_by_mh; i += 1) {
+				c_MTLS_1 = selectIndividual(list_params_MTLS);
+				c_MTLS_2 = selectIndividual(list_params_MTLS);
 
-			c_ROTS_1 = selectIndividual(list_params_ROST);
-			c_ROTS_2 = selectIndividual(list_params_ROST);
+				c_ROTS_1 = selectIndividual(list_params_ROST);
+				c_ROTS_2 = selectIndividual(list_params_ROST);
 
-			c_EO_1 = selectIndividual(list_params_EO);
-			c_EO_2 = selectIndividual(list_params_EO);
+				c_EO_1 = selectIndividual(list_params_EO);
+				c_EO_2 = selectIndividual(list_params_EO);
 
-			c_GA_1 = selectIndividual(list_params_GA);
-			c_GA_2 = selectIndividual(list_params_GA);
+				c_GA_1 = selectIndividual(list_params_GA);
+				c_GA_2 = selectIndividual(list_params_GA);
 
-			// crossover and mutation
-			paramsMTLS = crossover(c_MTLS_1.getParams(), c_MTLS_2.getParams(), MTLS); // crossover depending of method
-			paramsMTLS = mutate(paramsMTLS, MTLS, 0.5);
+				// crossover and mutation
+				paramsMTLS = crossover(c_MTLS_1.getParams(), c_MTLS_2.getParams(), MTLS); // crossover depending of
+																							// method
+				paramsMTLS = mutate(paramsMTLS, MTLS, 0.5);
 
-			paramsROTS = crossover(c_ROTS_1.getParams(), c_ROTS_2.getParams(), ROTS); // crossover depending of method
-			paramsROTS = mutate(paramsROTS, ROTS, 0.5);
+				paramsROTS = crossover(c_ROTS_1.getParams(), c_ROTS_2.getParams(), ROTS); // crossover depending of
+																							// method
+				paramsROTS = mutate(paramsROTS, ROTS, 0.5);
 
-			paramsEO = crossover(c_EO_1.getParams(), c_EO_2.getParams(), EO); // crossover depending of method
-			paramsEO = mutate(paramsEO, EO, 0.5);
+				paramsEO = crossover(c_EO_1.getParams(), c_EO_2.getParams(), EO); // crossover depending of method
+				paramsEO = mutate(paramsEO, EO, 0.5);
 
-			paramsGA = crossover(c_GA_1.getParams(), c_GA_2.getParams(), GA); // crossover depending of method
-			paramsGA = mutate(paramsGA, GA, 0.5);
+				paramsGA = crossover(c_GA_1.getParams(), c_GA_2.getParams(), GA); // crossover depending of method
+				paramsGA = mutate(paramsGA, GA, 0.5);
 
-			// printValues(generation);
+				// printValues(generation);
 
-			// setting variables for each method
-			ga.setEnvironment(paramsGA, elite_population); // GA environment is necessary make the first
-			mtls.setEnvironment(getSolution(diverse_population), paramsMTLS);
-			rots.setEnvironment(getSolution(diverse_population), paramsROTS);
-			eo.setEnvironment(getSolution(diverse_population), paramsEO);
-
-			// execution in parallel
-			pool.submit(mtls);
-			pool.submit(rots);
-			pool.submit(eo);
-			pool.submit(ga);
-
-			mtls.join();
-			rots.join();
-			eo.join();
-			ga.join();
-
-			// insert new parameters individual into generation
-			insertIndividual(paramsPopulation.get(MTLS), new Params(paramsMTLS, mtls.getBestCost()), MTLS);
-			insertSolution(mtls.getSolution());
-
-			insertIndividual(paramsPopulation.get(ROTS), new Params(paramsROTS, rots.getBestCost()), ROTS);
-			insertSolution(rots.getSolution());
-
-			insertIndividual(paramsPopulation.get(EO), new Params(paramsEO, eo.getBestCost()), EO);
-			insertSolution(eo.getSolution());
-
-			Results geneticAlgorithmResult = ga.getResults();
-			int[] s_GA = geneticAlgorithmResult.getBestIndividual().getGenes();
-			insertIndividual(paramsPopulation.get(GA), new Params(paramsGA, geneticAlgorithmResult.getBestFitness()),
-					GA);
-			insertSolution(s_GA);
-
-			diverse_population.clear();
-			diverse_population = ga.getFinalPopulation();
-
-			// listCost.get(GA).add(geneticAlgorithmResult.getBestFitness());
-
-			if (geneticAlgorithmResult.getBestFitness() == qap.getBKS()) {
-				findBKS();
+				// setting variables for each method
+				list_ga.get(i).setEnvironment(paramsGA, elite_population); // GA environment is necessary make the first
+				list_mtls.get(i).setEnvironment(getSolution(diverse_population), paramsMTLS);
+				list_rots.get(i).setEnvironment(getSolution(diverse_population), paramsROTS);
+				list_eo.get(i).setEnvironment(getSolution(diverse_population), paramsEO);
 			}
+
+			// launch execution in parallel
+			for (int i = 0; i < total_by_mh; i += 1) {
+				pool.submit(list_mtls.get(i));
+				pool.submit(list_rots.get(i));
+				pool.submit(list_eo.get(i));
+				pool.submit(list_ga.get(i));
+			}
+
+			// wait for each method
+			for (int i = 0; i < total_by_mh; i += 1) {
+				list_mtls.get(i).join();
+				list_rots.get(i).join();
+				list_eo.get(i).join();
+				list_ga.get(i).join();
+			}
+
+			for (int i = 0; i < total_by_mh; i += 1) {
+				// insert new parameters individual into generation
+				insertIndividual(paramsPopulation.get(MTLS), new Params(paramsMTLS, list_mtls.get(i).getBestCost()),
+						MTLS);
+				insertSolution(list_mtls.get(i).getSolution());
+
+				insertIndividual(paramsPopulation.get(ROTS), new Params(paramsROTS, list_rots.get(i).getBestCost()),
+						ROTS);
+				insertSolution(list_rots.get(i).getSolution());
+
+				insertIndividual(paramsPopulation.get(EO), new Params(paramsEO, list_eo.get(i).getBestCost()), EO);
+				insertSolution(list_eo.get(i).getSolution());
+
+				Results geneticAlgorithmResult = list_ga.get(i).getResults();
+				int[] s_GA = geneticAlgorithmResult.getBestIndividual().getGenes();
+				insertIndividual(paramsPopulation.get(GA),
+						new Params(paramsGA, geneticAlgorithmResult.getBestFitness()), GA);
+				insertSolution(s_GA);
+
+				// listCost.get(GA).add(geneticAlgorithmResult.getBestFitness());
+
+				if (geneticAlgorithmResult.getBestFitness() == qap.getBKS()) {
+					findBKS();
+				}
+
+			}
+			
+			diverse_population.clear();
+			int ga_population = random.nextInt(total_by_mh);
+			diverse_population = list_ga.get(ga_population).getFinalPopulation();
 
 			count_generations++;
 
-			/*
-			 * System.out.println("Elite"); printPopulation(elite_population);
-			 * System.out.println("Diverse"); printPopulation(diverse_population);
-			 */
+			//System.out.println("Elite");
+			//printPopulation(elite_population, df2);
+			//System.out.println("Diverse");
+			//printPopulation(diverse_population, df2);
 
+			list_mtls.clear();
+			list_rots.clear();
+			list_eo.clear();
+			list_ga.clear();
 		}
 		// printValues(paramsPopulation);
 		/*
@@ -173,33 +215,24 @@ public class MainActivity {
 			// Tools.printArray(listSolution.get(i).getArray());
 		}
 
-		DecimalFormat df2 = new DecimalFormat("#.##");
 		
-		System.out.println("Elite");
-		printPopulation(elite_population, df2);
-		System.out.println("Diverse");
-		printPopulation(diverse_population, df2);
-
-		printTotalTime(start);
-		System.out.println("Generations: " + count_generations);
-		
-
-		for (int i = 0; i < paramsPopulation.size(); i++) {
-			List<Params> listParams = paramsPopulation.get(i);
-			int best = Integer.MAX_VALUE;
-			int c = -1;
-			for (int l = 0; l < listParams.size(); l++) {
-				if (best > listParams.get(l).getScore()) {
-					best = listParams.get(l).getScore();
-					c = l;
-				}
-			}
-
-			printMetaheuristic(i, best, listParams.get(c).getParams(), df2);
-		}
-
-		/*
-		 * FileWriter fileWriter; try { fileWriter = new FileWriter("results.csv");
+		  System.out.println("Elite"); printPopulation(elite_population, df2);
+		  System.out.println("Diverse"); printPopulation(diverse_population, df2);
+		  
+		  printTotalTime(start); System.out.println("Generations: " +
+		  count_generations);
+		  
+		  for (int i = 0; i < paramsPopulation.size(); i++) { List<Params> listParams =
+		  paramsPopulation.get(i); int best = Integer.MAX_VALUE; int c = -1; for (int l
+		  = 0; l < listParams.size(); l++) { if (best > listParams.get(l).getScore()) {
+		  best = listParams.get(l).getScore(); c = l; } }
+		  
+		  printMetaheuristic(i, best, listParams.get(c).getParams(), df2); 
+		  }
+		  
+		  
+		 
+		/* FileWriter fileWriter; try { fileWriter = new FileWriter("results.csv");
 		 * fileWriter.append("Generation"); fileWriter.append(";");
 		 * fileWriter.append("MultiStart LocalSearch"); fileWriter.append(";");
 		 * fileWriter.append("Robust TabuSearch "); fileWriter.append(";");
@@ -265,8 +298,8 @@ public class MainActivity {
 		}
 
 		diverse_population = new ArrayList<>(elite_population);
-		return paramsPopulation;
 
+		return paramsPopulation;
 	}
 
 	public static Params selectIndividual(List<Params> p) {
@@ -567,8 +600,8 @@ public class MainActivity {
 			}
 		}
 
-		//qap.printSolution(best_solution, best_cost);
-		
+		// qap.printSolution(best_solution, best_cost);
+
 		double std = best_cost * 100.0 / qap.getBKS() - 100;
 		System.out.println("Cost: " + best_cost + " " + df2.format(std) + "%");
 		// Tools.printArray(listSolution.get(i).getArray());

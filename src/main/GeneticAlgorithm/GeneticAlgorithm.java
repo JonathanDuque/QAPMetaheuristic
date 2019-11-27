@@ -80,7 +80,7 @@ public class GeneticAlgorithm extends RecursiveAction {
 				//Collections.sort(population, compareByFitness);
 
 			}
-			Collections.sort(population, compareByFitness);
+			//Collections.sort(population, compareByFitness);
 			count_generations++;
 			time = System.currentTimeMillis();
 
