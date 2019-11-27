@@ -8,6 +8,6 @@ public class Solution {
 	}
 
 	public int[] getArray() {
-		return array;
+		return array.clone();
 	}
 }

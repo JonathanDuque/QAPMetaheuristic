@@ -9,6 +9,7 @@ import java.util.concurrent.RecursiveAction;
 
 import main.MainActivity;
 import main.QAPData;
+import main.Solution;
 
 public class GeneticAlgorithm extends RecursiveAction {
 	/**
@@ -20,6 +21,7 @@ public class GeneticAlgorithm extends RecursiveAction {
 	private Results results;
 	private Random random;
 	private int[] params;
+	private List<Individual> population;
 
 	public GeneticAlgorithm(QAPData qapData, int seed) {
 		super();
@@ -30,8 +32,9 @@ public class GeneticAlgorithm extends RecursiveAction {
 	}
 
 	// always before compute function, is necessary set the environment
-	public void setEnvironment(int[] params) {
+	public void setEnvironment(int[] params, List<Solution> diverse_population) {
 		this.params = params.clone();
+		population = getGenerationFromDiversePopulation(diverse_population);
 	}
 
 	@Override
@@ -39,25 +42,26 @@ public class GeneticAlgorithm extends RecursiveAction {
 		// System.out.println("GA");
 		// first the variables necessary for the execution
 		Individual individual1, individual2, bestChild;
-		List<Individual> new_generation = new ArrayList<>();
+		
 		List<Individual> temp_generation = new ArrayList<>();// temporal generation
 		int count_generations = 0;
-		final int pop_size = params[0];
+		 //int pop_size = params[0];
 		final double mutation_probability = params[1] / 1000.0;
 		final boolean crossover_ux = params[2] == 0 ? true : false;
 		// random = new Random(MainActivity.getSeed());
 
 		// creating the first generation
-		new_generation = createFirstGeneration(pop_size);
-		Collections.sort(new_generation, compareByFitness);
-		// System.out.println("\nGeneración inicial");
-		// printPopulation(new_generation);
+		//population = createFirstGeneration(pop_size);
+		Collections.sort(population, compareByFitness);
+		//System.out.println("\nGeneración inicial");
+		//printPopulation(population);
+		final int pop_size = population.size();
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
 		// this cycle finish when complete all generations
 		while (time - start < MainActivity.getExecutionTime()) { // execution during 10 milliseconds = 0.01 seconds
-			temp_generation = new ArrayList<>(new_generation);
+			temp_generation = new ArrayList<>(population);
 
 			for (int i = 0; i < pop_size / 2; i++) {
 
@@ -65,15 +69,15 @@ public class GeneticAlgorithm extends RecursiveAction {
 				individual2 = selectIndividual(temp_generation);
 				bestChild = getBestOffspring(individual1, individual2, mutation_probability, crossover_ux);
 
-				new_generation.remove(pop_size - 1);// delete the last one
+				population.remove(pop_size - 1);// delete the last one
 				// insert the best child and sure that is different, if not mutate until will be
-				insertIndividualIntoPoblation(new_generation, bestChild);
+				insertIndividualIntoPoblation(population, bestChild);
 
 				// order the population by fitness
-				Collections.sort(new_generation, compareByFitness);
+				Collections.sort(population, compareByFitness);
 
 			}
-			Collections.sort(new_generation, compareByFitness);
+			Collections.sort(population, compareByFitness);
 			count_generations++;
 			time = System.currentTimeMillis();
 
@@ -81,7 +85,7 @@ public class GeneticAlgorithm extends RecursiveAction {
 		// System.out.println("\nGeneración final");
 		// printPopulation(new_generation);
 		// save the results
-		results = populationResults(new_generation, pop_size);
+		results = populationResults(population, pop_size);
 
 		// System.out.println("GA : " + count_generations);
 		//System.out.println("Fin GA");
@@ -348,11 +352,33 @@ public class GeneticAlgorithm extends RecursiveAction {
 		return start_generation;
 
 	}
+	
+	private List<Individual> getGenerationFromDiversePopulation(List<Solution> diverse_population) {
+		int pop_size = diverse_population.size();
+		List<Individual> start_generation = new ArrayList<>(pop_size);
+		
+		for (Solution s: diverse_population) {
+			insertIndividualIntoPoblation(start_generation, new Individual(s.getArray()));
+		}
+		
+		return start_generation;
+	}
 
 	private void printPopulation(List<Individual> population) {
 		for (int i = 0; i < population.size(); i++) {
 			population.get(i).printIndividualWithFitness(qap);
 		}
+	}
+	
+	public List<Solution> getFinalPopulation(){
+		int pop_size = population.size();
+		List<Solution> final_population = new ArrayList<>(pop_size);
+		
+		for (Individual i: population) {
+			final_population.add(new Solution(i.getGenes().clone()));
+		}
+		
+		return final_population;	
 	}
 
 	Comparator<Individual> compareByFitness = new Comparator<Individual>() {

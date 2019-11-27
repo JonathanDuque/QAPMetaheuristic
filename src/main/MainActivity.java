@@ -19,8 +19,9 @@ public class MainActivity {
 	private static QAPData qap;
 	private static final int execution_time = 1000;
 	private static boolean no_find_BKS = true;
-	static List<List<Integer>> listCost = new ArrayList<>(4);// 4 mh
-	private static List<Solution> listSolution;
+	//static List<List<Integer>> listCost = new ArrayList<>(4);// 4 mh
+	private static List<Solution> elite_population;
+	private static List<Solution> diverse_population;
 
 	public static void main(String[] args) {
 		final String problem = "tai35a.qap";
@@ -45,7 +46,7 @@ public class MainActivity {
 		// Tools.printArray(listSolution.get(i).getArray());
 		// }
 
-		int generations = 20, count_generations = 0;
+		int generations = 10, count_generations = 0;
 
 		// create parameters for each mh
 		Params c_MTLS_1, c_MTLS_2;
@@ -66,7 +67,12 @@ public class MainActivity {
 		 * ArrayList<>(); cost_by_mh.add(initCost); listCost.add(cost_by_mh); }
 		 */
 
-		// printValues(paramsPopulation);
+		//printValues(paramsPopulation);
+		
+		printPopulation(elite_population);
+		System.out.println("\n");
+		printPopulation(diverse_population);
+		
 		while (count_generations < generations && no_find_BKS) {
 
 			MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
@@ -108,11 +114,11 @@ public class MainActivity {
 			// printValues(generation);
 
 			// setting variables for each method
-			mtls.setEnvironment(getSolution(), paramsMTLS);
-			rots.setEnvironment(getSolution(), paramsROTS);
-			eo.setEnvironment(getSolution(), paramsEO);
-			ga.setEnvironment(paramsGA);
-
+			ga.setEnvironment(paramsGA, elite_population); //GA environment is necessary make the first 
+			mtls.setEnvironment(getSolution(diverse_population), paramsMTLS);
+			rots.setEnvironment(getSolution(diverse_population), paramsROTS);
+			eo.setEnvironment(getSolution(diverse_population), paramsEO);
+			
 			// for (int i=0; i<listSolution.size(); i++) {
 			// Tools.printArray(listSolution.get(i).getArray());
 			// }
@@ -144,8 +150,12 @@ public class MainActivity {
 
 			Results geneticAlgorithmResult = ga.getResults();
 			int[] s_GA = geneticAlgorithmResult.getBestIndividual().getGenes();
-			insertIndividual(paramsPopulation.get(GA), new Params(paramsGA, geneticAlgorithmResult.getBestFitness()),
-					GA);
+			insertIndividual(paramsPopulation.get(GA), new Params(paramsGA, geneticAlgorithmResult.getBestFitness()), GA);
+			insertSolution(s_GA);
+			
+			diverse_population.clear();
+			diverse_population = ga.getFinalPopulation();
+			
 			// listCost.get(GA).add(geneticAlgorithmResult.getBestFitness());
 
 			if (geneticAlgorithmResult.getBestFitness() == qap.getBKS()) {
@@ -153,6 +163,9 @@ public class MainActivity {
 			}
 
 			count_generations++;
+			//printPopulation(elite_population);
+			//System.out.println("\n");
+			//printPopulation(diverse_population);
 
 		}
 		// printValues(paramsPopulation);
@@ -160,8 +173,8 @@ public class MainActivity {
 		 * for (int i = 0; i < listCost.size(); i++) { System.out.println( (i)+": " +
 		 * listCost.get(i)); }
 		 */
-		for (int i = 0; i < listSolution.size(); i++) {
-			qap.printSolution(listSolution.get(i).getArray());
+		for (int i = 0; i > elite_population.size(); i++) {
+			qap.printSolution(elite_population.get(i).getArray());
 			// Tools.printArray(listSolution.get(i).getArray());
 		}
 
@@ -209,7 +222,7 @@ public class MainActivity {
 	}
 
 	public static List<List<Params>> generateInitialPopulation(int number_by_mh, Constructive constructive) {
-		listSolution = new ArrayList<>();
+		elite_population = new ArrayList<>();
 
 		List<List<Params>> paramsPopulation = new ArrayList<>(4); // because there are 4 different mh
 
@@ -243,12 +256,13 @@ public class MainActivity {
 					break;
 				}
 				tempList.add(new Params(p, Integer.MAX_VALUE));
-				listSolution.add(new Solution(s));
+				elite_population.add(new Solution(s));
 			}
 
 			paramsPopulation.add(tempList);
 		}
 
+		diverse_population = new ArrayList<>(elite_population);
 		return paramsPopulation;
 
 	}
@@ -264,11 +278,11 @@ public class MainActivity {
 		return selected;
 	}
 
-	public static int[] getSolution() {
+	public static int[] getSolution(List <Solution> p) {
 		Solution selected_solution;
-		int index = random.nextInt(listSolution.size());
-		selected_solution = listSolution.get(index);
-		listSolution.remove(index);// delete for no selecting later
+		int index = random.nextInt(p.size());
+		selected_solution = p.get(index);
+		p.remove(index);// delete for no selecting later
 		// System.out.println("selected : " + index);
 
 		return selected_solution.getArray();
@@ -451,7 +465,7 @@ public class MainActivity {
 				System.out.println(i);
 				for (int l = 0; l < listChromosomes.size(); l++) {
 					Tools.printArray(listChromosomes.get(l).getParams());
-					System.out.println("costo " + listChromosomes.get(l).getScore());
+					//System.out.println("costo " + listChromosomes.get(l).getScore());
 				}
 			}
 		}
@@ -504,13 +518,13 @@ public class MainActivity {
 
 	}
 
-	public static void insertSolution(int[] s) {
+	public static void insertSolution(int[] s ) {
 		boolean exist;
 		// this cycle finish until the new solution will be different
 		do {
 			exist = false;
 			// identify if the new solution is already in the population
-			for (Solution temp : listSolution) {
+			for (Solution temp : elite_population) {
 				if (Arrays.equals(temp.getArray(), s)) {
 					exist = true;
 					break;
@@ -519,10 +533,29 @@ public class MainActivity {
 			// if exist is necessary mutate
 			if (exist) {
 				s = mutate(s);
-			} else {
-				listSolution.add(new Solution(s));
-			}
+			} 
 
 		} while (exist);
+		
+		int worst=-1, temp_cost;
+		int cost = Integer.MIN_VALUE;
+		
+		for (int i = 0; i < elite_population.size(); i++) {
+			temp_cost = qap.evalSolution(elite_population.get(i).getArray());
+			if (temp_cost > cost) {
+				cost = temp_cost;
+				worst = i;
+			}
+		}
+
+		elite_population.remove(worst);
+		elite_population.add(new Solution(s));
+	}
+
+	public static void printPopulation(List <Solution> p) {
+		for (int i = 0; i < p.size(); i++) {
+			qap.printSolution(p.get(i).getArray());
+			// Tools.printArray(listSolution.get(i).getArray());
+		}
 	}
 }
