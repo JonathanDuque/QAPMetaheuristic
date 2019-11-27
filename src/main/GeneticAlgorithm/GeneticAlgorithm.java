@@ -30,7 +30,7 @@ public class GeneticAlgorithm extends RecursiveAction {
 	}
 
 	// always before compute function, is necessary set the environment
-	public void setEnviroment(int[] params) {
+	public void setEnvironment(int[] params) {
 		this.params = params.clone();
 	}
 

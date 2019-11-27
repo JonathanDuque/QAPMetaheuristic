@@ -28,7 +28,7 @@ public class RobustTabuSearch extends RecursiveAction {
 	}
 
 	// always before compute function, is neccesary set the enviroment
-	public void setEnviroment(int[] initSolution, int[] params) {
+	public void setEnvironment(int[] initSolution, int[] params) {
 		this.params = params.clone();
 		this.initSolution = initSolution.clone();
 	}

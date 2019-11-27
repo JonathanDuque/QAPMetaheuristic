@@ -37,8 +37,7 @@ public class MainActivity {
 		// int numberOfProcessors = Runtime.getRuntime().availableProcessors();
 		ForkJoinPool pool = new ForkJoinPool(4);
 
-		// List<Gene> generation = createFirstGeneration(8);
-		final int number_by_mh = 5;
+		final int number_by_mh = 4;
 		final Constructive constructive = new Constructive();
 		List<List<Params>> paramsPopulation = generateInitialPopulation(number_by_mh, constructive);
 
@@ -47,8 +46,6 @@ public class MainActivity {
 		// }
 
 		int generations = 20, count_generations = 0;
-
-		int[] s = new int[qap_size];
 
 		// create parameters for each mh
 		Params c_MTLS_1, c_MTLS_2;
@@ -72,12 +69,12 @@ public class MainActivity {
 		// printValues(paramsPopulation);
 		while (count_generations < generations && no_find_BKS) {
 
-			MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch(qap, random.nextInt());
-			RobustTabuSearch robustTabuSearch = new RobustTabuSearch(qap, random.nextInt());
-			ExtremalOptimization extremalOptimization = new ExtremalOptimization(qap, random.nextInt());
-			GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(qap, random.nextInt());
+			MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
+			RobustTabuSearch rots = new RobustTabuSearch(qap, random.nextInt());
+			ExtremalOptimization eo = new ExtremalOptimization(qap, random.nextInt());
+			GeneticAlgorithm ga = new GeneticAlgorithm(qap, random.nextInt());
 
-			// System.out.println( count_generations );
+			System.out.println( count_generations );
 			List<Params> list_params_MTLS = new ArrayList<>(paramsPopulation.get(MTLS));
 			List<Params> list_params_ROST = new ArrayList<>(paramsPopulation.get(ROTS));
 			List<Params> list_params_EO = new ArrayList<>(paramsPopulation.get(EO));
@@ -111,50 +108,42 @@ public class MainActivity {
 			// printValues(generation);
 
 			// setting variables for each method
-			mutiStartLocalSearch.setEnviroment(getSolution(), paramsMTLS);
-			robustTabuSearch.setEnviroment(getSolution(), paramsROTS);
-			extremalOptimization.setEnviroment(getSolution(), paramsEO);
-			geneticAlgorithm.setEnviroment(paramsGA);
+			mtls.setEnvironment(getSolution(), paramsMTLS);
+			rots.setEnvironment(getSolution(), paramsROTS);
+			eo.setEnvironment(getSolution(), paramsEO);
+			ga.setEnvironment(paramsGA);
 
 			// for (int i=0; i<listSolution.size(); i++) {
 			// Tools.printArray(listSolution.get(i).getArray());
 			// }
 
 			// execution in parallel
-			pool.submit(mutiStartLocalSearch);
-			pool.submit(robustTabuSearch);
-			pool.submit(extremalOptimization);
-			pool.submit(geneticAlgorithm);
+			pool.submit(mtls);
+			pool.submit(rots);
+			pool.submit(eo);
+			pool.submit(ga);
 
-			mutiStartLocalSearch.join();
-			robustTabuSearch.join();
-			extremalOptimization.join();
-			geneticAlgorithm.join();
+			mtls.join();
+			rots.join();
+			eo.join();
+			ga.join();
 
 			// insert new parameters individual into generation
-			// Chromosome newChromosomeMTLS = new
-			// Chromosome(mutiStartLocalSearch.getSolution(), paramsMTLS, qap_size);
-			insertIndividual(paramsPopulation.get(MTLS), new Params(paramsMTLS, mutiStartLocalSearch.getBestCost()),
-					MTLS);
-			insertSolution(mutiStartLocalSearch.getSolution());
+			insertIndividual(paramsPopulation.get(MTLS), new Params(paramsMTLS, mtls.getBestCost()), MTLS);
+			insertSolution(mtls.getSolution());
 
-			// Chromosome newChromosomeROTS = new Chromosome(robustTabuSearch.getSolution(),
-			// paramsROTS, qap_size);
-			insertIndividual(paramsPopulation.get(ROTS), new Params(paramsROTS, robustTabuSearch.getBestCost()), ROTS);
-			insertSolution(robustTabuSearch.getSolution());
+			insertIndividual(paramsPopulation.get(ROTS), new Params(paramsROTS, rots.getBestCost()), ROTS);
+			insertSolution(rots.getSolution());
 
-			// Chromosome newChromosomeEO = new
-			// Chromosome(extremalOptimization.getSolution(), paramsEO, qap_size);
-			insertIndividual(paramsPopulation.get(EO), new Params(paramsEO, extremalOptimization.getBestCost()), EO);
-			insertSolution(extremalOptimization.getSolution());
+			insertIndividual(paramsPopulation.get(EO), new Params(paramsEO, eo.getBestCost()), EO);
+			insertSolution(eo.getSolution());
 
 			// for (int i=0; i<listSolution.size(); i++) {
 			// Tools.printArray(listSolution.get(i).getArray());
 			// }
 
-			Results geneticAlgorithmResult = geneticAlgorithm.getResults();
+			Results geneticAlgorithmResult = ga.getResults();
 			int[] s_GA = geneticAlgorithmResult.getBestIndividual().getGenes();
-			// Chromosome newChromosomeGA = new Chromosome(s_GA, paramsGA, qap_size);
 			insertIndividual(paramsPopulation.get(GA), new Params(paramsGA, geneticAlgorithmResult.getBestFitness()),
 					GA);
 			// listCost.get(GA).add(geneticAlgorithmResult.getBestFitness());
