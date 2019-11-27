@@ -52,7 +52,7 @@ public class GeneticAlgorithm extends RecursiveAction {
 
 		// creating the first generation
 		//population = createFirstGeneration(pop_size);
-		Collections.sort(population, compareByFitness);
+		//Collections.sort(population, compareByFitness);
 		//System.out.println("\nGeneración inicial");
 		//printPopulation(population);
 		final int pop_size = population.size();
@@ -69,12 +69,15 @@ public class GeneticAlgorithm extends RecursiveAction {
 				individual2 = selectIndividual(temp_generation);
 				bestChild = getBestOffspring(individual1, individual2, mutation_probability, crossover_ux);
 
-				population.remove(pop_size - 1);// delete the last one
+				//population.remove(pop_size - 1);// delete the last one
+				
+				population.remove(random.nextInt(pop_size));//delete whatever individual
+				
 				// insert the best child and sure that is different, if not mutate until will be
 				insertIndividualIntoPoblation(population, bestChild);
 
 				// order the population by fitness
-				Collections.sort(population, compareByFitness);
+				//Collections.sort(population, compareByFitness);
 
 			}
 			Collections.sort(population, compareByFitness);

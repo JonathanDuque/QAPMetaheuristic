@@ -19,7 +19,7 @@ public class MainActivity {
 	private static QAPData qap;
 	private static final int execution_time = 1000;
 	private static boolean no_find_BKS = true;
-	//static List<List<Integer>> listCost = new ArrayList<>(4);// 4 mh
+	// static List<List<Integer>> listCost = new ArrayList<>(4);// 4 mh
 	private static List<Solution> elite_population;
 	private static List<Solution> diverse_population;
 
@@ -46,7 +46,7 @@ public class MainActivity {
 		// Tools.printArray(listSolution.get(i).getArray());
 		// }
 
-		int generations = 10, count_generations = 0;
+		int generations = 20, count_generations = 0;
 
 		// create parameters for each mh
 		Params c_MTLS_1, c_MTLS_2;
@@ -67,12 +67,12 @@ public class MainActivity {
 		 * ArrayList<>(); cost_by_mh.add(initCost); listCost.add(cost_by_mh); }
 		 */
 
-		//printValues(paramsPopulation);
-		
-		printPopulation(elite_population);
-		System.out.println("\n");
-		printPopulation(diverse_population);
-		
+		// printValues(paramsPopulation);
+
+		// printPopulation(elite_population);
+		// System.out.println("\n");
+		// printPopulation(diverse_population);
+
 		while (count_generations < generations && no_find_BKS) {
 
 			MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
@@ -80,7 +80,7 @@ public class MainActivity {
 			ExtremalOptimization eo = new ExtremalOptimization(qap, random.nextInt());
 			GeneticAlgorithm ga = new GeneticAlgorithm(qap, random.nextInt());
 
-			System.out.println( count_generations );
+			// System.out.println( count_generations );
 			List<Params> list_params_MTLS = new ArrayList<>(paramsPopulation.get(MTLS));
 			List<Params> list_params_ROST = new ArrayList<>(paramsPopulation.get(ROTS));
 			List<Params> list_params_EO = new ArrayList<>(paramsPopulation.get(EO));
@@ -114,14 +114,10 @@ public class MainActivity {
 			// printValues(generation);
 
 			// setting variables for each method
-			ga.setEnvironment(paramsGA, elite_population); //GA environment is necessary make the first 
+			ga.setEnvironment(paramsGA, elite_population); // GA environment is necessary make the first
 			mtls.setEnvironment(getSolution(diverse_population), paramsMTLS);
 			rots.setEnvironment(getSolution(diverse_population), paramsROTS);
 			eo.setEnvironment(getSolution(diverse_population), paramsEO);
-			
-			// for (int i=0; i<listSolution.size(); i++) {
-			// Tools.printArray(listSolution.get(i).getArray());
-			// }
 
 			// execution in parallel
 			pool.submit(mtls);
@@ -144,18 +140,15 @@ public class MainActivity {
 			insertIndividual(paramsPopulation.get(EO), new Params(paramsEO, eo.getBestCost()), EO);
 			insertSolution(eo.getSolution());
 
-			// for (int i=0; i<listSolution.size(); i++) {
-			// Tools.printArray(listSolution.get(i).getArray());
-			// }
-
 			Results geneticAlgorithmResult = ga.getResults();
 			int[] s_GA = geneticAlgorithmResult.getBestIndividual().getGenes();
-			insertIndividual(paramsPopulation.get(GA), new Params(paramsGA, geneticAlgorithmResult.getBestFitness()), GA);
+			insertIndividual(paramsPopulation.get(GA), new Params(paramsGA, geneticAlgorithmResult.getBestFitness()),
+					GA);
 			insertSolution(s_GA);
-			
+
 			diverse_population.clear();
 			diverse_population = ga.getFinalPopulation();
-			
+
 			// listCost.get(GA).add(geneticAlgorithmResult.getBestFitness());
 
 			if (geneticAlgorithmResult.getBestFitness() == qap.getBKS()) {
@@ -163,9 +156,11 @@ public class MainActivity {
 			}
 
 			count_generations++;
-			//printPopulation(elite_population);
-			//System.out.println("\n");
-			//printPopulation(diverse_population);
+
+			/*
+			 * System.out.println("Elite"); printPopulation(elite_population);
+			 * System.out.println("Diverse"); printPopulation(diverse_population);
+			 */
 
 		}
 		// printValues(paramsPopulation);
@@ -178,9 +173,16 @@ public class MainActivity {
 			// Tools.printArray(listSolution.get(i).getArray());
 		}
 
+		DecimalFormat df2 = new DecimalFormat("#.##");
+		
+		System.out.println("Elite");
+		printPopulation(elite_population, df2);
+		System.out.println("Diverse");
+		printPopulation(diverse_population, df2);
+
 		printTotalTime(start);
 		System.out.println("Generations: " + count_generations);
-		DecimalFormat df2 = new DecimalFormat("#.##");
+		
 
 		for (int i = 0; i < paramsPopulation.size(); i++) {
 			List<Params> listParams = paramsPopulation.get(i);
@@ -278,7 +280,7 @@ public class MainActivity {
 		return selected;
 	}
 
-	public static int[] getSolution(List <Solution> p) {
+	public static int[] getSolution(List<Solution> p) {
 		Solution selected_solution;
 		int index = random.nextInt(p.size());
 		selected_solution = p.get(index);
@@ -465,7 +467,7 @@ public class MainActivity {
 				System.out.println(i);
 				for (int l = 0; l < listChromosomes.size(); l++) {
 					Tools.printArray(listChromosomes.get(l).getParams());
-					//System.out.println("costo " + listChromosomes.get(l).getScore());
+					// System.out.println("costo " + listChromosomes.get(l).getScore());
 				}
 			}
 		}
@@ -518,7 +520,7 @@ public class MainActivity {
 
 	}
 
-	public static void insertSolution(int[] s ) {
+	public static void insertSolution(int[] s) {
 		boolean exist;
 		// this cycle finish until the new solution will be different
 		do {
@@ -533,13 +535,13 @@ public class MainActivity {
 			// if exist is necessary mutate
 			if (exist) {
 				s = mutate(s);
-			} 
+			}
 
 		} while (exist);
-		
-		int worst=-1, temp_cost;
+
+		int worst = -1, temp_cost;
 		int cost = Integer.MIN_VALUE;
-		
+
 		for (int i = 0; i < elite_population.size(); i++) {
 			temp_cost = qap.evalSolution(elite_population.get(i).getArray());
 			if (temp_cost > cost) {
@@ -552,10 +554,24 @@ public class MainActivity {
 		elite_population.add(new Solution(s));
 	}
 
-	public static void printPopulation(List <Solution> p) {
+	public static void printPopulation(List<Solution> p, DecimalFormat df2) {
+		int[] best_solution = p.get(0).getArray();
+		int best_cost = Integer.MAX_VALUE;
 		for (int i = 0; i < p.size(); i++) {
-			qap.printSolution(p.get(i).getArray());
-			// Tools.printArray(listSolution.get(i).getArray());
+			int[] temp_s = p.get(i).getArray();
+			int temp_cost = qap.evalSolution(p.get(i).getArray());
+			//qap.printSolution(temp_s, temp_cost);
+			if (temp_cost < best_cost) {
+				best_solution = temp_s;
+				best_cost = temp_cost;
+			}
 		}
+
+		//qap.printSolution(best_solution, best_cost);
+		
+		double std = best_cost * 100.0 / qap.getBKS() - 100;
+		System.out.println("Cost: " + best_cost + " " + df2.format(std) + "%");
+		// Tools.printArray(listSolution.get(i).getArray());
+
 	}
 }
