@@ -28,7 +28,6 @@ public class Individual {
 		genes[position] = value;
 	}
 	
-
 	public void printIndividual() {
 		String individual = "";
 		for (int i : genes) {

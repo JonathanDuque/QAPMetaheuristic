@@ -20,9 +20,10 @@ public class MainActivity {
 	private static final int execution_time = 1000;
 	private static boolean no_find_BKS = true;
 	static List<List<Integer>> listCost = new ArrayList<>(4);// 4 mh
+	private static List<Solution> listSolution;
 
 	public static void main(String[] args) {
-		final String problem = args[0]; // "bur26a.qap";
+		final String problem = "tai35a.qap";
 		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
 		final ReadFile readFile = new ReadFile("Data/" + problem);
 		final long start = System.currentTimeMillis();
@@ -39,34 +40,36 @@ public class MainActivity {
 		// List<Gene> generation = createFirstGeneration(8);
 		final int number_by_mh = 5;
 		final Constructive constructive = new Constructive();
-		List<List<Chromosome>> generation = generateInitialPopulation(number_by_mh, constructive);
+		List<List<Params>> paramsPopulation = generateInitialPopulation(number_by_mh, constructive);
+
+		// for (int i = 0; i < listSolution.size(); i++) {
+		// Tools.printArray(listSolution.get(i).getArray());
+		// }
 
 		int generations = 20, count_generations = 0;
 
 		int[] s = new int[qap_size];
 
-		// create chromosome for each mh
-		Chromosome c_MTLS_1, c_MTLS_2;
-		Chromosome c_ROTS_1, c_ROTS_2;
-		Chromosome c_EO_1, c_EO_2;
-		Chromosome c_GA_1, c_GA_2;
+		// create parameters for each mh
+		Params c_MTLS_1, c_MTLS_2;
+		Params c_ROTS_1, c_ROTS_2;
+		Params c_EO_1, c_EO_2;
+		Params c_GA_1, c_GA_2;
 
 		// create params for each mh
 		int[] paramsMTLS = new int[3];
 		int[] paramsROTS = new int[3];
 		int[] paramsEO = new int[3];
 		int[] paramsGA = new int[3];
-		boolean sequential = false;
 
-		for (int i=0; i<4; i++){
-			int initCost = qap.evalSolution((generation.get(i).get(0).getSolution()));
-			//System.out.println(""+initCost);
-			List<Integer> cost_by_mh = new ArrayList<>();
-			cost_by_mh.add(initCost);
-			listCost.add(cost_by_mh);
-		}
-		
-		
+		/*
+		 * for (int i = 0; i < 4; i++) { int initCost =
+		 * qap.evalSolution((generation.get(i).get(0).getSolution())); //
+		 * System.out.println(""+initCost); List<Integer> cost_by_mh = new
+		 * ArrayList<>(); cost_by_mh.add(initCost); listCost.add(cost_by_mh); }
+		 */
+
+		// printValues(paramsPopulation);
 		while (count_generations < generations && no_find_BKS) {
 
 			MultiStartLocalSearch mutiStartLocalSearch = new MultiStartLocalSearch(qap, random.nextInt());
@@ -75,22 +78,22 @@ public class MainActivity {
 			GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(qap, random.nextInt());
 
 			// System.out.println( count_generations );
-			List<Chromosome> listMTLS = new ArrayList<>(generation.get(0));
-			List<Chromosome> listROST = new ArrayList<>(generation.get(1));
-			List<Chromosome> listEO = new ArrayList<>(generation.get(2));
-			List<Chromosome> listGA = new ArrayList<>(generation.get(3));
+			List<Params> list_params_MTLS = new ArrayList<>(paramsPopulation.get(MTLS));
+			List<Params> list_params_ROST = new ArrayList<>(paramsPopulation.get(ROTS));
+			List<Params> list_params_EO = new ArrayList<>(paramsPopulation.get(EO));
+			List<Params> list_params_GA = new ArrayList<>(paramsPopulation.get(GA));
 
-			c_MTLS_1 = selectIndividual(listMTLS);
-			c_MTLS_2 = selectIndividual(listMTLS);
+			c_MTLS_1 = selectIndividual(list_params_MTLS);
+			c_MTLS_2 = selectIndividual(list_params_MTLS);
 
-			c_ROTS_1 = selectIndividual(listROST);
-			c_ROTS_2 = selectIndividual(listROST);
+			c_ROTS_1 = selectIndividual(list_params_ROST);
+			c_ROTS_2 = selectIndividual(list_params_ROST);
 
-			c_EO_1 = selectIndividual(listEO);
-			c_EO_2 = selectIndividual(listEO);
+			c_EO_1 = selectIndividual(list_params_EO);
+			c_EO_2 = selectIndividual(list_params_EO);
 
-			c_GA_1 = selectIndividual(listGA);
-			c_GA_2 = selectIndividual(listGA);
+			c_GA_1 = selectIndividual(list_params_GA);
+			c_GA_2 = selectIndividual(list_params_GA);
 
 			// crossover and mutation
 			paramsMTLS = crossover(c_MTLS_1.getParams(), c_MTLS_2.getParams(), MTLS); // crossover depending of method
@@ -105,139 +108,126 @@ public class MainActivity {
 			paramsGA = crossover(c_GA_1.getParams(), c_GA_2.getParams(), GA); // crossover depending of method
 			paramsGA = mutate(paramsGA, GA, 0.5);
 
-			if (sequential) {
-				s = mutiStartLocalSearch.solve(c_MTLS_1.getSolution(), paramsMTLS, qap, constructive);
-				Chromosome newGene = new Chromosome(s, paramsMTLS, qap_size);
-				insertIndividual(generation.get(MTLS), newGene);
+			// printValues(generation);
 
-				s = robustTabuSearch.solve(c_ROTS_1.getSolution(), paramsROTS, qap);
-				newGene = new Chromosome(s, paramsROTS, qap_size);
-				insertIndividual(generation.get(ROTS), newGene);
+			// setting variables for each method
+			mutiStartLocalSearch.setEnviroment(getSolution(), paramsMTLS);
+			robustTabuSearch.setEnviroment(getSolution(), paramsROTS);
+			extremalOptimization.setEnviroment(getSolution(), paramsEO);
+			geneticAlgorithm.setEnviroment(paramsGA);
 
-				s = extremalOptimization.solve(c_EO_1.getSolution(), paramsEO, qap);
-				newGene = new Chromosome(s, paramsEO, qap_size);
-				insertIndividual(generation.get(EO), newGene);
+			// for (int i=0; i<listSolution.size(); i++) {
+			// Tools.printArray(listSolution.get(i).getArray());
+			// }
 
-				geneticAlgorithm.solve(paramsGA, qap);
-				Results geneticAlgorithmResult = geneticAlgorithm.getResults();
-				s = geneticAlgorithmResult.getBestIndividual().getGenes();
-				newGene = new Chromosome(s, paramsGA, qap_size);
-				insertIndividual(generation.get(GA), newGene);
-			} else {
+			// execution in parallel
+			pool.submit(mutiStartLocalSearch);
+			pool.submit(robustTabuSearch);
+			pool.submit(extremalOptimization);
+			pool.submit(geneticAlgorithm);
 
-				// printValues(generation);
+			mutiStartLocalSearch.join();
+			robustTabuSearch.join();
+			extremalOptimization.join();
+			geneticAlgorithm.join();
 
-				// setting variables for each method
-				mutiStartLocalSearch.setEnviroment(c_MTLS_1.getSolution(), paramsMTLS);
-				robustTabuSearch.setEnviroment(c_ROTS_1.getSolution(), paramsROTS);
-				extremalOptimization.setEnviroment(c_EO_1.getSolution(), paramsEO);
-				geneticAlgorithm.setEnviroment(paramsGA);
+			// insert new parameters individual into generation
+			// Chromosome newChromosomeMTLS = new
+			// Chromosome(mutiStartLocalSearch.getSolution(), paramsMTLS, qap_size);
+			insertIndividual(paramsPopulation.get(MTLS), new Params(paramsMTLS, mutiStartLocalSearch.getBestCost()),
+					MTLS);
+			insertSolution(mutiStartLocalSearch.getSolution());
 
-				// execution in parallel
-				pool.submit(mutiStartLocalSearch);
-				pool.submit(robustTabuSearch);
-				pool.submit(extremalOptimization);
-				pool.submit(geneticAlgorithm);
+			// Chromosome newChromosomeROTS = new Chromosome(robustTabuSearch.getSolution(),
+			// paramsROTS, qap_size);
+			insertIndividual(paramsPopulation.get(ROTS), new Params(paramsROTS, robustTabuSearch.getBestCost()), ROTS);
+			insertSolution(robustTabuSearch.getSolution());
 
-				mutiStartLocalSearch.join();
-				robustTabuSearch.join();
-				extremalOptimization.join();
-				geneticAlgorithm.join();
+			// Chromosome newChromosomeEO = new
+			// Chromosome(extremalOptimization.getSolution(), paramsEO, qap_size);
+			insertIndividual(paramsPopulation.get(EO), new Params(paramsEO, extremalOptimization.getBestCost()), EO);
+			insertSolution(extremalOptimization.getSolution());
 
-				// insert new individual into generation
-				Chromosome newChromosomeMTLS = new Chromosome(mutiStartLocalSearch.getSolution(), paramsMTLS, qap_size);
-				insertIndividual(generation.get(MTLS), newChromosomeMTLS);
+			// for (int i=0; i<listSolution.size(); i++) {
+			// Tools.printArray(listSolution.get(i).getArray());
+			// }
 
-				Chromosome newChromosomeROTS = new Chromosome(robustTabuSearch.getSolution(), paramsROTS, qap_size);
-				insertIndividual(generation.get(ROTS), newChromosomeROTS);
+			Results geneticAlgorithmResult = geneticAlgorithm.getResults();
+			int[] s_GA = geneticAlgorithmResult.getBestIndividual().getGenes();
+			// Chromosome newChromosomeGA = new Chromosome(s_GA, paramsGA, qap_size);
+			insertIndividual(paramsPopulation.get(GA), new Params(paramsGA, geneticAlgorithmResult.getBestFitness()),
+					GA);
+			// listCost.get(GA).add(geneticAlgorithmResult.getBestFitness());
 
-				Chromosome newChromosomeEO = new Chromosome(extremalOptimization.getSolution(), paramsEO, qap_size);
-				insertIndividual(generation.get(EO), newChromosomeEO);
-
-				Results geneticAlgorithmResult = geneticAlgorithm.getResults();
-				int[] s_GA = geneticAlgorithmResult.getBestIndividual().getGenes();
-				Chromosome newChromosomeGA = new Chromosome(s_GA, paramsGA, qap_size);
-				insertIndividual(generation.get(GA), newChromosomeGA);
-				listCost.get(GA).add(geneticAlgorithmResult.getBestFitness());
-
-				if (geneticAlgorithmResult.getBestFitness() == qap.getBKS()) {
-					findBKS();
-				}
-
+			if (geneticAlgorithmResult.getBestFitness() == qap.getBKS()) {
+				findBKS();
 			}
 
 			count_generations++;
+
 		}
-		// printValues(generation);
+		// printValues(paramsPopulation);
 		/*
 		 * for (int i = 0; i < listCost.size(); i++) { System.out.println( (i)+": " +
 		 * listCost.get(i)); }
 		 */
+		for (int i = 0; i < listSolution.size(); i++) {
+			qap.printSolution(listSolution.get(i).getArray());
+			// Tools.printArray(listSolution.get(i).getArray());
+		}
 
 		printTotalTime(start);
 		System.out.println("Generations: " + count_generations);
 		DecimalFormat df2 = new DecimalFormat("#.##");
 
-		for (int i = 0; i < generation.size(); i++) {
-			List<Chromosome> listChromosomes = generation.get(i);
+		for (int i = 0; i < paramsPopulation.size(); i++) {
+			List<Params> listParams = paramsPopulation.get(i);
 			int best = Integer.MAX_VALUE;
 			int c = -1;
-			for (int l = 0; l < listChromosomes.size(); l++) {
-				if (best > qap.evalSolution(listChromosomes.get(l).getSolution())) {
-					best = qap.evalSolution(listChromosomes.get(l).getSolution());
+			for (int l = 0; l < listParams.size(); l++) {
+				if (best > listParams.get(l).getScore()) {
+					best = listParams.get(l).getScore();
 					c = l;
 				}
 			}
 
-			printMetaheuristic(i, listChromosomes.get(c).getSolution(), best, listChromosomes.get(c).getParams(), df2);
+			printMetaheuristic(i, best, listParams.get(c).getParams(), df2);
 		}
 
-		
-		FileWriter fileWriter;
-		try {
-			fileWriter = new FileWriter("results.csv");
-			fileWriter.append("Generation");
-			fileWriter.append(";");
-			fileWriter.append("MultiStart LocalSearch");
-			fileWriter.append(";");
-			fileWriter.append("Robust TabuSearch ");
-			fileWriter.append(";");
-			fileWriter.append("Extremal Optimization");
-			fileWriter.append(";");
-			fileWriter.append("Genetic Algorithm");
-			fileWriter.append("\n");
-
-			for (int i = 0; i <= count_generations; i++) {
-				fileWriter.append(Integer.toString(i));
-				fileWriter.append(";");
-				fileWriter.append(Integer.toString(listCost.get(MTLS).get(i)));
-				fileWriter.append(";");
-				fileWriter.append(Integer.toString(listCost.get(ROTS).get(i)));
-				fileWriter.append(";");
-				fileWriter.append(Integer.toString(listCost.get(EO).get(i)));
-				fileWriter.append(";");
-				fileWriter.append(Integer.toString(listCost.get(GA).get(i)));
-				fileWriter.append("\n");
-			}
-
-			fileWriter.flush();
-			fileWriter.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		/*
+		 * FileWriter fileWriter; try { fileWriter = new FileWriter("results.csv");
+		 * fileWriter.append("Generation"); fileWriter.append(";");
+		 * fileWriter.append("MultiStart LocalSearch"); fileWriter.append(";");
+		 * fileWriter.append("Robust TabuSearch "); fileWriter.append(";");
+		 * fileWriter.append("Extremal Optimization"); fileWriter.append(";");
+		 * fileWriter.append("Genetic Algorithm"); fileWriter.append("\n");
+		 * 
+		 * for (int i = 0; i <= count_generations; i++) {
+		 * fileWriter.append(Integer.toString(i)); fileWriter.append(";");
+		 * fileWriter.append(Integer.toString(listCost.get(MTLS).get(i)));
+		 * fileWriter.append(";");
+		 * fileWriter.append(Integer.toString(listCost.get(ROTS).get(i)));
+		 * fileWriter.append(";");
+		 * fileWriter.append(Integer.toString(listCost.get(EO).get(i)));
+		 * fileWriter.append(";");
+		 * fileWriter.append(Integer.toString(listCost.get(GA).get(i)));
+		 * fileWriter.append("\n"); }
+		 * 
+		 * fileWriter.flush(); fileWriter.close(); } catch (IOException e) {
+		 * e.printStackTrace(); }
+		 */
 
 	}
 
-	public static List<List<Chromosome>> generateInitialPopulation(int number_by_mh, Constructive constructive) {
+	public static List<List<Params>> generateInitialPopulation(int number_by_mh, Constructive constructive) {
+		listSolution = new ArrayList<>();
 
-		List<List<Chromosome>> generation = new ArrayList<>(4); // because there are 4 different mh
+		List<List<Params>> paramsPopulation = new ArrayList<>(4); // because there are 4 different mh
 
 		for (int k = 0; k < 4; k++) {
-			List<Chromosome> g = new ArrayList<>(number_by_mh);
-			int[] s;
-			s = constructive.createRandomSolution(qap_size, k);// random.nextInt()
+			List<Params> tempList = new ArrayList<>(number_by_mh);
 			for (int i = 0; i < number_by_mh; i++) {
-
+				int[] s = constructive.createRandomSolution(qap_size, (k * number_by_mh + i));
 				int[] p = { 0, 0, 0 };
 
 				switch (k) {
@@ -263,25 +253,36 @@ public class MainActivity {
 
 					break;
 				}
-				g.add(new Chromosome(s, p, qap_size));
+				tempList.add(new Params(p, Integer.MAX_VALUE));
+				listSolution.add(new Solution(s));
 			}
 
-			generation.add(g);
+			paramsPopulation.add(tempList);
 		}
 
-		return generation;
+		return paramsPopulation;
 
 	}
 
-	public static Chromosome selectIndividual(List<Chromosome> g) {
-		Chromosome selected;
+	public static Params selectIndividual(List<Params> p) {
+		Params selected;
 		// obtain a number between 0 - size population
-		int index = random.nextInt(g.size());
-		selected = g.get(index);
-		g.remove(index);// delete for no selecting later
+		int index = random.nextInt(p.size());
+		selected = p.get(index);
+		p.remove(index);// delete for no selecting later
 		// System.out.println("selected : " + index);
 
 		return selected;
+	}
+
+	public static int[] getSolution() {
+		Solution selected_solution;
+		int index = random.nextInt(listSolution.size());
+		selected_solution = listSolution.get(index);
+		listSolution.remove(index);// delete for no selecting later
+		// System.out.println("selected : " + index);
+
+		return selected_solution.getArray();
 	}
 
 	public static int[] crossover(int[] params1, int[] params2, int mh_type) {
@@ -375,72 +376,53 @@ public class MainActivity {
 
 	}
 
-	public static void insertIndividual(List<Chromosome> g, Chromosome new_individual) {
+	public static void insertIndividual(List<Params> listParams, Params new_params, final int type) {
 
 		int worst = -1;
 		int cost = Integer.MIN_VALUE;
-		int temp_cost = 0;
+		int temp_score = 0;
 		boolean exist = false;
 
-		// this cycle finish until the new chromosome will be different
-		do {
-			exist = false;
-			// identify if the new individual is already in the generation
-			for (Chromosome temp : g) {
-				if (areIquals(temp, new_individual)) {
-					exist = true;
-					break;
-				}
-			}
-			// if exist is necessary mutate
-			if (exist) {
-				new_individual = mutate(new_individual);
-			}
+		// this cycle finish until the new params will be different
+		/*
+		 * do { exist = false; // identify if the new individual is already in the
+		 * generation for (Params temp : listParams) {
+		 * Tools.printArray(temp.getParams()); Tools.printArray(new_params.getParams());
+		 * if (Arrays.equals(temp.getParams(), new_params.getParams())) { exist = true;
+		 * break; } } // if exist is necessary mutate if (exist) { new_params = new
+		 * Params(mutate(new_params.getParams(), type, 1), new_params.getScore()); }
+		 * System.out.println("aca"); } while (exist);
+		 */
 
-		} while (exist);
-
-		for (int i = 0; i < g.size(); i++) {
-			temp_cost = qap.evalSolution(g.get(i).getSolution());
-			if (temp_cost > cost) {
-				cost = temp_cost;
+		for (int i = 0; i < listParams.size(); i++) {
+			temp_score = listParams.get(i).getScore();
+			if (temp_score > cost) {
+				cost = temp_score;
 				worst = i;
 			}
 		}
 
-		g.remove(worst);
-		g.add(new_individual);
+		listParams.remove(worst);
+		listParams.add(new_params);
 	}
 
-	private static Chromosome mutate(Chromosome new_individual) {
-		int pos_geneX, pos_geneY, temp_gene;
+	private static int[] mutate(int[] s) {
+		int posX, posY, temp;
 
-		// first decide what genes change randomly
-		pos_geneX = random.nextInt(qap_size);// with this value we put the range of number
+		// first decide what value change randomly
+		posX = random.nextInt(qap_size);// with this value we put the range of number
 		do {
-			pos_geneY = random.nextInt(qap_size);// check that the position to change are different
-		} while (pos_geneX == pos_geneY);
+			posY = random.nextInt(qap_size);// check that the position to change are different
+		} while (posX == posY);
 
 		// swapping - making the mutation
-		temp_gene = new_individual.genes[pos_geneX];
-		new_individual.genes[pos_geneX] = new_individual.genes[pos_geneY];
-		new_individual.genes[pos_geneY] = temp_gene;
-		return new_individual;
-	}
-
-	private static boolean areIquals(Chromosome individual1, Chromosome individual2) {
-		int[] array1 = individual1.getSolution();
-		int[] array2 = individual2.getSolution();
-		// check position by position if they are equals
-		/*
-		 * for (int i = 0; i < qap.getSize(); i++) { if (array1[i] != array2[i]) {
-		 * return false; } }
-		 */
-
-		return Arrays.equals(array1, array2);
+		temp = s[posX];
+		s[posX] = s[posY];
+		s[posY] = temp;
+		return s;
 	}
 
 	public static void printTotalTime(long start) {
-		// show the total time
 		double time = (System.currentTimeMillis() - start);
 		time /= 1000;
 		System.out.println("\nTotal time: " + time + " sec");
@@ -463,36 +445,34 @@ public class MainActivity {
 		}
 	}
 
-	public static void printChromosomes(List<Chromosome> listChromosomes, int i) {
+	public static void printParams(List<Params> listParams, int i) {
 		if (i == -1) {
 			System.out.println(i);
-			for (int l = 0; l < listChromosomes.size(); l++) {
-				Tools.printArray(listChromosomes.get(l).genes);
-				System.out.println("costo " + qap.evalSolution(listChromosomes.get(l).getSolution()));
+			for (int l = 0; l < listParams.size(); l++) {
+				Tools.printArray(listParams.get(l).getParams());
+				System.out.println("costo " + listParams.get(l).getScore());
 			}
 		}
 	}
 
-	public static void printValues(List<List<Chromosome>> generation) {
+	public static void printValues(List<List<Params>> generation) {
 		for (int i = 0; i < generation.size(); i++) {
-			List<Chromosome> listChromosomes = generation.get(i);
+			List<Params> listChromosomes = generation.get(i);
 			if (i >= 0) {
 				System.out.println(i);
 				for (int l = 0; l < listChromosomes.size(); l++) {
-					Tools.printArray(listChromosomes.get(l).genes);
-					System.out.println("costo " + qap.evalSolution(listChromosomes.get(l).getSolution()));
+					Tools.printArray(listChromosomes.get(l).getParams());
+					System.out.println("costo " + listChromosomes.get(l).getScore());
 				}
 			}
 		}
 	}
 
 	public static void findBKS() {
-		// System.out.println(from);
 		no_find_BKS = false;
 	}
 
-	public static void printMetaheuristic(final int type_mh, final int[] solution, final int cost, final int[] p,
-			DecimalFormat df2) {
+	public static void printMetaheuristic(final int type_mh, final int cost, final int[] p, DecimalFormat df2) {
 
 		String params_text = "";
 		switch (type_mh) {
@@ -530,9 +510,30 @@ public class MainActivity {
 
 		double std = cost * 100.0 / qap.getBKS() - 100;
 		System.out.println("Cost: " + cost + " " + df2.format(std) + "%");
-		Tools.printArray(solution);
+		// Tools.printArray(solution);
 		System.out.println("Params " + params_text);
 
 	}
 
+	public static void insertSolution(int[] s) {
+		boolean exist;
+		// this cycle finish until the new solution will be different
+		do {
+			exist = false;
+			// identify if the new solution is already in the population
+			for (Solution temp : listSolution) {
+				if (Arrays.equals(temp.getArray(), s)) {
+					exist = true;
+					break;
+				}
+			}
+			// if exist is necessary mutate
+			if (exist) {
+				s = mutate(s);
+			} else {
+				listSolution.add(new Solution(s));
+			}
+
+		} while (exist);
+	}
 }

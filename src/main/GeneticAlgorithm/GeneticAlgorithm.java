@@ -29,7 +29,7 @@ public class GeneticAlgorithm extends RecursiveAction {
 		n = qap.getSize();
 	}
 
-	// always before compute function, is neccesary set the enviroment
+	// always before compute function, is necessary set the environment
 	public void setEnviroment(int[] params) {
 		this.params = params.clone();
 	}
@@ -84,63 +84,7 @@ public class GeneticAlgorithm extends RecursiveAction {
 		results = populationResults(new_generation, pop_size);
 
 		// System.out.println("GA : " + count_generations);
-		// System.out.println("Fin GA");
-	}
-
-	public void solve(int[] params, QAPData qapData) {
-		// first the variables necessary for the execution
-		Individual individual1, individual2, bestChild;
-		List<Individual> new_generation = new ArrayList<>();
-		List<Individual> temp_generation = new ArrayList<>();// temporal generation
-		int count_generations = 0;
-		qap = qapData;
-		final int pop_size = params[0];
-		final double mutation_probability = params[1] / 1000.0;
-		final boolean crossover_ux = params[2] == 0 ? true : false;
-		random = new Random(MainActivity.getSeed());
-
-		// printing the parameters for the execution
-		// System.out.println("Tamaño de la población: " + pop_size);
-		// System.out.println("Número de generaciones: " + generations);
-		// System.out.println("Probabilidad de mutación: " + mutation_probability);
-
-		// creating the first generation
-		new_generation = createFirstGeneration(pop_size);
-		Collections.sort(new_generation, compareByFitness);
-		// System.out.println("\nGeneración inicial");
-		// printPopulation(new_generation);
-
-		final long start = System.currentTimeMillis();
-		long time = 0;
-		// this cycle finish when complete all generations
-		while (time - start < MainActivity.getExecutionTime()) { // execution during 10 milliseconds = 0.01 seconds
-			temp_generation = new ArrayList<>(new_generation);
-
-			for (int i = 0; i < pop_size / 2; i++) {
-
-				individual1 = selectIndividual(temp_generation);// select a random individual
-				individual2 = selectIndividual(temp_generation);
-				bestChild = getBestOffspring(individual1, individual2, mutation_probability, crossover_ux);
-
-				new_generation.remove(pop_size - 1);// delete the last one
-				// insert the best child and sure that is different, if not mutate until will be
-				insertIndividualIntoPoblation(new_generation, bestChild);
-
-				// order the population by fitness
-				Collections.sort(new_generation, compareByFitness);
-
-			}
-			Collections.sort(new_generation, compareByFitness);
-			count_generations++;
-			time = System.currentTimeMillis();
-
-		}
-		// System.out.println("\nGeneración final");
-		// printPopulation(new_generation);
-		// save the results
-		results = populationResults(new_generation, pop_size);
-		// System.out.println("GA : " + count_generations);
-
+		//System.out.println("Fin GA");
 	}
 
 	private Individual getBestOffspring(Individual individual1, Individual individual2, double mp,
@@ -394,7 +338,6 @@ public class GeneticAlgorithm extends RecursiveAction {
 
 			for (int k = 0; k < n; k++) {
 				new_genes[k] = random.nextInt(n);
-				;
 			}
 
 			// Individual individual = mutate(new Individual(new_genes), 1);

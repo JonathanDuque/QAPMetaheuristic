@@ -9,10 +9,6 @@ import java.util.Random;
 import java.util.concurrent.RecursiveAction;
 
 public class ExtremalOptimization extends RecursiveAction {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 3L;
 
 	public class Delta {
@@ -32,6 +28,7 @@ public class ExtremalOptimization extends RecursiveAction {
 	QAPData qap;
 	private int[] solution, initSolution;
 	private int[] params;
+	private int bestCost;
 
 	public ExtremalOptimization(QAPData qapData, int seed) {
 		super();
@@ -50,11 +47,14 @@ public class ExtremalOptimization extends RecursiveAction {
 	public int[] getSolution() {
 		return solution;
 	}
+	
+	public int getBestCost() {
+		return bestCost;
+	}
 
 	@Override
 	protected void compute() {
-		//System.out.println(" Hello EO");
-		int currentCost, bestCost;
+		int currentCost;
 		pdf = new float[n];
 		// int currentIteration = 1;
 		// int totalIterations = 1000;
@@ -62,6 +62,9 @@ public class ExtremalOptimization extends RecursiveAction {
 		int tempDelta, bestDelta;
 		List<Delta> deltaList = new ArrayList<>();
 		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
+		
+		//System.out.println("EO");
+		//Tools.printArray(currentSolution);
 
 		// receive tau parameter
 		final double tau = params[0] / 100.0; // necesario para que la division de decimal
@@ -152,97 +155,11 @@ public class ExtremalOptimization extends RecursiveAction {
 
 		}
 
-		MainActivity.listCost.get(2).add(bestCost);
+		//MainActivity.listCost.get(2).add(bestCost);
 		//System.out.println("bestCost: " + bestCost);
 		//System.out.println("solution: " + qap.evalSolution(solution) + "\n");
-	}
+		//System.out.println("Fin EO");
 
-	public int[] solve(int[] initSolution, int[] params, QAPData qap) {
-		int n = qap.getSize(), currentCost, bestCost;
-		pdf = new float[n];
-		// int currentIteration = 1;
-		// int totalIterations = 1000;
-		int[] currentSolution = Arrays.copyOf(initSolution, n), bestSolution;
-		int tempDelta, bestDelta;
-		List<Delta> deltaList = new ArrayList<>();
-		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
-		random = new Random(MainActivity.getSeed());// set the seed, 1 in this case
-
-		// receive tau parameter
-		final double tau = params[0] / 100.0; // necesario para que la division de decimal
-
-		final int pdf_function_type = params[1];
-		// System.out.println("\ntau: " + tau + " pfd type: "+ pdf_function_type);
-
-		switch (pdf_function_type) {
-		case 0:
-			initPdfExp(n, tau);
-			break;
-		case 1:
-			initPdfPow(n, tau);
-			break;
-		case 2:
-			initPdfGamma(n, tau);
-			break;
-		}
-
-		currentCost = qap.evalSolution(initSolution);
-		bestCost = currentCost;
-		bestSolution = Arrays.copyOf(initSolution, n);
-		qap.initDeltas(initSolution);
-
-		int counterBest = 0;
-
-		final long start = System.currentTimeMillis();
-		long time = 0;
-		while (time - start < MainActivity.getExecutionTime()) { // execution during 10 milliseconds = 0.01 seconds
-
-			for (int i = 0; i < n; i++) {
-				int bestMove = 0;
-				bestDelta = negative_infinity;
-
-				for (int j = 0; j < n; j++) {
-					if (i == j) {
-						continue;
-					}
-					tempDelta = qap.evalMovement(currentSolution, i, j);
-
-					// if improve
-					if (tempDelta > bestDelta) {
-						bestMove = j;
-						bestDelta = tempDelta;
-						counterBest = 1;
-					} else if (tempDelta == bestDelta && random.nextInt(++counterBest) == 0) {
-						bestMove = j;
-						bestDelta = tempDelta;
-					}
-				}
-				deltaList.add(new Delta(bestDelta, i, bestMove));
-			}
-
-			Collections.sort(deltaList, compareByCost);
-			Delta delta = deltaList.get(pdfPick()); // pdf pick gets the index recommended
-
-			// always update the current solution and its cost
-			currentSolution = qap.makeSwap(currentSolution, delta.index, delta.bestMove);
-			currentCost = currentCost - delta.cost;
-			qap.updateDeltas(currentSolution, delta.index, delta.bestMove);
-
-			// update the best solution found if is the best of the moment at the end this
-			// block help to save the best of the best
-			if (currentCost < bestCost) {
-				bestSolution = Arrays.copyOf(currentSolution, n);
-				bestCost = currentCost;
-			}
-
-			// currentIteration++;
-			deltaList.clear();// delete delta moves
-			time = System.currentTimeMillis();
-
-		}
-		// System.out.println("EO : " + currentIteration);
-
-		return bestSolution;
 	}
 
 	public void initPdfExp(int n, double tau) {

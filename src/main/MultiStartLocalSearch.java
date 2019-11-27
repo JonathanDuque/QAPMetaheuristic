@@ -6,9 +6,6 @@ import java.util.concurrent.RecursiveAction;
 
 public class MultiStartLocalSearch extends RecursiveAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private Random random;
 	private final int n;
@@ -16,6 +13,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 	QAPData qap;
 	private int[] solution, initSolution;
 	private int[] params;
+	private int bestCost;
 
 	public MultiStartLocalSearch(QAPData qapData, int seed) {
 		super();
@@ -35,22 +33,26 @@ public class MultiStartLocalSearch extends RecursiveAction {
 	public int[] getSolution() {
 		return solution;
 	}
+	
+	public int getBestCost() {
+		return bestCost;
+	}
 
 	@Override
 	protected void compute() {
 		// this initial block define the variable needed
-		// System.out.println("MTLS");
-
 		solution = Arrays.copyOf(initSolution, n);
 		int[] currentSolution = Arrays.copyOf(initSolution, n);
 		boolean improve = false; // this flag control when the solution no improve and we are in an optimo local
 		int currentIteration = 0;
-		int temporalDelta, bestDelta, cost = qap.evalSolution(initSolution), bestCost;
+		int temporalDelta, bestDelta, cost = qap.evalSolution(initSolution);
 		bestCost = cost;
 		final boolean random_restart = params[0] == 0 ? true : false; // restart type 0: random restart, 1: swaps
 		// System.out.println(params[0] + " " +random_restart);
 		qap.initDeltas(initSolution);
-		// Tools.printArray(currentSolution);
+		
+		//System.out.println("MTLS");
+		//Tools.printArray(currentSolution);
 		// qap.showData();
 
 		final Constructive constructive = new Constructive();
@@ -113,83 +115,10 @@ public class MultiStartLocalSearch extends RecursiveAction {
 
 		}
 		
-		MainActivity.listCost.get(0).add(bestCost);
+		//MainActivity.listCost.get(0).add(bestCost);
 		// qap.showData();
 		//System.out.println("MSLS : " + currentIteration + " time: " + (time - start));
-		// System.out.println("Fin MTLS");
-	}
-
-	public int[] solve(int[] initSolution, int[] params, QAPData qap2, Constructive constructive) {
-		// this initial block define the variable needed
-
-		int[] currentSolution = Arrays.copyOf(initSolution, n);
-		solution = Arrays.copyOf(initSolution, n);
-		boolean improve = false; // this flag control when the solution no improve and we are in an optimo local
-		int currentIteration = 0;
-		int temporalDelta, bestDelta, cost = qap.evalSolution(initSolution), bestCost;
-		bestCost = cost;
-		final boolean random_restart = params[0] == 0 ? true : false; // restart type 0: random restart, 1: swaps
-		// System.out.println(params[0] + " " +random_restart);
-		qap.initDeltas(initSolution);
-		// Tools.printArray(currentSolution);
-		// qap.showData();
-
-		final long start = System.currentTimeMillis();
-		long time = 0;
-		// here find the best solution from the initSolution
-		while (time - start < MainActivity.getExecutionTime()) { // execution during 10 milliseconds = 0.01 seconds
-			improve = false;
-			bestDelta = 0;
-
-			int i_selected = -1, j_selected = -1;
-			// here evaluate all the neighborhood
-			for (int i = 0; i < (n - 1); i++) {
-				for (int j = i + 1; j < n; j++) {
-					temporalDelta = qap.evalMovement(currentSolution, i, j);
-
-					// if improve
-					if (temporalDelta > bestDelta) {
-						i_selected = i;
-						j_selected = j;
-						bestDelta = temporalDelta;
-						improve = true;
-					}
-				}
-			}
-
-			if (improve) {
-				cost -= bestDelta;
-				currentSolution = qap.makeSwap(currentSolution, i_selected, j_selected);
-				if (cost < bestCost) {
-					bestCost = cost;
-					solution = Arrays.copyOf(currentSolution, n);
-				}
-
-				// qap.printSolution(bestSolution);
-				qap.updateDeltas(currentSolution, i_selected, j_selected);
-
-			} else {
-				improve = false;
-				if (random_restart) {
-					// System.out.println("restart");
-					// start in a new point
-					currentSolution = constructive.createRandomSolution(n, MainActivity.getSeed());
-				} else {
-					// System.out.println("many swaps");
-					currentSolution = makeManySwaps(currentSolution, qap);
-				}
-
-				qap.initDeltas(currentSolution);
-				cost = qap.evalSolution(currentSolution);
-			}
-			currentIteration++;
-			time = System.currentTimeMillis();
-
-		}
-		// qap.showData();
-		//System.out.println("MSLS : " + currentIteration + " time: " + (time - start));
-
-		return solution;
+		//System.out.println("Fin MTLS");
 	}
 
 	public int[] makeManySwaps(int[] currentSolution, QAPData qap) {

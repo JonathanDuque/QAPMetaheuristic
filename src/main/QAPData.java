@@ -156,20 +156,15 @@ public class QAPData implements Cloneable {
 		Tools.printMatrix(delta, "\nMatriz de Deltas");
 	}
 
-	public void printSolution(int[] array, String label) {
+	public void printSolution(int[] array) {
 
-		System.out.println(label);
-		System.out.println("Costo: " + evalSolution(array));
-		String facilities = "Facilidades: ", locations = "Ubicaciones: ";
-		// for (int i = 0; i < array.length; i++) {
-		// facilities = facilities + ((i + 1) + " ");
-		// }
-
-		// System.out.println(facilities);
+		//System.out.println(label);
+		//System.out.println("Costo: " + evalSolution(array));
+		String locations = "";
 		for (int i : array) {
 			locations = locations + ((i + 1) + " ");// +1 because the index in java start with 0
 		}
-		System.out.println(locations);
+		System.out.println(locations + " " + evalSolution(array));
 
 	}
 
