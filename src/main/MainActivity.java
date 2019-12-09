@@ -17,24 +17,49 @@ public class MainActivity {
 	private static Random random;
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
 	private static QAPData qap;
-	private static final int execution_time = 1000;
+	private static int execution_time = 1000;
 	private static boolean no_find_BKS = true;
 	// static List<List<Integer>> listCost = new ArrayList<>(4);// 4 mh
 	private static List<Solution> elite_population;
 	private static List<Solution> diverse_population;
 
 	public static void main(String[] args) {
-		//final int workers = 4;
-		final int workers = Integer.parseInt(args[1]);
+		final String problem;
+		final int workers;
+
+		switch (args.length) {
+		case 3:
+			problem = args[0];
+			workers = Integer.parseInt(args[1]);
+			execution_time = Integer.parseInt(args[2]);
+			break;
+		case 2:
+			problem = args[0];
+			workers = Integer.parseInt(args[1]);
+			execution_time = 1000;
+			break;
+		case 1:
+			problem = args[0];
+			workers = 4;
+			execution_time = 1000;
+			break;
+		default:
+			problem = "tai40b.qap";
+			workers = 4;
+			execution_time = 1000;
+			break;
+		}
+
 		if ((workers % 4) != 0) {
 			System.out.println(
-					"\n***************** Is necessary workes multiple of 4     ********************************");
+					"\n***************** Is necessary workers multiple of 4     ********************************");
 			return;
 		}
 
-		final String problem = args[0];//"ste36a.qap";
-		//final String problem = "ste36a.qap";
 		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
+		System.out.println("Threads: " + workers);
+		System.out.println("Metaheuristic time: " + execution_time/1000.0 + " seconds\n");
+
 		final ReadFile readFile = new ReadFile("Data/" + problem);
 		final long start = System.currentTimeMillis();
 
@@ -47,7 +72,7 @@ public class MainActivity {
 		// int numberOfProcessors = Runtime.getRuntime().availableProcessors();
 		// System.out.println("Processors : " + numberOfProcessors );
 
-		ForkJoinPool pool = new ForkJoinPool(4);
+		ForkJoinPool pool = new ForkJoinPool(workers);
 
 		final int total_by_mh = workers / 4;
 		final int number_by_mh = 5 * total_by_mh;
@@ -203,7 +228,7 @@ public class MainActivity {
 			list_eo.clear();
 			list_ga.clear();
 		}
-		//printValues(paramsPopulation);
+		// printValues(paramsPopulation);
 		/*
 		 * for (int i = 0; i < listCost.size(); i++) { System.out.println( (i)+": " +
 		 * listCost.get(i)); }
@@ -211,8 +236,8 @@ public class MainActivity {
 
 		System.out.println("Best Solution");
 		printPopulation(elite_population, df2);
-		//System.out.println("Diverse");
-		//printPopulation(diverse_population, df2);
+		// System.out.println("Diverse");
+		// printPopulation(diverse_population, df2);
 
 		printTotalTime(start);
 		System.out.println("Generations: " + count_generations);
@@ -228,7 +253,7 @@ public class MainActivity {
 				}
 			}
 
-			//printMetaheuristic(i, best, listParams.get(c).getParams(), df2);
+			// printMetaheuristic(i, best, listParams.get(c).getParams(), df2);
 		}
 
 		/*
