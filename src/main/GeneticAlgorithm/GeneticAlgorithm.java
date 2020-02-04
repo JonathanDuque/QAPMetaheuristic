@@ -356,12 +356,13 @@ public class GeneticAlgorithm extends RecursiveAction {
 
 	}
 	
+	//this function converts a population of Solution class to population Individual class 
 	private List<Individual> getGenerationFromDiversePopulation(List<Solution> diverse_population) {
-		int pop_size = diverse_population.size();
+		final int pop_size = diverse_population.size();
 		List<Individual> start_generation = new ArrayList<>(pop_size);
 		
 		for (Solution s: diverse_population) {
-			insertIndividualIntoPoblation(start_generation, new Individual(s.getArray()));
+			insertIndividualIntoPoblation(start_generation, new Individual(s.getArray())); //getArray clones the array
 		}
 		
 		return start_generation;

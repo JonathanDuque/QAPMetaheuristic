@@ -1,17 +1,21 @@
 package main;
 
-public class Tools {
-	public static void printArray(int[] array) {
-		String array_s="";
-		for (int i : array) {
-			array_s = array_s + i  + " ";
-		}
-		System.out.print(array_s+"\n");// +1 because the index in java start with 0
+import java.text.DecimalFormat;
 
-		//System.out.println("\n");
+public class Tools {
+	public static DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
+
+	public static void printArray(int[] array) {
+		String array_s = "";
+		for (int i : array) {
+			array_s = array_s + i + " ";
+		}
+		System.out.print(array_s + "\n");// +1 because the index in java start with 0
+
+		// System.out.println("\n");
 	}
 
-	public static void printMatrix(int [][] matrix , String label) {
+	public static void printMatrix(int[][] matrix, String label) {
 		System.out.println("\n" + label);
 		for (int[] row : matrix) {
 			for (int i : row) {
@@ -22,8 +26,7 @@ public class Tools {
 
 	}
 
-	
-	//data from  https://neos-guide.org/content/qap9
+	// data from https://neos-guide.org/content/qap9
 	public static int[][] getDataforDistance(int option) {
 		// QAP 6
 		int[][] d1 = { { 0, 40, 64, 36, 22, 60 }, { 40, 0, 41, 22, 36, 72 }, { 64, 41, 0, 28, 44, 53 },
