@@ -14,16 +14,12 @@ public class MultiStartLocalSearch extends RecursiveAction {
 	private int[] solution, initSolution;
 	private int[] params;
 	private int bestCost;
-	private String name;
-
-	public MultiStartLocalSearch(QAPData qapData, int seed, int id) {
+	public MultiStartLocalSearch(QAPData qapData, int seed) {
 		super();
 		this.random = new Random(seed);
 
 		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(),qapData.getBKS());
 		n = qap.getSize();
-
-		name = "MTLS " + id;
 	}
 
 	// always before compute function, is necessary set the environment

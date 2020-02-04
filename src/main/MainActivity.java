@@ -1,7 +1,5 @@
 package main;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,13 +50,13 @@ public class MainActivity {
 
 		if ((workers % 4) != 0) {
 			System.out.println(
-					"\n***************** Is necessary workers multiple of 4     ********************************");
+					"\n***************** Please enter workers multiple of 4     ********************************");
 			return;
 		}
 
 		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
 		System.out.println("Threads: " + workers);
-		System.out.println("Metaheuristic time: " + execution_time/1000.0 + " seconds\n");
+		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds\n");
 
 		final ReadFile readFile = new ReadFile("Data/" + problem);
 		final long start = System.currentTimeMillis();
@@ -74,20 +72,20 @@ public class MainActivity {
 
 		ForkJoinPool pool = new ForkJoinPool(workers);
 
-		final int total_by_mh = workers / 4;
-		final int number_by_mh = 5 * total_by_mh;
+		final int parameters_by_mh = workers / 4;
+		final int number_of_each_mh = 5 * parameters_by_mh;
 		final Constructive constructive = new Constructive();
-		List<List<Params>> paramsPopulation = generateInitialPopulation(number_by_mh, constructive);
+		List<List<Params>> paramsPopulation = generateInitialPopulation(number_of_each_mh, constructive);
 
 		int generations = 20, count_generations = 0;
 
-		// create parameters for each mh
-		Params c_MTLS_1, c_MTLS_2;
-		Params c_ROTS_1, c_ROTS_2;
-		Params c_EO_1, c_EO_2;
-		Params c_GA_1, c_GA_2;
+		// create params class for each mh
+		Params p_MTLS_1, p_MTLS_2;
+		Params p_ROTS_1, p_ROTS_2;
+		Params p_EO_1, p_EO_2;
+		Params p_GA_1, p_GA_2;
 
-		// create params for each mh
+		// create array params for each mh
 		int[] paramsMTLS = new int[3];
 		int[] paramsROTS = new int[3];
 		int[] paramsEO = new int[3];
@@ -106,6 +104,7 @@ public class MainActivity {
 		// System.out.println("\n");
 		// printPopulation(diverse_population);
 
+		// these lists are necessary for executing in parallel
 		List<MultiStartLocalSearch> list_mtls = new ArrayList<>();
 		List<RobustTabuSearch> list_rots = new ArrayList<>();
 		List<ExtremalOptimization> list_eo = new ArrayList<>();
@@ -114,8 +113,8 @@ public class MainActivity {
 
 		while (count_generations < generations && no_find_BKS) {
 
-			for (int i = 0; i < total_by_mh; i += 1) {
-				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt(), i);
+			for (int i = 0; i < parameters_by_mh; i += 1) {
+				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
 				RobustTabuSearch rots = new RobustTabuSearch(qap, random.nextInt());
 				ExtremalOptimization eo = new ExtremalOptimization(qap, random.nextInt());
 				GeneticAlgorithm ga = new GeneticAlgorithm(qap, random.nextInt());
@@ -132,32 +131,30 @@ public class MainActivity {
 			List<Params> list_params_EO = new ArrayList<>(paramsPopulation.get(EO));
 			List<Params> list_params_GA = new ArrayList<>(paramsPopulation.get(GA));
 
-			for (int i = 0; i < total_by_mh; i += 1) {
-				c_MTLS_1 = selectIndividual(list_params_MTLS);
-				c_MTLS_2 = selectIndividual(list_params_MTLS);
+			for (int i = 0; i < parameters_by_mh; i += 1) {
+				p_MTLS_1 = selectIndividual(list_params_MTLS);
+				p_MTLS_2 = selectIndividual(list_params_MTLS);
 
-				c_ROTS_1 = selectIndividual(list_params_ROST);
-				c_ROTS_2 = selectIndividual(list_params_ROST);
+				p_ROTS_1 = selectIndividual(list_params_ROST);
+				p_ROTS_2 = selectIndividual(list_params_ROST);
 
-				c_EO_1 = selectIndividual(list_params_EO);
-				c_EO_2 = selectIndividual(list_params_EO);
+				p_EO_1 = selectIndividual(list_params_EO);
+				p_EO_2 = selectIndividual(list_params_EO);
 
-				c_GA_1 = selectIndividual(list_params_GA);
-				c_GA_2 = selectIndividual(list_params_GA);
+				p_GA_1 = selectIndividual(list_params_GA);
+				p_GA_2 = selectIndividual(list_params_GA);
 
-				// crossover and mutation
-				paramsMTLS = crossover(c_MTLS_1.getParams(), c_MTLS_2.getParams(), MTLS); // crossover depending of
-																							// method
+				// crossover and mutation are method dependent
+				paramsMTLS = crossover(p_MTLS_1.getParams(), p_MTLS_2.getParams(), MTLS); 
 				paramsMTLS = mutate(paramsMTLS, MTLS, 0.5);
 
-				paramsROTS = crossover(c_ROTS_1.getParams(), c_ROTS_2.getParams(), ROTS); // crossover depending of
-																							// method
+				paramsROTS = crossover(p_ROTS_1.getParams(), p_ROTS_2.getParams(), ROTS);
 				paramsROTS = mutate(paramsROTS, ROTS, 0.5);
 
-				paramsEO = crossover(c_EO_1.getParams(), c_EO_2.getParams(), EO); // crossover depending of method
+				paramsEO = crossover(p_EO_1.getParams(), p_EO_2.getParams(), EO);
 				paramsEO = mutate(paramsEO, EO, 0.5);
 
-				paramsGA = crossover(c_GA_1.getParams(), c_GA_2.getParams(), GA); // crossover depending of method
+				paramsGA = crossover(p_GA_1.getParams(), p_GA_2.getParams(), GA);
 				paramsGA = mutate(paramsGA, GA, 0.5);
 
 				// printValues(generation);
@@ -170,7 +167,7 @@ public class MainActivity {
 			}
 
 			// launch execution in parallel for all workers
-			for (int i = 0; i < total_by_mh; i += 1) {
+			for (int i = 0; i < parameters_by_mh; i += 1) {
 				pool.submit(list_mtls.get(i));
 				pool.submit(list_rots.get(i));
 				pool.submit(list_eo.get(i));
@@ -178,14 +175,14 @@ public class MainActivity {
 			}
 
 			// wait for each method
-			for (int i = 0; i < total_by_mh; i += 1) {
+			for (int i = 0; i < parameters_by_mh; i += 1) {
 				list_mtls.get(i).join();
 				list_rots.get(i).join();
 				list_eo.get(i).join();
 				list_ga.get(i).join();
 			}
 
-			for (int i = 0; i < total_by_mh; i += 1) {
+			for (int i = 0; i < parameters_by_mh; i += 1) {
 				// insert new parameters individual into generation
 				insertIndividual(paramsPopulation.get(MTLS), new Params(paramsMTLS, list_mtls.get(i).getBestCost()),
 						MTLS);
@@ -213,7 +210,7 @@ public class MainActivity {
 			}
 
 			diverse_population.clear();
-			int ga_population = random.nextInt(total_by_mh);
+			int ga_population = random.nextInt(parameters_by_mh);
 			diverse_population = list_ga.get(ga_population).getFinalPopulation();
 
 			count_generations++;
@@ -281,16 +278,16 @@ public class MainActivity {
 
 	}
 
-	public static List<List<Params>> generateInitialPopulation(int number_by_mh, Constructive constructive) {
+	public static List<List<Params>> generateInitialPopulation(int number_of_each_mh, Constructive constructive) {
 		elite_population = new ArrayList<>();
 
 		List<List<Params>> paramsPopulation = new ArrayList<>(4); // because there are 4 different mh
 
 		for (int k = 0; k < 4; k++) {
-			List<Params> tempList = new ArrayList<>(number_by_mh);
-			for (int i = 0; i < number_by_mh; i++) {
-				int[] s = constructive.createRandomSolution(qap_size, (k * number_by_mh + i));
-				int[] p = { 0, 0, 0 };
+			List<Params> tempListParams = new ArrayList<>(number_of_each_mh);
+			for (int i = 0; i < number_of_each_mh; i++) {
+				int[] s = constructive.createRandomSolution(qap_size, (k * number_of_each_mh + i));
+				int[] p = { 0, 0, 0 }; // params array
 
 				switch (k) {
 				case MTLS:
@@ -315,13 +312,14 @@ public class MainActivity {
 
 					break;
 				}
-				tempList.add(new Params(p, Integer.MAX_VALUE));
+				tempListParams.add(new Params(p, Integer.MAX_VALUE));
 				elite_population.add(new Solution(s));
 			}
 
-			paramsPopulation.add(tempList);
+			paramsPopulation.add(tempListParams);
 		}
 
+		// elite and diverse population start both equal
 		diverse_population = new ArrayList<>(elite_population);
 
 		return paramsPopulation;
