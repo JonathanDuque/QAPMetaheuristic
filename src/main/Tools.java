@@ -3,7 +3,8 @@ package main;
 import java.text.DecimalFormat;
 
 public class Tools {
-	public static DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
+	public static DecimalFormat DECIMAL_FORMAT_2D = new DecimalFormat("#.##");
+	public static DecimalFormat DECIMAL_FORMAT_3D = new DecimalFormat("#.###");
 
 	public static void printArray(int[] array) {
 		String array_s = "";

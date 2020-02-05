@@ -1,5 +1,8 @@
 package main;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,10 +17,10 @@ public class MainActivity {
 	private static int qap_size;
 	private static Random random;
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
+	private static String[] mh_text = { "MTLS", "ROTS", "EO", "GA" };
 	private static QAPData qap;
 	private static int execution_time = 1000;
 	private static boolean no_find_BKS = true;
-	// static List<List<Integer>> listCost = new ArrayList<>(4);// 4 mh
 	private static List<Solution> elite_population;
 	private static List<Solution> diverse_population;
 
@@ -42,7 +45,7 @@ public class MainActivity {
 			execution_time = 1000;
 			break;
 		default:
-			problem = "chr12a.qap";
+			problem = "tai40b.qap";
 			workers = 4;
 			execution_time = 1000;
 			break;
@@ -77,7 +80,7 @@ public class MainActivity {
 		final Constructive constructive = new Constructive();
 		List<List<Params>> params_population = generateInitialPopulation(number_of_each_mh, constructive);
 
-		int generations = 20, count_generations = 0;
+		int generations = 25, count_generations = 0;
 
 		// create params class for each mh
 		Params p_MTLS_1, p_MTLS_2;
@@ -91,18 +94,8 @@ public class MainActivity {
 		int[] paramsEO = new int[3];
 		int[] paramsGA = new int[3];
 
-		/*
-		 * for (int i = 0; i < 4; i++) { int initCost =
-		 * qap.evalSolution((generation.get(i).get(0).getSolution())); //
-		 * System.out.println(""+initCost); List<Integer> cost_by_mh = new
-		 * ArrayList<>(); cost_by_mh.add(initCost); listCost.add(cost_by_mh); }
-		 */
-
-		// printValues(paramsPopulation);
-
-		// printPopulation(elite_population);
-		// System.out.println("\n");
-		// printPopulation(diverse_population);
+		// printParamsPopulation(params_population);
+		// printSolutionPopulation(elite_population, Tools.DECIMAL_FORMAT);
 
 		// these lists are necessary for executing in parallel
 		List<MultiStartLocalSearch> list_mtls = new ArrayList<>();
@@ -223,56 +216,90 @@ public class MainActivity {
 			list_eo.clear();
 			list_ga.clear();
 		}
-		// printValues(paramsPopulation);
-		/*
-		 * for (int i = 0; i < listCost.size(); i++) { System.out.println( (i)+": " +
-		 * listCost.get(i)); }
-		 */
 
 		// System.out.println("Best Solution");
-		// printPopulation(elite_population, Tools.DECIMAL_FORMAT);
-		// System.out.println("Diverse");
-		// printPopulation(diverse_population, df2);
+		// printSolutionPopulation(elite_population);
 
-		printTotalTime(start);
-		System.out.println("Generations: " + count_generations);
-
-		for (int i = 0; i < params_population.size(); i++) {
-			List<Params> listParams = params_population.get(i);
-			int best = Integer.MAX_VALUE;
-			int c = -1;
-			for (int l = 0; l < listParams.size(); l++) {
-				if (best > listParams.get(l).getScore()) {
-					best = listParams.get(l).getScore();
-					c = l;
-				}
+		// get results
+		int[] best_solution = elite_population.get(0).getArray();
+		int best_cost = Integer.MAX_VALUE;
+		for (int i = 0; i < elite_population.size(); i++) {
+			int[] temp_s = elite_population.get(i).getArray();
+			int temp_cost = qap.evalSolution(elite_population.get(i).getArray());
+			if (temp_cost < best_cost) {
+				best_solution = temp_s;
+				best_cost = temp_cost;
 			}
-
-			// printMetaheuristic(i, best, listParams.get(c).getParams(), df2);
 		}
 
+		qap.printSolution(best_solution, best_cost);
+		double std = best_cost * 100.0 / qap.getBKS() - 100;
+		System.out.println("Cost: " + best_cost + " " + Tools.DECIMAL_FORMAT_2D.format(std) + "%");
+
+		double total_time = (System.currentTimeMillis() - start);
+		total_time /= 1000.0;
+		System.out.println("\nTotal time: " + total_time + " sec");
+		System.out.println("Generations: " + count_generations);
+
 		/*
-		 * FileWriter fileWriter; try { fileWriter = new FileWriter("results.csv");
-		 * fileWriter.append("Generation"); fileWriter.append(";");
-		 * fileWriter.append("MultiStart LocalSearch"); fileWriter.append(";");
-		 * fileWriter.append("Robust TabuSearch "); fileWriter.append(";");
-		 * fileWriter.append("Extremal Optimization"); fileWriter.append(";");
-		 * fileWriter.append("Genetic Algorithm"); fileWriter.append("\n");
+		 * for (int i = 0; i < params_population.size(); i++) { List<Params> listParams
+		 * = params_population.get(i); int best = Integer.MAX_VALUE; int c = -1; for
+		 * (int l = 0; l < listParams.size(); l++) { if (best >
+		 * listParams.get(l).getScore()) { best = listParams.get(l).getScore(); c = l; }
+		 * }
 		 * 
-		 * for (int i = 0; i <= count_generations; i++) {
-		 * fileWriter.append(Integer.toString(i)); fileWriter.append(";");
-		 * fileWriter.append(Integer.toString(listCost.get(MTLS).get(i)));
-		 * fileWriter.append(";");
-		 * fileWriter.append(Integer.toString(listCost.get(ROTS).get(i)));
-		 * fileWriter.append(";");
-		 * fileWriter.append(Integer.toString(listCost.get(EO).get(i)));
-		 * fileWriter.append(";");
-		 * fileWriter.append(Integer.toString(listCost.get(GA).get(i)));
-		 * fileWriter.append("\n"); }
-		 * 
-		 * fileWriter.flush(); fileWriter.close(); } catch (IOException e) {
-		 * e.printStackTrace(); }
+		 * printMetaheuristic(i, best, listParams.get(c).getParams(),
+		 * Tools.DECIMAL_FORMAT); }
 		 */
+
+		File idea = new File("Results/" + problem + ".csv");
+		FileWriter fileWriter;
+		if (!idea.exists()) {
+			// if file does not exist, so create and write header
+
+			try {
+				fileWriter = new FileWriter("Results/" + problem + ".csv");
+				fileWriter.append("solution");
+				fileWriter.append(";");
+				fileWriter.append("cost");
+				fileWriter.append(";");
+				fileWriter.append("deviation ");
+				fileWriter.append(";");
+				fileWriter.append("time");
+				fileWriter.append(";");
+				fileWriter.append("generations");
+				fileWriter.append("\n");
+
+				fileWriter.flush();
+				fileWriter.close();
+
+			} catch (IOException e) {
+				System.out.println("Error writing headers");
+				e.printStackTrace();
+			}
+		}
+
+		try {
+			fileWriter = new FileWriter("Results/" + problem + ".csv", true);
+			// solution - cost- deviation - time - generations
+			fileWriter.append(Arrays.toString(best_solution));
+			fileWriter.append(";");
+			fileWriter.append(Integer.toString(best_cost));
+			fileWriter.append(";");
+			fileWriter.append(Tools.DECIMAL_FORMAT_2D.format(std));
+			fileWriter.append(";");
+			fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(total_time));
+			fileWriter.append(";");
+			fileWriter.append(Integer.toString(count_generations));
+			fileWriter.append("\n");
+
+			fileWriter.flush();
+			fileWriter.close();
+		} catch (IOException e) {
+			System.out.println("Error writing data");
+
+			e.printStackTrace();
+		}
 
 	}
 
@@ -339,7 +366,7 @@ public class MainActivity {
 		final int index = random.nextInt(p.size());
 		selected_solution = p.get(index);
 		p.remove(index);// delete for no selecting later
-		System.out.println("selected : " + index);
+		// System.out.println("selected : " + index);
 
 		return selected_solution.getArray();
 	}
@@ -481,12 +508,6 @@ public class MainActivity {
 		return s;
 	}
 
-	public static void printTotalTime(long start) {
-		double time = (System.currentTimeMillis() - start);
-		time /= 1000;
-		System.out.println("\nTotal time: " + time + " sec");
-	}
-
 	public static int getSeed() {
 		return random.nextInt();
 	}
@@ -504,21 +525,11 @@ public class MainActivity {
 		}
 	}
 
-	public static void printParams(List<Params> listParams, int i) {
-		if (i == -1) {
-			System.out.println(i);
-			for (int l = 0; l < listParams.size(); l++) {
-				Tools.printArray(listParams.get(l).getParams());
-				System.out.println("costo " + listParams.get(l).getScore());
-			}
-		}
-	}
-
-	public static void printValues(List<List<Params>> generation) {
+	public static void printParamsPopulation(List<List<Params>> generation) {
 		for (int i = 0; i < generation.size(); i++) {
 			List<Params> listChromosomes = generation.get(i);
 			if (i >= 0) {
-				System.out.println(i);
+				System.out.println(mh_text[i]);
 				for (int l = 0; l < listChromosomes.size(); l++) {
 					Tools.printArray(listChromosomes.get(l).getParams());
 					// System.out.println("costo " + listChromosomes.get(l).getScore());
@@ -608,23 +619,18 @@ public class MainActivity {
 		elite_population.add(new Solution(s));
 	}
 
-	public static void printPopulation(List<Solution> p, DecimalFormat df2) {
+	public static void printSolutionPopulation(List<Solution> p) {
 		int[] best_solution = p.get(0).getArray();
 		int best_cost = Integer.MAX_VALUE;
 		for (int i = 0; i < p.size(); i++) {
 			int[] temp_s = p.get(i).getArray();
 			int temp_cost = qap.evalSolution(p.get(i).getArray());
-			// qap.printSolution(temp_s, temp_cost);
+			qap.printSolution(temp_s, temp_cost);
 			if (temp_cost < best_cost) {
 				best_solution = temp_s;
 				best_cost = temp_cost;
 			}
 		}
-
-		qap.printSolution(best_solution, best_cost);
-		double std = best_cost * 100.0 / qap.getBKS() - 100;
-		System.out.println("Cost: " + best_cost + " " + df2.format(std) + "%");
-		// Tools.printArray(listSolution.get(i).getArray());
 
 	}
 }
