@@ -58,8 +58,8 @@ public class MainActivity {
 		}
 
 		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
-		System.out.println("Threads: " + workers);
-		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds\n");
+		//System.out.println("Threads: " + workers);
+		//System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds\n");
 
 		final ReadFile readFile = new ReadFile("Data/" + problem);
 		final long start = System.currentTimeMillis();
@@ -80,7 +80,7 @@ public class MainActivity {
 		final Constructive constructive = new Constructive();
 		List<List<Params>> params_population = generateInitialPopulation(number_of_each_mh, constructive);
 
-		int generations = 25, count_generations = 0;
+		int generations = 30, count_generations = 0;
 
 		// create params class for each mh
 		Params p_MTLS_1, p_MTLS_2;
@@ -232,14 +232,14 @@ public class MainActivity {
 			}
 		}
 
-		qap.printSolution(best_solution, best_cost);
+		//qap.printSolution(best_solution, best_cost);
 		double std = best_cost * 100.0 / qap.getBKS() - 100;
-		System.out.println("Cost: " + best_cost + " " + Tools.DECIMAL_FORMAT_2D.format(std) + "%");
+		//System.out.println("Cost: " + best_cost + " " + Tools.DECIMAL_FORMAT_2D.format(std) + "%");
 
 		double total_time = (System.currentTimeMillis() - start);
 		total_time /= 1000.0;
-		System.out.println("\nTotal time: " + total_time + " sec");
-		System.out.println("Generations: " + count_generations);
+		System.out.println("Total time: " + total_time + " sec");
+		//System.out.println("Generations: " + count_generations);
 
 		/*
 		 * for (int i = 0; i < params_population.size(); i++) { List<Params> listParams
@@ -252,13 +252,14 @@ public class MainActivity {
 		 * Tools.DECIMAL_FORMAT); }
 		 */
 
-		File idea = new File("Results/" + problem + ".csv");
+		final String file_name = problem.replace(".qap", "");
+		File idea = new File("Results/" + file_name + ".csv");
 		FileWriter fileWriter;
 		if (!idea.exists()) {
 			// if file does not exist, so create and write header
 
 			try {
-				fileWriter = new FileWriter("Results/" + problem + ".csv");
+				fileWriter = new FileWriter("Results/" + file_name + ".csv");
 				fileWriter.append("solution");
 				fileWriter.append(";");
 				fileWriter.append("cost");
@@ -280,7 +281,7 @@ public class MainActivity {
 		}
 
 		try {
-			fileWriter = new FileWriter("Results/" + problem + ".csv", true);
+			fileWriter = new FileWriter("Results/" + file_name + ".csv", true);
 			// solution - cost- deviation - time - generations
 			fileWriter.append(Arrays.toString(best_solution));
 			fileWriter.append(";");
