@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import main.GeneticAlgorithm.GeneticAlgorithm;
 import main.GeneticAlgorithm.Results;
@@ -19,12 +20,14 @@ public class MainActivity {
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
 	private static String[] mh_text = { "MTLS", "ROTS", "EO", "GA" };
 	private static QAPData qap;
-	private static int execution_time = 1000;
-	private static boolean no_find_BKS = true;
+	private static int execution_time = 10000;
+	//atomic variable to avoid race condition reading and writing it throw threads
+	private static AtomicBoolean no_find_BKS = new AtomicBoolean(true);
 	private static List<Solution> elite_population;
 	private static List<Solution> diverse_population;
 
 	public static void main(String[] args) {
+		final long start = System.currentTimeMillis();
 		final String problem;
 		final int workers;
 
@@ -37,17 +40,17 @@ public class MainActivity {
 		case 2:
 			problem = args[0];
 			workers = Integer.parseInt(args[1]);
-			execution_time = 1000;
+			execution_time = 10000;
 			break;
 		case 1:
 			problem = args[0];
 			workers = 4;
-			execution_time = 1000;
+			execution_time = 10000;
 			break;
 		default:
 			problem = "tai40b.qap";
 			workers = 4;
-			execution_time = 1000;
+			execution_time = 10000;
 			break;
 		}
 
@@ -62,7 +65,7 @@ public class MainActivity {
 		//System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds\n");
 
 		final ReadFile readFile = new ReadFile("Data/" + problem);
-		final long start = System.currentTimeMillis();
+		
 
 		// initialize qap data, i.e matrix of flow and distance matrix [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
@@ -102,8 +105,12 @@ public class MainActivity {
 		List<RobustTabuSearch> list_rots = new ArrayList<>();
 		List<ExtremalOptimization> list_eo = new ArrayList<>();
 		List<GeneticAlgorithm> list_ga = new ArrayList<>();
+		
+		double init_time = (System.currentTimeMillis() - start);
+		init_time /= 1000.0;
+		//System.out.println("Init time: " + init_time + " sec");
 
-		while (count_generations < generations && no_find_BKS) {
+		while (count_generations < generations && no_find_BKS.get()) {
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
@@ -269,6 +276,8 @@ public class MainActivity {
 				fileWriter.append("time");
 				fileWriter.append(";");
 				fileWriter.append("generations");
+				fileWriter.append(";");
+				fileWriter.append("init_time");
 				fileWriter.append("\n");
 
 				fileWriter.flush();
@@ -292,6 +301,8 @@ public class MainActivity {
 			fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(total_time));
 			fileWriter.append(";");
 			fileWriter.append(Integer.toString(count_generations));
+			fileWriter.append(";");
+			fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(init_time));
 			fileWriter.append("\n");
 
 			fileWriter.flush();
@@ -539,10 +550,14 @@ public class MainActivity {
 		}
 	}
 
-	public static void findBKS() {
-		no_find_BKS = false;
+	//The synchronized keyword ensures that only one thread can enter the method at one time, is one possibility
+	public  static void findBKS() {
+		no_find_BKS.set(false);
 	}
 
+	public static boolean is_BKS_was_not_found() {
+		return no_find_BKS.get();
+	}
 	public static void printMetaheuristic(final int type_mh, final int cost, final int[] p, DecimalFormat df2) {
 
 		String params_text = "";

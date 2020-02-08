@@ -60,7 +60,7 @@ public class GeneticAlgorithm extends RecursiveAction {
 		final long start = System.currentTimeMillis();
 		long time = 0;
 		// this cycle finish when complete all generations
-		while (time - start < MainActivity.getExecutionTime()) { // execution during 10 milliseconds = 0.01 seconds
+		while (time - start < MainActivity.getExecutionTime() && MainActivity.is_BKS_was_not_found()) { // execution during 10 milliseconds = 0.01 seconds
 			temp_generation = new ArrayList<>(population);
 
 			for (int i = 0; i < pop_size / 2; i++) {

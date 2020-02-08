@@ -59,7 +59,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 		final int execution_time = MainActivity.getExecutionTime();
 
 		// here find the best solution from the initSolution
-		while (time - start < execution_time  && bestCost != qap.getBKS()) { // execution during 10 milliseconds = 0.01 seconds
+		while (time - start < execution_time && MainActivity.is_BKS_was_not_found()) { // execution during execution_time or until find bks
 			improve = false;
 			bestDelta = 0;
 

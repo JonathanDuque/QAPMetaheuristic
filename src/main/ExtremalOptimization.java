@@ -93,7 +93,7 @@ public class ExtremalOptimization extends RecursiveAction {
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
-		while (time - start < MainActivity.getExecutionTime() && bestCost != qap.getBKS()) {
+		while (time - start < MainActivity.getExecutionTime() && MainActivity.is_BKS_was_not_found()) {
 
 			for (int i = 0; i < n; i++) {
 				int bestMove = -1;
