@@ -22,7 +22,7 @@ public class ExtremalOptimization extends RecursiveAction {
 		int cost, index, bestMove;
 	}
 
-	float[] pdf;
+	double[] pdf;
 	Random random;
 	private final int n;
 	QAPData qap;
@@ -47,7 +47,7 @@ public class ExtremalOptimization extends RecursiveAction {
 	public int[] getSolution() {
 		return solution;
 	}
-	
+
 	public int getBestCost() {
 		return bestCost;
 	}
@@ -55,16 +55,16 @@ public class ExtremalOptimization extends RecursiveAction {
 	@Override
 	protected void compute() {
 		int currentCost;
-		pdf = new float[n];
+		pdf = new double[n];
 		// int currentIteration = 1;
 		// int totalIterations = 1000;
 		int[] currentSolution = Arrays.copyOf(initSolution, n);
 		int tempDelta, bestDelta;
 		List<Delta> deltaList = new ArrayList<>();
 		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
-		
-		//System.out.println("EO");
-		//Tools.printArray(currentSolution);
+
+		// System.out.println("EO");
+		// Tools.printArray(currentSolution);
 
 		// receive tau parameter
 		final double tau = params[0] / 100.0; // necesario para que la division de decimal
@@ -123,7 +123,7 @@ public class ExtremalOptimization extends RecursiveAction {
 			}
 
 			Collections.sort(deltaList, compareByCost);
-			//printDeltas(deltaList);
+			// printDeltas(deltaList);
 
 			Delta delta = deltaList.get(pdfPick()); // pdf pick gets the index recommended
 
@@ -136,7 +136,7 @@ public class ExtremalOptimization extends RecursiveAction {
 			// block help to save the best of the best
 			// System.out.println("best: " + bestCost);
 			// System.out.println("curr: " + currentCost );
-			//System.out.println("delta: " + delta.cost + "\n");
+			// System.out.println("delta: " + delta.cost + "\n");
 
 			if (currentCost < bestCost) {
 				solution = Arrays.copyOf(currentSolution, n);
@@ -151,14 +151,14 @@ public class ExtremalOptimization extends RecursiveAction {
 
 			// currentIteration++;
 			deltaList.clear();// delete delta moves
-			time = System.currentTimeMillis();	
+			time = System.currentTimeMillis();
 
 		}
 
-		//MainActivity.listCost.get(2).add(bestCost);
-		//System.out.println("bestCost: " + bestCost);
-		//System.out.println("solution: " + qap.evalSolution(solution) + "\n");
-		//System.out.println("Fin EO");
+		// MainActivity.listCost.get(2).add(bestCost);
+		// System.out.println("bestCost: " + bestCost);
+		// System.out.println("solution: " + qap.evalSolution(solution) + "\n");
+		// System.out.println("Fin EO");
 
 	}
 
@@ -170,7 +170,7 @@ public class ExtremalOptimization extends RecursiveAction {
 			y = Math.exp(-tau * (i + 1));
 			// System.out.println("f(" + i + ") = " + (float) y);
 
-			pdf[i] = (float) y; // cast because don't need so much decimals
+			pdf[i] = y;
 			sum += y;
 		}
 		for (int i = 0; i < n; i++) {
@@ -190,7 +190,7 @@ public class ExtremalOptimization extends RecursiveAction {
 		for (int i = 0; i < n; i++) {
 			y = Math.pow((i + 1), -tau);
 			// System.out.println("f(" + i + ") = " + (float) y);
-			pdf[i] = (float) y; // cast because don't need so much decimals
+			pdf[i] = y;
 			sum += y;
 		}
 
@@ -215,7 +215,7 @@ public class ExtremalOptimization extends RecursiveAction {
 		for (int i = 0; i < n; i++) {
 			y = Math.pow(i + 1, tau - 1) * Math.exp(-(i + 1) / theta) / constk;
 			// System.out.println("f(" + i + ") = " + (float) y);
-			pdf[i] = (float) y; // cast because don't need so much decimals
+			pdf[i] = y;
 			sum += y;
 		}
 
