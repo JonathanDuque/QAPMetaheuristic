@@ -36,6 +36,10 @@ public class GeneticAlgorithm extends RecursiveAction {
 		this.params = params.clone();
 		population = getGenerationFromDiversePopulation(diverse_population);
 	}
+	
+	public void setEnvironment(int[] params) {
+		this.params = params.clone();
+	}
 
 	@Override
 	protected void compute() {
@@ -45,17 +49,17 @@ public class GeneticAlgorithm extends RecursiveAction {
 		
 		List<Individual> temp_generation = new ArrayList<>();// temporal generation
 		int count_generations = 0;
-		 //int pop_size = params[0];
+		int pop_size = params[0];
 		final double mutation_probability = params[1] / 1000.0;
 		final boolean crossover_ux = params[2] == 0 ? true : false;
 		// random = new Random(MainActivity.getSeed());
 
 		// creating the first generation
-		//population = createFirstGeneration(pop_size);
+		population = createFirstGeneration(pop_size);
 		//Collections.sort(population, compareByFitness);
 		//System.out.println("\nGeneración inicial");
 		//printPopulation(population);
-		final int pop_size = population.size();
+		//final int pop_size = population.size();
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
