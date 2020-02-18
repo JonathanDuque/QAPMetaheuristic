@@ -1,20 +1,5 @@
-java -jar ParallelHyperQAP.jar sko90.qap 8 10000
-java -jar ParallelHyperQAP.jar sko100b.qap 8 10000
-java -jar ParallelHyperQAP.jar sko100c.qap 8 10000
-java -jar ParallelHyperQAP.jar sko100d.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai50a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai50a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai50a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai50a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai50a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai80a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai80a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai100a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai50b.qap 8 10000
-java -jar ParallelHyperQAP.jar tai100b.qap 8 10000
-java -jar ParallelHyperQAP.jar wil100.qap 8 10000
+source exec_sko56.sh
+source exec_sko100a.sh
+source exec_tai20b.sh
+source exec_tai50b.sh
+source exec_tai100b.sh

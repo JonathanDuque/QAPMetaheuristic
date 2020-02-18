@@ -83,7 +83,8 @@ public class MainActivity {
 		final Constructive constructive = new Constructive();
 		List<List<Params>> params_population = generateInitialPopulation(number_of_each_mh, constructive);
 
-		int generations = 30, count_generations = 0;
+		final int generations = 10;
+		int count_generations = 0;
 
 		// create params class for each mh
 		Params p_MTLS_1, p_MTLS_2;
