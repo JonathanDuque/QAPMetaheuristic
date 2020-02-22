@@ -375,11 +375,12 @@ public class GeneticAlgorithm extends RecursiveAction {
 	}
 	
 	public List<Solution> getFinalPopulation(){
+		final int[] empty_params = { -1, -1, -1 };
 		int pop_size = population.size();
 		List<Solution> final_population = new ArrayList<>(pop_size);
 		
 		for (Individual i: population) {
-			final_population.add(new Solution(i.getGenes().clone()));
+			final_population.add(new Solution(i.getGenes().clone(), empty_params, "N/A"));
 		}
 		
 		return final_population;	
