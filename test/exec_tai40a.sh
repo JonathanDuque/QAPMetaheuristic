@@ -1,30 +1,30 @@
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
-java -jar ParallelHyperQAP.jar tai40a.qap 8 10000
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20
+java -jar ParallelHyperQAP.jar tai40a.qap 8 15000 20

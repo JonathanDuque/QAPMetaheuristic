@@ -76,7 +76,7 @@ public class MainActivity {
 		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
 		System.out.println("Generations: " + generations + "\n");
 
-		final ReadFile readFile = new ReadFile("test/Data/" + problem);
+		final ReadFile readFile = new ReadFile("Data/" + problem);
 
 		// initialize qap data, i.e matrix of flow and distance matrix [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
