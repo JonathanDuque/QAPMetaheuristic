@@ -419,7 +419,7 @@ public class MainActivity {
 			break;
 		case GA:
 			p[0] = params1[0];// population size
-			p[1] = params2[1];// mutation *1000
+			p[1] = params1[1];// mutation *1000
 			p[2] = params2[2]; // crossover type
 			break;
 		}
