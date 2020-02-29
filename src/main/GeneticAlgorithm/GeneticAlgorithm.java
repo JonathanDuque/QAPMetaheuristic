@@ -36,6 +36,12 @@ public class GeneticAlgorithm extends RecursiveAction {
 		this.params = params.clone();
 		population = getGenerationFromDiversePopulation(diverse_population);
 	}
+	
+	// always before compute function, is necessary set the environment
+		public void setEnvironment(int[] params, int population_size) {
+			this.params = params.clone();
+			population = createFirstGeneration(population_size);
+		}
 
 	@Override
 	protected void compute() {

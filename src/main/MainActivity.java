@@ -23,8 +23,8 @@ public class MainActivity {
 	private static int execution_time = 10000;
 	// atomic variable to avoid race condition reading and writing it throw threads
 	private static AtomicBoolean no_find_BKS = new AtomicBoolean(true);
-	private static List<Solution> elite_population;
-	private static List<Solution> diverse_population;
+	private static List<Solution> result_population;
+	// private static List<Solution> diverse_population;
 
 	public static void main(String[] args) {
 		final int generations;
@@ -58,7 +58,7 @@ public class MainActivity {
 			generations = 20;
 			break;
 		default:
-			problem = "tai40a.qap";
+			problem = "sko56.qap";
 			workers = 4;
 			execution_time = 15000;
 			generations = 20;
@@ -112,13 +112,20 @@ public class MainActivity {
 		List<ExtremalOptimization> list_eo = new ArrayList<>();
 		List<GeneticAlgorithm> list_ga = new ArrayList<>();
 
+		int count_generations = 0;
+
+		// create and initiate variables for results
+		int[] best_solution = constructive.createRandomSolution(qap_size, count_generations);
+		int[] best_params = { -1, -1, -1 };
+		String method = "";
+		int best_cost = qap.evalSolution(best_solution);
+
 		double init_time = (System.currentTimeMillis() - start);
 		init_time /= 1000.0;
 		// System.out.println("Init time: " + init_time + " sec");
 
-		int count_generations = 0;
-
 		while (count_generations < generations && no_find_BKS.get()) {
+			result_population = new ArrayList<>();
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
@@ -167,10 +174,16 @@ public class MainActivity {
 				// printValues(generation);
 
 				// setting variables for each method
-				list_ga.get(i).setEnvironment(paramsGA, elite_population); // GA environment is necessary make the first
-				list_mtls.get(i).setEnvironment(getSolution(diverse_population), paramsMTLS);
-				list_rots.get(i).setEnvironment(getSolution(diverse_population), paramsROTS);
-				list_eo.get(i).setEnvironment(getSolution(diverse_population), paramsEO);
+				list_ga.get(i).setEnvironment(paramsGA, paramsGA[0]); // GA environment is necessary make the first
+				list_mtls.get(i).setEnvironment(
+						constructive.createRandomSolution(qap_size, (i + 1) * (i + 1) + 6 * count_generations),
+						paramsMTLS);
+				list_rots.get(i).setEnvironment(
+						constructive.createRandomSolution(qap_size, (i + 1) * (i + 1) + 1 + 6 * count_generations),
+						paramsROTS);
+				list_eo.get(i).setEnvironment(
+						constructive.createRandomSolution(qap_size, (i + 1) * (i + 1) + 2 + 6 * count_generations),
+						paramsEO);
 			}
 
 			// launch execution in parallel for all workers
@@ -214,41 +227,38 @@ public class MainActivity {
 
 			}
 
-			diverse_population.clear();
-			int ga_population = random.nextInt(number_workes_by_mh);
-			diverse_population = list_ga.get(ga_population).getFinalPopulation();
+			// diverse_population.clear();
+			// int ga_population = random.nextInt(number_workes_by_mh);
+			// diverse_population = list_ga.get(ga_population).getFinalPopulation();
 
 			count_generations++;
 
-			// System.out.println("Elite");
-			// printSolutionPopulation(elite_population);
-			// System.out.println("Diverse");
-			// printPopulation(diverse_population, );
+			// System.out.println("Result Population");
+			// printSolutionPopulation(result_population);
 
 			list_mtls.clear();
 			list_rots.clear();
 			list_eo.clear();
 			list_ga.clear();
+
+			// update results
+			for (int i = 0; i < result_population.size(); i++) {
+				int[] temp_s = result_population.get(i).getArray();
+				int temp_cost = qap.evalSolution(result_population.get(i).getArray());
+				if (temp_cost < best_cost) {
+					best_solution = temp_s;
+					best_cost = temp_cost;
+					best_params = result_population.get(i).getParams();
+					method = result_population.get(i).getMethod();
+				}
+			}
+
+			result_population.clear();
+
 		}
 
 		// System.out.println("Best Solution");
 		// printSolutionPopulation(elite_population);
-
-		// get results
-		int[] best_solution = elite_population.get(0).getArray();
-		int[] best_params = { -1, -1, -1 };
-		String method = "";
-		int best_cost = Integer.MAX_VALUE;
-		for (int i = 0; i < elite_population.size(); i++) {
-			int[] temp_s = elite_population.get(i).getArray();
-			int temp_cost = qap.evalSolution(elite_population.get(i).getArray());
-			if (temp_cost < best_cost) {
-				best_solution = temp_s;
-				best_cost = temp_cost;
-				best_params = elite_population.get(i).getParams();
-				method = elite_population.get(i).getMethod();
-			}
-		}
 
 		// qap.printSolution(best_solution, best_cost);
 		double std = best_cost * 100.0 / qap.getBKS() - 100;
@@ -335,7 +345,7 @@ public class MainActivity {
 	}
 
 	public static List<List<Params>> generateInitialPopulation(int number_of_each_mh, Constructive constructive) {
-		elite_population = new ArrayList<>();
+		// elite_population = new ArrayList<>();
 
 		List<List<Params>> paramsPopulation = new ArrayList<>(4); // because there are 4 different mh
 		final int[] empty_params = { -1, -1, -1 };
@@ -343,7 +353,8 @@ public class MainActivity {
 		for (int k = 0; k < 4; k++) {
 			List<Params> tempListParams = new ArrayList<>(number_of_each_mh);
 			for (int i = 0; i < number_of_each_mh; i++) {
-				int[] s = constructive.createRandomSolution(qap_size, (k * number_of_each_mh + i));
+				// int[] s = constructive.createRandomSolution(qap_size, (k * number_of_each_mh
+				// + i));
 				int[] p = { 0, 0, 0 }; // params array
 
 				switch (k) {
@@ -370,14 +381,14 @@ public class MainActivity {
 					break;
 				}
 				tempListParams.add(new Params(p, Integer.MAX_VALUE));
-				elite_population.add(new Solution(s, empty_params, "N/A"));
+				// elite_population.add(new Solution(s, empty_params, "N/A"));
 			}
 
 			paramsPopulation.add(tempListParams);
 		}
 
 		// elite and diverse population start both equal
-		diverse_population = new ArrayList<>(elite_population);
+		// diverse_population = new ArrayList<>(elite_population);
 
 		return paramsPopulation;
 	}
@@ -615,47 +626,36 @@ public class MainActivity {
 	}
 
 	public static void insertSolution(int[] s, int[] params, String method) {
-		boolean exist;
-		// this cycle finish until the new solution will be different
-		do {
-			exist = false;
-			// identify if the new solution is already in the population
-			for (Solution temp : elite_population) {
-				if (Arrays.equals(temp.getArray(), s)) {
-					exist = true;
-					break;
-				}
-			}
-			// if exist is necessary mutate
-			if (exist) {
-				s = mutate(s);
-			}
+		result_population.add(new Solution(s, params, method));
 
-		} while (exist);
-
-		int worst = -1, temp_cost;
-		int cost = Integer.MIN_VALUE;
-
-		for (int i = 0; i < elite_population.size(); i++) {
-			temp_cost = qap.evalSolution(elite_population.get(i).getArray());
-			if (temp_cost > cost) {
-				cost = temp_cost;
-				worst = i;
-			}
-		}
-
-		elite_population.remove(worst);
-		elite_population.add(new Solution(s, params, method));
+		/*
+		 * boolean exist; // this cycle finish until the new solution will be different
+		 * do { exist = false; // identify if the new solution is already in the
+		 * population for (Solution temp : elite_population) { if
+		 * (Arrays.equals(temp.getArray(), s)) { exist = true; break; } } // if exist is
+		 * necessary mutate if (exist) { s = mutate(s); }
+		 * 
+		 * } while (exist);
+		 * 
+		 * int worst = -1, temp_cost; int cost = Integer.MIN_VALUE;
+		 * 
+		 * for (int i = 0; i < elite_population.size(); i++) { temp_cost =
+		 * qap.evalSolution(elite_population.get(i).getArray()); if (temp_cost > cost) {
+		 * cost = temp_cost; worst = i; } }
+		 * 
+		 * elite_population.remove(worst); elite_population.add(new Solution(s, params,
+		 * method));
+		 */
 	}
 
 	public static void printSolutionPopulation(List<Solution> p) {
 
 		for (int i = 0; i < p.size(); i++) {
 			int[] temp_s = p.get(i).getArray();
-			// int temp_cost = qap.evalSolution(p.get(i).getArray());
-			// qap.printSolution(temp_s);
+			int temp_cost = qap.evalSolution(p.get(i).getArray());
 			System.out.println(p.get(i).getMethod());
-			Tools.printArray(p.get(i).getParams());
+			qap.printSolution(temp_s, temp_cost);
+			//Tools.printArray(p.get(i).getParams());
 			// qap.printSolution(temp_s, temp_cost);
 		}
 
