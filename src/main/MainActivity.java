@@ -27,7 +27,7 @@ public class MainActivity {
 	// private static List<Solution> diverse_population;
 
 	public static void main(String[] args) {
-		final int generations;
+		int generations;
 		final long start = System.currentTimeMillis();
 		final String problem;
 		final int workers;
@@ -64,6 +64,9 @@ public class MainActivity {
 			generations = 20;
 			break;
 		}
+		
+		execution_time = 15000;
+		generations = 20;
 
 		if ((workers % 4) != 0) {
 			System.out.println(
