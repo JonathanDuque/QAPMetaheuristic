@@ -164,7 +164,7 @@ public class ExtremalOptimization extends RecursiveAction {
 
 	public void initPdfExp(int n, double tau) {
 
-		float sum = 0;
+		double sum = 0;
 		double y = 0;
 		for (int i = 0; i < n; i++) {
 			y = Math.exp(-tau * (i + 1));
@@ -185,7 +185,7 @@ public class ExtremalOptimization extends RecursiveAction {
 	}
 
 	public void initPdfPow(int n, double tau) {
-		float sum = 0;
+		double sum = 0;
 		double y = 0;
 		for (int i = 0; i < n; i++) {
 			y = Math.pow((i + 1), -tau);
@@ -207,7 +207,7 @@ public class ExtremalOptimization extends RecursiveAction {
 
 	public void initPdfGamma(int n, double tau) {
 
-		float sum = 0;
+		double sum = 0;
 		double y = 0;
 		// double k = tau;
 		double theta = Math.exp(tau);
@@ -223,8 +223,9 @@ public class ExtremalOptimization extends RecursiveAction {
 			pdf[i] /= sum;
 		}
 
-		// System.out.println("total " + sum + "\n");
+		// pdf[0]-= 0.0000000000000002;
 
+		// System.out.println("total " + sum + "\n");
 		// for (int i = 0; i < n; i++) {
 		// System.out.println("f(" + i + ") = " + pdf[i]);
 		// }
