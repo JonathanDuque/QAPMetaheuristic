@@ -3,7 +3,6 @@ package main;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,27 +27,38 @@ public class MainActivity {
 		final long start = System.currentTimeMillis();
 		final String problem;
 		final int workers;
+		final int global_seed;
 
 		switch (args.length) {
+		case 4:
+			problem = args[0];
+			workers = Integer.parseInt(args[1]);
+			execution_time = Integer.parseInt(args[2]);
+			global_seed = Integer.parseInt(args[3]);
+			break;
 		case 3:
 			problem = args[0];
 			workers = Integer.parseInt(args[1]);
 			execution_time = Integer.parseInt(args[2]);
+			global_seed = 1;
 			break;
 		case 2:
 			problem = args[0];
 			workers = Integer.parseInt(args[1]);
 			execution_time = 10000;
+			global_seed = 1;
 			break;
 		case 1:
 			problem = args[0];
 			workers = 3;
 			execution_time = 10000;
+			global_seed = 1;
 			break;
 		default:
 			problem = "tai40b.qap";
 			workers = 3;
 			execution_time = 10000;
+			global_seed = 1;
 			System.out.println("Default configuration execution");
 			break;
 		}
@@ -63,15 +73,17 @@ public class MainActivity {
 
 		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
 		System.out.println("Threads: " + workers);
-		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds\n");
+		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
+		System.out.println("Seed for random values: " + global_seed+ "\n");
 
-		final ReadFile readFile = new ReadFile("test/Data/" + problem);
+
+		final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
 		// initialize qap data, i.e matrix of flow and distance matrix [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
 		qap = new QAPData(distance, flow, readFile.getTarget());
 		qap_size = qap.getSize();
-		random = new Random(1);
+		random = new Random(global_seed);
 
 		ForkJoinPool pool = new ForkJoinPool(workers);
 
@@ -196,7 +208,7 @@ public class MainActivity {
 			// if file does not exist, so create and write header
 
 			try {
-				fileWriter = new FileWriter("Results/" + file_name + ".csv");
+				fileWriter = new FileWriter("../Results/" + file_name + ".csv");
 				fileWriter.append("solution");
 				fileWriter.append(";");
 				fileWriter.append("cost");
@@ -222,7 +234,7 @@ public class MainActivity {
 		}
 
 		try {
-			fileWriter = new FileWriter("Results/" + file_name + ".csv", true);
+			fileWriter = new FileWriter("../Results/" + file_name + ".csv", true);
 			// solution - cost- deviation - time - generations
 			fileWriter.append(Arrays.toString(best_solution));
 			fileWriter.append(";");
@@ -282,7 +294,7 @@ public class MainActivity {
 			params_population.add(tempListParams);
 		}
 
-		// printParamsPopulation(paramsPopulation);
+		//printParamsPopulation(params_population);
 		return params_population;
 	}
 
