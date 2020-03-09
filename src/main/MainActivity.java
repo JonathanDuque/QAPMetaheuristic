@@ -74,8 +74,7 @@ public class MainActivity {
 		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
 		System.out.println("Threads: " + workers);
 		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
-		System.out.println("Seed for random values: " + global_seed+ "\n");
-
+		System.out.println("Seed for random values: " + global_seed + "\n");
 
 		final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
@@ -200,15 +199,16 @@ public class MainActivity {
 		 * printMetaheuristic(i, best, listParams.get(c).getParams(),
 		 * Tools.DECIMAL_FORMAT); }
 		 */
+		final String dir_file = "../Results/";
 
 		final String file_name = problem.replace(".qap", "");
-		File idea = new File("Results/" + file_name + ".csv");
+		File idea = new File(dir_file, file_name + ".csv");
 		FileWriter fileWriter;
 		if (!idea.exists()) {
 			// if file does not exist, so create and write header
 
 			try {
-				fileWriter = new FileWriter("../Results/" + file_name + ".csv");
+				fileWriter = new FileWriter(dir_file + file_name + ".csv");
 				fileWriter.append("solution");
 				fileWriter.append(";");
 				fileWriter.append("cost");
@@ -234,7 +234,7 @@ public class MainActivity {
 		}
 
 		try {
-			fileWriter = new FileWriter("../Results/" + file_name + ".csv", true);
+			fileWriter = new FileWriter(dir_file + file_name + ".csv", true);
 			// solution - cost- deviation - time - generations
 			fileWriter.append(Arrays.toString(best_solution));
 			fileWriter.append(";");
@@ -294,7 +294,7 @@ public class MainActivity {
 			params_population.add(tempListParams);
 		}
 
-		//printParamsPopulation(params_population);
+		// printParamsPopulation(params_population);
 		return params_population;
 	}
 
