@@ -14,7 +14,7 @@ public class Params {
 		return p.clone();
 	}
 	
-	public int getScore() {
+	public int getFitness() {
 		return score;
 	}
 }

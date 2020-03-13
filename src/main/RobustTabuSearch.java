@@ -37,6 +37,10 @@ public class RobustTabuSearch extends RecursiveAction {
 		return solution;
 	}
 	
+	public int[] getParams() {
+		return params;
+	}
+	
 	public int getBestCost() {
 		return bestCost;
 	}

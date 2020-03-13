@@ -47,6 +47,10 @@ public class ExtremalOptimization extends RecursiveAction {
 	public int[] getSolution() {
 		return solution;
 	}
+	
+	public int[] getParams() {
+		return params;
+	}
 
 	public int getBestCost() {
 		return bestCost;
