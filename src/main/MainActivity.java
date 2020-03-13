@@ -50,28 +50,28 @@ public class MainActivity {
 			problem = args[0];
 			workers = Integer.parseInt(args[1]);
 			execution_time = Integer.parseInt(args[2]);
-			generations = 20;
+			generations = 15;
 			global_seed = 1;
 			break;
 		case 2:
 			problem = args[0];
 			workers = Integer.parseInt(args[1]);
-			execution_time = 15000;
-			generations = 20;
+			execution_time = 20000;
+			generations = 15;
 			global_seed = 1;
 			break;
 		case 1:
 			problem = args[0];
 			workers = 3;
-			execution_time = 15000;
-			generations = 20;
+			execution_time = 20000;
+			generations = 15;
 			global_seed = 1;
 			break;
 		default:
 			problem = "tai40a.qap";
 			workers = 3;
-			execution_time = 3000;
-			generations = 20;
+			execution_time = 20000;
+			generations = 15;
 			global_seed = 1;
 			break;
 		}
@@ -88,7 +88,7 @@ public class MainActivity {
 		System.out.println("Generations: " + generations);
 		System.out.println("Seed for random values: " + global_seed + "\n");
 
-		final ReadFile readFile = new ReadFile("Data/" + problem);
+		final ReadFile readFile = new ReadFile("../Data/" + problem);
 
 		// initialize qap data, i.e matrix of flow and distance matrix [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
@@ -366,7 +366,7 @@ public class MainActivity {
 		System.out.println("Total time: " + total_time + " sec");
 		// System.out.println("Generations: " + count_generations);
 
-		final String dir_file = "Results/";
+		final String dir_file = "../../Results/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file + file_name + ".csv");

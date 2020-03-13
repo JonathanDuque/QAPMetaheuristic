@@ -14,4 +14,6 @@ source exec_sko100f.sh
 source exec_tai40a.sh
 source exec_tai50a.sh
 source exec_tai60a.sh
-
+source exec_tai80a.sh
+source exec_tai100a.sh
+source exec_tai20b.sh

@@ -1,6 +1,3 @@
-source exec_tai80a.sh
-source exec_tai100a.sh
-source exec_tai20b.sh
 source exec_tai25b.sh
 source exec_tai30b.sh
 source exec_tai35b.sh
