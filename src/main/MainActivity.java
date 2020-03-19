@@ -21,8 +21,7 @@ public class MainActivity {
 	private static int execution_time = 10000;
 	// atomic variable to avoid race condition reading and writing it throw threads
 	private static AtomicBoolean no_find_BKS = new AtomicBoolean(true);
-	private static List<Solution> result_population;
-	// private static List<Solution> diverse_population;
+	private static List<Solution> solution_population;
 
 	public static void main(String[] args) {
 		final int generations;
@@ -88,7 +87,7 @@ public class MainActivity {
 		System.out.println("Generations: " + generations);
 		System.out.println("Seed for random values: " + global_seed + "\n");
 
-		final ReadFile readFile = new ReadFile("../Data/" + problem);
+		final ReadFile readFile = new ReadFile("Data/" + problem);
 
 		// initialize qap data, i.e matrix of flow and distance matrix [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
@@ -102,8 +101,9 @@ public class MainActivity {
 		final int number_workes_by_mh = workers / DIFFERENT_MH;
 		final int params_of_each_mh = 3 * number_workes_by_mh;
 
-		List<List<Params>> params_population_one = generateInitialPopulation(params_of_each_mh, constructive);
-		List<List<Params>> params_population = generateEmptyPopulation(params_of_each_mh);
+		List<List<Params>> params_population_one = generateInitialParamsPopulation(params_of_each_mh);
+		List<List<Params>> params_population = generateEmptyParamsPopulation(params_of_each_mh);
+		solution_population = generateInitialSolutionPopulation(workers, constructive);
 
 		// create params class for each mh
 		Params p_MTLS_1, p_MTLS_2;
@@ -136,7 +136,6 @@ public class MainActivity {
 		// System.out.println("Initiate time: " + init_time + " sec");
 
 		while (count_generations < params_of_each_mh / number_workes_by_mh && no_find_BKS.get()) {
-			result_population = new ArrayList<>();
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
 				RobustTabuSearch rots = new RobustTabuSearch(qap, random.nextInt());
@@ -151,21 +150,18 @@ public class MainActivity {
 			List<Params> list_params_ROST = params_population_one.get(ROTS);
 			List<Params> list_params_EO = params_population_one.get(EO);
 
+			// is necessary a copy because after solution population will be update
+			List<Solution> solution_population_copy = new ArrayList<>(solution_population);
+
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				paramsMTLS = selectParam(list_params_MTLS).getParams();
 				paramsROTS = selectParam(list_params_ROST).getParams();
 				paramsEO = selectParam(list_params_EO).getParams();
 
 				// setting variables for each method
-				list_mtls.get(i).setEnvironment(
-						constructive.createRandomSolution(qap_size, (i + 1) * (i + 1) + 6 * count_generations),
-						paramsMTLS);
-				list_rots.get(i).setEnvironment(
-						constructive.createRandomSolution(qap_size, (i + 1) * (i + 1) + 1 + 6 * count_generations),
-						paramsROTS);
-				list_eo.get(i).setEnvironment(
-						constructive.createRandomSolution(qap_size, (i + 1) * (i + 1) + 2 + 6 * count_generations),
-						paramsEO);
+				list_mtls.get(i).setEnvironment(getSolution(solution_population_copy), paramsMTLS);
+				list_rots.get(i).setEnvironment(getSolution(solution_population_copy), paramsROTS);
+				list_eo.get(i).setEnvironment(getSolution(solution_population_copy), paramsEO);
 			}
 
 			// launch execution in parallel for all workers
@@ -182,7 +178,9 @@ public class MainActivity {
 				list_eo.get(i).join();
 			}
 
-			//save the results of each method
+			solution_population.clear();
+
+			// save the results of each method
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				paramsMTLS = list_mtls.get(i).getParams();
 				paramsROTS = list_rots.get(i).getParams();
@@ -192,9 +190,10 @@ public class MainActivity {
 				params_population.get(ROTS).add(new Params(paramsROTS, list_rots.get(i).getBestCost()));
 				params_population.get(EO).add(new Params(paramsEO, list_eo.get(i).getBestCost()));
 
-				insertSolution(list_mtls.get(i).getSolution(), paramsMTLS, mh_text[MTLS]);
-				insertSolution(list_rots.get(i).getSolution(), paramsROTS, mh_text[ROTS]);
-				insertSolution(list_eo.get(i).getSolution(), paramsEO, mh_text[EO]);
+				// update solution population
+				updateSolutionPopulation(list_mtls.get(i).getSolution(), paramsMTLS, mh_text[MTLS]);
+				updateSolutionPopulation(list_rots.get(i).getSolution(), paramsROTS, mh_text[ROTS]);
+				updateSolutionPopulation(list_eo.get(i).getSolution(), paramsEO, mh_text[EO]);
 			}
 
 			count_generations++;
@@ -203,41 +202,30 @@ public class MainActivity {
 			list_rots.clear();
 			list_eo.clear();
 
-			// update results
-			for (int i = 0; i < result_population.size(); i++) {
-				int[] temp_s = result_population.get(i).getArray();
-				int temp_cost = qap.evalSolution(result_population.get(i).getArray());
-				if (temp_cost < best_cost) {
-					best_solution = temp_s;
-					best_cost = temp_cost;
-					best_params = result_population.get(i).getParams();
-					method = result_population.get(i).getMethod();
-				}
-			}
+			// System.out.println("Solution Population");
+			// printSolutionPopulation(solution_population);
 
-			result_population.clear();
 		}
 
 		while (count_generations < generations && no_find_BKS.get()) {
-			result_population = new ArrayList<>();
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
 				RobustTabuSearch rots = new RobustTabuSearch(qap, random.nextInt());
 				ExtremalOptimization eo = new ExtremalOptimization(qap, random.nextInt());
-				// GeneticAlgorithm ga = new GeneticAlgorithm(qap, random.nextInt());
 
 				list_mtls.add(mtls);
 				list_rots.add(rots);
 				list_eo.add(eo);
-				// list_ga.add(ga);
 			}
 
 			// System.out.println( count_generations );
 			List<Params> list_params_MTLS = new ArrayList<>(params_population.get(MTLS));
 			List<Params> list_params_ROST = new ArrayList<>(params_population.get(ROTS));
 			List<Params> list_params_EO = new ArrayList<>(params_population.get(EO));
-			// List<Params> list_params_GA = new ArrayList<>(params_population.get(GA));
+
+			// is necessary a copy because after solution population will be update
+			List<Solution> solution_population_copy = new ArrayList<>(solution_population);
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				p_MTLS_1 = selectParam(list_params_MTLS);
@@ -249,9 +237,6 @@ public class MainActivity {
 				p_EO_1 = selectParam(list_params_EO);
 				p_EO_2 = selectParam(list_params_EO);
 
-				// p_GA_1 = selectIndividual(list_params_GA);
-				// p_GA_2 = selectIndividual(list_params_GA);
-
 				// crossover and mutation are method dependent
 				paramsMTLS = crossover(p_MTLS_1.getParams(), p_MTLS_2.getParams(), MTLS);
 				paramsMTLS = mutate(paramsMTLS, MTLS, 0.5);
@@ -262,23 +247,10 @@ public class MainActivity {
 				paramsEO = crossover(p_EO_1.getParams(), p_EO_2.getParams(), EO);
 				paramsEO = mutate(paramsEO, EO, 0.5);
 
-				// paramsGA = crossover(p_GA_1.getParams(), p_GA_2.getParams(), GA);
-				// paramsGA = mutate(paramsGA, GA, 0.5);
-
-				// printValues(generation);
-
 				// setting variables for each method
-				// list_ga.get(i).setEnvironment(paramsGA, paramsGA[0]); // GA environment is
-				// necessary make the first
-				list_mtls.get(i).setEnvironment(
-						constructive.createRandomSolution(qap_size, (i + 1) * (i + 1) + 6 * count_generations),
-						paramsMTLS);
-				list_rots.get(i).setEnvironment(
-						constructive.createRandomSolution(qap_size, (i + 1) * (i + 1) + 1 + 6 * count_generations),
-						paramsROTS);
-				list_eo.get(i).setEnvironment(
-						constructive.createRandomSolution(qap_size, (i + 1) * (i + 1) + 2 + 6 * count_generations),
-						paramsEO);
+				list_mtls.get(i).setEnvironment(getSolution(solution_population_copy), paramsMTLS);
+				list_rots.get(i).setEnvironment(getSolution(solution_population_copy), paramsROTS);
+				list_eo.get(i).setEnvironment(getSolution(solution_population_copy), paramsEO);
 			}
 
 			// launch execution in parallel for all workers
@@ -286,7 +258,6 @@ public class MainActivity {
 				pool.submit(list_mtls.get(i));
 				pool.submit(list_rots.get(i));
 				pool.submit(list_eo.get(i));
-				// pool.submit(list_ga.get(i));
 			}
 
 			// wait for each method
@@ -294,35 +265,24 @@ public class MainActivity {
 				list_mtls.get(i).join();
 				list_rots.get(i).join();
 				list_eo.get(i).join();
-				// list_ga.get(i).join();
 			}
+
+			solution_population.clear();
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				paramsMTLS = list_mtls.get(i).getParams();
 				paramsROTS = list_rots.get(i).getParams();
 				paramsEO = list_eo.get(i).getParams();
 
-				// insert new parameters into params population
+				// insert the new parameters into params population
 				insertParam(params_population.get(MTLS), new Params(paramsMTLS, list_mtls.get(i).getBestCost()), MTLS);
-				// inserts solution into result population and deletes the worst
-				insertSolution(list_mtls.get(i).getSolution(), paramsMTLS, mh_text[MTLS]);
-
 				insertParam(params_population.get(ROTS), new Params(paramsROTS, list_rots.get(i).getBestCost()), ROTS);
-				insertSolution(list_rots.get(i).getSolution(), paramsROTS, mh_text[ROTS]);
-
 				insertParam(params_population.get(EO), new Params(paramsEO, list_eo.get(i).getBestCost()), EO);
-				insertSolution(list_eo.get(i).getSolution(), paramsEO, mh_text[EO]);
 
-				/*
-				 * Results ga_result = list_ga.get(i).getResults(); int[] s_GA =
-				 * ga_result.getBestIndividual().getGenes();
-				 * insertIndividual(params_population.get(GA), new Params(paramsGA,
-				 * ga_result.getBestFitness()), GA); insertSolution(s_GA, paramsGA,
-				 * mh_text[GA]);
-				 * 
-				 * if (ga_result.getBestFitness() == qap.getBKS()) { findBKS(); }
-				 */
-
+				// inserts solution into solution population
+				updateSolutionPopulation(list_mtls.get(i).getSolution(), paramsMTLS, mh_text[MTLS]);
+				updateSolutionPopulation(list_rots.get(i).getSolution(), paramsROTS, mh_text[ROTS]);
+				updateSolutionPopulation(list_eo.get(i).getSolution(), paramsEO, mh_text[EO]);
 			}
 
 			// diverse_population.clear();
@@ -331,28 +291,25 @@ public class MainActivity {
 
 			count_generations++;
 
-			// System.out.println("Result Population");
-			// printSolutionPopulation(result_population);
+			// System.out.println("Solution Population");
+			// printSolutionPopulation(solution_population);
 
 			list_mtls.clear();
 			list_rots.clear();
 			list_eo.clear();
-			// list_ga.clear();
 
-			// update results variables
-			for (int i = 0; i < result_population.size(); i++) {
-				int[] temp_s = result_population.get(i).getArray();
-				int temp_cost = qap.evalSolution(result_population.get(i).getArray());
-				if (temp_cost < best_cost) {
-					best_solution = temp_s;
-					best_cost = temp_cost;
-					best_params = result_population.get(i).getParams();
-					method = result_population.get(i).getMethod();
-				}
+		}
+
+		// update final results variables
+		for (int i = 0; i < solution_population.size(); i++) {
+			int[] temp_s = solution_population.get(i).getArray();
+			int temp_cost = qap.evalSolution(solution_population.get(i).getArray());
+			if (temp_cost < best_cost) {
+				best_solution = temp_s;
+				best_cost = temp_cost;
+				best_params = solution_population.get(i).getParams();
+				method = solution_population.get(i).getMethod();
 			}
-
-			result_population.clear();
-
 		}
 
 		final double std = best_cost * 100.0 / qap.getBKS() - 100;
@@ -366,7 +323,7 @@ public class MainActivity {
 		System.out.println("Total time: " + total_time + " sec");
 		// System.out.println("Generations: " + count_generations);
 
-		final String dir_file = "../../Results/";
+		final String dir_file = "Results/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file + file_name + ".csv");
@@ -431,17 +388,24 @@ public class MainActivity {
 
 	}
 
-	public static List<List<Params>> generateInitialPopulation(int params_of_each_mh, Constructive constructive) {
-		// elite_population = new ArrayList<>();
+	public static List<Solution> generateInitialSolutionPopulation(final int total, Constructive constructive) {
+		List<Solution> init_solution_population = new ArrayList<>();
+		final int[] empty_params = { -1, -1, -1 };
 
+		for (int i = 0; i < total; i++) {
+			int[] s = constructive.createRandomSolution(qap_size, i);
+			init_solution_population.add(new Solution(s, empty_params, "N/A"));
+		}
+
+		return init_solution_population;
+	}
+
+	public static List<List<Params>> generateInitialParamsPopulation(int params_of_each_mh) {
 		List<List<Params>> params_population = new ArrayList<>(DIFFERENT_MH); // because there are # DIFFERENT_MH
-		// final int[] empty_params = { -1, -1, -1 };
 
 		for (int k = 0; k < DIFFERENT_MH; k++) {
 			List<Params> tempListParams = new ArrayList<>(params_of_each_mh);
 			for (int i = 0; i < params_of_each_mh; i++) {
-				// int[] s = constructive.createRandomSolution(qap_size, (k * number_of_each_mh
-				// + i));
 				int[] p = { 0, 0, 0 }; // params array
 
 				switch (k) {
@@ -467,28 +431,24 @@ public class MainActivity {
 				 */
 				}
 				tempListParams.add(new Params(p, Integer.MAX_VALUE));
-				// elite_population.add(new Solution(s, empty_params, "N/A"));
 			}
 
 			params_population.add(tempListParams);
 		}
 
-		// elite and diverse population start both equal
-		// diverse_population = new ArrayList<>(elite_population);
-
 		// printParamsPopulation(params_population);
 		return params_population;
 	}
 
-	public static List<List<Params>> generateEmptyPopulation(int params_of_each_mh) {
+	public static List<List<Params>> generateEmptyParamsPopulation(int params_of_each_mh) {
 		List<List<Params>> params_population_empty = new ArrayList<>(DIFFERENT_MH); // because there are # DIFFERENT_MH
+
 		for (int k = 0; k < DIFFERENT_MH; k++) {
 			List<Params> tempListParams = new ArrayList<>(params_of_each_mh);
 			params_population_empty.add(tempListParams);
 		}
 
 		return params_population_empty;
-
 	}
 
 	public static Params selectParam(List<Params> p) {
@@ -505,9 +465,9 @@ public class MainActivity {
 	public static int[] getSolution(List<Solution> p) {
 		Solution selected_solution;
 		final int index = random.nextInt(p.size());
+
 		selected_solution = p.get(index);
 		p.remove(index);// delete for no selecting later
-		// System.out.println("selected : " + index);
 
 		return selected_solution.getArray();
 	}
@@ -603,15 +563,16 @@ public class MainActivity {
 
 	}
 
-	//insert new params and remove the worst
+	// insert new params and remove the worst
 	public static void insertParam(List<Params> listParams, Params new_params, final int type) {
 
 		int worst = -1;
 		int cost = Integer.MIN_VALUE;
 		int temp_score = 0;
 		boolean exist = false;
-		
-		//is no possible mutate because for example MTLS only has two options 0 0 0 and 1 0 0
+
+		// is no possible mutate because for example MTLS only has two options 0 0 0 and
+		// 1 0 0
 
 		// this cycle finish until the new params will be different
 		/*
@@ -725,27 +686,36 @@ public class MainActivity {
 
 	}
 
-	public static void insertSolution(int[] s, int[] params, String method) {
-		result_population.add(new Solution(s, params, method));
+	public static void updateSolutionPopulation(int[] s, int[] params, String method) {
+		// solution_population.add(new Solution(s, params, method));
+
+		boolean exist; // this cycle finish until the new solution will be different
+
+		do {
+			exist = false; // identify if the new solution is already in the population
+			for (Solution temp : solution_population) {
+				if (Arrays.equals(temp.getArray(), s)) {
+					exist = true;
+					break;
+				}
+			} // if exist is necessary mutate
+			if (exist) {
+				s = mutate(s);
+			}
+
+		} while (exist);
 
 		/*
-		 * boolean exist; // this cycle finish until the new solution will be different
-		 * do { exist = false; // identify if the new solution is already in the
-		 * population for (Solution temp : elite_population) { if
-		 * (Arrays.equals(temp.getArray(), s)) { exist = true; break; } } // if exist is
-		 * necessary mutate if (exist) { s = mutate(s); }
-		 * 
-		 * } while (exist);
-		 * 
 		 * int worst = -1, temp_cost; int cost = Integer.MIN_VALUE;
 		 * 
-		 * for (int i = 0; i < elite_population.size(); i++) { temp_cost =
-		 * qap.evalSolution(elite_population.get(i).getArray()); if (temp_cost > cost) {
-		 * cost = temp_cost; worst = i; } }
-		 * 
-		 * elite_population.remove(worst); elite_population.add(new Solution(s, params,
-		 * method));
+		 * for (int i = 0; i < solution_population.size(); i++) { temp_cost =
+		 * qap.evalSolution(solution_population.get(i).getArray()); if (temp_cost >
+		 * cost) { cost = temp_cost; worst = i; } }
 		 */
+
+		// solution_population.remove(worst);
+		solution_population.add(new Solution(s, params, method));
+
 	}
 
 	public static void printSolutionPopulation(List<Solution> p) {
@@ -753,7 +723,7 @@ public class MainActivity {
 		for (int i = 0; i < p.size(); i++) {
 			int[] temp_s = p.get(i).getArray();
 			int temp_cost = qap.evalSolution(p.get(i).getArray());
-			System.out.println(p.get(i).getMethod());
+			// System.out.println(p.get(i).getMethod());
 			qap.printSolution(temp_s, temp_cost);
 			// Tools.printArray(p.get(i).getParams());
 			// qap.printSolution(temp_s, temp_cost);
