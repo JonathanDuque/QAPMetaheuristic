@@ -15,8 +15,8 @@ public class MainActivity {
 	private static int qap_size;
 	private static Random random;
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
-	private static String[] mh_text = { "MTLS", "ROTS", "EO", "GA" };
-	private static int DIFFERENT_MH = 3;
+	static final String[] mh_text = { "MTLS", "ROTS", "EO", "GA" };
+	private static final int DIFFERENT_MH = 3;
 	private static QAPData qap;
 	private static int execution_time = 10000;
 	// atomic variable to avoid race condition reading and writing it throw threads
@@ -99,10 +99,11 @@ public class MainActivity {
 		final Constructive constructive = new Constructive();
 
 		final int number_workes_by_mh = workers / DIFFERENT_MH;
-		final int params_of_each_mh = 3 * number_workes_by_mh;
+		// final int params_of_each_mh = 3 * number_workes_by_mh;
 
-		List<List<Params>> params_population_one = generateInitialParamsPopulation(params_of_each_mh);
-		List<List<Params>> params_population = generateEmptyParamsPopulation(params_of_each_mh);
+		// List<List<Params>> params_population_one =
+		// generateInitialParamsPopulation(params_of_each_mh);
+		List<List<Params>> params_population = generateInitialParamsPopulation(number_workes_by_mh);
 		solution_population = generateInitialSolutionPopulation(workers, constructive);
 
 		// create params class for each mh
@@ -135,7 +136,8 @@ public class MainActivity {
 		init_time /= 1000.0;
 		// System.out.println("Initiate time: " + init_time + " sec");
 
-		while (count_generations < params_of_each_mh / number_workes_by_mh && no_find_BKS.get()) {
+		while (count_generations < generations && no_find_BKS.get()) {
+
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
 				RobustTabuSearch rots = new RobustTabuSearch(qap, random.nextInt());
@@ -146,14 +148,16 @@ public class MainActivity {
 				list_eo.add(eo);
 			}
 
-			List<Params> list_params_MTLS = params_population_one.get(MTLS);
-			List<Params> list_params_ROST = params_population_one.get(ROTS);
-			List<Params> list_params_EO = params_population_one.get(EO);
+			// System.out.println( count_generations );
+			List<Params> list_params_MTLS = new ArrayList<>(params_population.get(MTLS));
+			List<Params> list_params_ROST = new ArrayList<>(params_population.get(ROTS));
+			List<Params> list_params_EO = new ArrayList<>(params_population.get(EO));
 
 			// is necessary a copy because after solution population will be update
 			List<Solution> solution_population_copy = new ArrayList<>(solution_population);
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
+
 				paramsMTLS = selectParam(list_params_MTLS).getParams();
 				paramsROTS = selectParam(list_params_ROST).getParams();
 				paramsEO = selectParam(list_params_EO).getParams();
@@ -180,99 +184,18 @@ public class MainActivity {
 
 			solution_population.clear();
 
-			// save the results of each method
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
-				paramsMTLS = list_mtls.get(i).getParams();
-				paramsROTS = list_rots.get(i).getParams();
-				paramsEO = list_eo.get(i).getParams();
+				// init_cost, final cost order matter
+				double delta_solution_mtls = compareSolutionCost(list_mtls.get(i).getInitCost(),
+						list_mtls.get(i).getBestCost());
+				double delta_solution_rots = compareSolutionCost(list_rots.get(i).getInitCost(),
+						list_rots.get(i).getBestCost());
+				double delta_solution_eo = compareSolutionCost(list_eo.get(i).getInitCost(),
+						list_eo.get(i).getBestCost());
 
-				params_population.get(MTLS).add(new Params(paramsMTLS, list_mtls.get(i).getBestCost()));
-				params_population.get(ROTS).add(new Params(paramsROTS, list_rots.get(i).getBestCost()));
-				params_population.get(EO).add(new Params(paramsEO, list_eo.get(i).getBestCost()));
-
-				// update solution population
-				updateSolutionPopulation(list_mtls.get(i).getSolution(), paramsMTLS, mh_text[MTLS]);
-				updateSolutionPopulation(list_rots.get(i).getSolution(), paramsROTS, mh_text[ROTS]);
-				updateSolutionPopulation(list_eo.get(i).getSolution(), paramsEO, mh_text[EO]);
-			}
-
-			count_generations++;
-
-			list_mtls.clear();
-			list_rots.clear();
-			list_eo.clear();
-
-			// System.out.println("Solution Population");
-			// printSolutionPopulation(solution_population);
-
-		}
-
-		while (count_generations < generations && no_find_BKS.get()) {
-
-			for (int i = 0; i < number_workes_by_mh; i += 1) {
-				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
-				RobustTabuSearch rots = new RobustTabuSearch(qap, random.nextInt());
-				ExtremalOptimization eo = new ExtremalOptimization(qap, random.nextInt());
-
-				list_mtls.add(mtls);
-				list_rots.add(rots);
-				list_eo.add(eo);
-			}
-
-			// System.out.println( count_generations );
-			List<Params> list_params_MTLS = new ArrayList<>(params_population.get(MTLS));
-			List<Params> list_params_ROST = new ArrayList<>(params_population.get(ROTS));
-			List<Params> list_params_EO = new ArrayList<>(params_population.get(EO));
-
-			// is necessary a copy because after solution population will be update
-			List<Solution> solution_population_copy = new ArrayList<>(solution_population);
-
-			for (int i = 0; i < number_workes_by_mh; i += 1) {
-				p_MTLS_1 = selectParam(list_params_MTLS);
-				p_MTLS_2 = selectParam(list_params_MTLS);
-
-				p_ROTS_1 = selectParam(list_params_ROST);
-				p_ROTS_2 = selectParam(list_params_ROST);
-
-				p_EO_1 = selectParam(list_params_EO);
-				p_EO_2 = selectParam(list_params_EO);
-
-				// crossover and mutation are method dependent
-				paramsMTLS = crossover(p_MTLS_1.getParams(), p_MTLS_2.getParams(), MTLS);
-				paramsMTLS = mutate(paramsMTLS, MTLS, 0.5);
-
-				paramsROTS = crossover(p_ROTS_1.getParams(), p_ROTS_2.getParams(), ROTS);
-				paramsROTS = mutate(paramsROTS, ROTS, 0.5);
-
-				paramsEO = crossover(p_EO_1.getParams(), p_EO_2.getParams(), EO);
-				paramsEO = mutate(paramsEO, EO, 0.5);
-
-				// setting variables for each method
-				list_mtls.get(i).setEnvironment(getSolution(solution_population_copy), paramsMTLS);
-				list_rots.get(i).setEnvironment(getSolution(solution_population_copy), paramsROTS);
-				list_eo.get(i).setEnvironment(getSolution(solution_population_copy), paramsEO);
-			}
-
-			// launch execution in parallel for all workers
-			for (int i = 0; i < number_workes_by_mh; i += 1) {
-				pool.submit(list_mtls.get(i));
-				pool.submit(list_rots.get(i));
-				pool.submit(list_eo.get(i));
-			}
-
-			// wait for each method
-			for (int i = 0; i < number_workes_by_mh; i += 1) {
-				list_mtls.get(i).join();
-				list_rots.get(i).join();
-				list_eo.get(i).join();
-			}
-
-			solution_population.clear();
-
-			for (int i = 0; i < number_workes_by_mh; i += 1) {
-				paramsMTLS = list_mtls.get(i).getParams();
-				paramsROTS = list_rots.get(i).getParams();
-				paramsEO = list_eo.get(i).getParams();
+				paramsMTLS = transformParameter(list_mtls.get(i).getParams(), delta_solution_mtls, MTLS);
+				paramsROTS = transformParameter(list_rots.get(i).getParams(), delta_solution_rots, ROTS);
+				paramsEO = transformParameter(list_eo.get(i).getParams(), delta_solution_eo, EO);
 
 				// insert the new parameters into params population
 				insertParam(params_population.get(MTLS), new Params(paramsMTLS, list_mtls.get(i).getBestCost()), MTLS);
@@ -451,6 +374,27 @@ public class MainActivity {
 		return params_population_empty;
 	}
 
+	public static int[] createParam(int type) {
+
+		int[] p = { 0, 0, 0 };
+
+		switch (type) {
+		case MTLS:
+			p[0] = random.nextInt(2); // restart type 0: random restart, 1: swaps
+			break;
+		case ROTS:
+			p[0] = random.nextInt(16 * qap_size) + 4 * qap_size; // 4n to 20n
+			p[1] = random.nextInt(9 * qap_size * qap_size) + qap_size * qap_size; // n*n to 10*n*n
+			// same range dokeroglu article
+			break;
+		case EO:
+			p[0] = random.nextInt(100); // tau*100
+			p[1] = random.nextInt(3); // pdf function type
+			break;
+		}
+		return p;
+	}
+
 	public static Params selectParam(List<Params> p) {
 		Params selected;
 		// obtain a number between 0 - size population
@@ -621,18 +565,6 @@ public class MainActivity {
 		return execution_time;
 	}
 
-	public static void printParamsPopulation(List<List<Params>> params_population) {
-		for (int i = 0; i < params_population.size(); i++) {
-			List<Params> list_params = params_population.get(i);
-			System.out.println(mh_text[i]);
-			for (int l = 0; l < list_params.size(); l++) {
-				Tools.printArray(list_params.get(l).getParams());
-				// System.out.println("fitnes " + list_params.get(l).getFitness());
-			}
-
-		}
-	}
-
 	// The synchronized keyword ensures that only one thread can enter the method at
 	// one time, is one possibility
 	public static void findBKS() {
@@ -641,49 +573,6 @@ public class MainActivity {
 
 	public static boolean is_BKS_was_not_found() {
 		return no_find_BKS.get();
-	}
-
-	public static void printMetaheuristic(final int type_mh, final int cost, final int[] p, DecimalFormat df2) {
-
-		String params_text = "";
-		switch (type_mh) {
-		case MTLS:
-			System.out.println("\nMultiStart LocalSearch Results:");
-			params_text = (p[0] == 0) ? "\nRandom Restart" : "\nRestart by swaps";
-			break;
-		case ROTS:
-			System.out.println("\nRobust TabuSearch Results:");
-			params_text = "\nTabu duration: " + p[0] + "\nAspiration factor: " + p[1];
-			break;
-		case EO:
-			System.out.println("\nExtremal Optimization Results:");
-			params_text = "\nTau: " + p[0] / 100.0 + "\nPdf function: ";
-			switch (p[1]) {
-			case 0:
-				params_text += "Exponential";
-				break;
-			case 1:
-				params_text += "Power";
-				break;
-			case 2:
-				params_text += "Gamma";
-				break;
-			}
-
-			break;
-		case GA:
-			System.out.println("\nGenetic Algorithm Results:");
-			params_text = "\nPopulation: " + p[0] + "\nMutation rate: " + p[1] / 1000.0;
-			params_text += (p[2] == 0) ? "\nCrossover UX" : "\nCrossover in random point";
-
-			break;
-		}
-
-		double std = cost * 100.0 / qap.getBKS() - 100;
-		System.out.println("Cost: " + cost + " " + df2.format(std) + "%");
-		// Tools.printArray(solution);
-		System.out.println("Params " + params_text);
-
 	}
 
 	public static void updateSolutionPopulation(int[] s, int[] params, String method) {
@@ -718,16 +607,63 @@ public class MainActivity {
 
 	}
 
-	public static void printSolutionPopulation(List<Solution> p) {
+	public static double compareSolutionCost(int init_cost, int final_cost) {
+		// init_cost - 100%
+		// init_cost-final_cost - x
+		double value = (init_cost - final_cost) * 100.0 / init_cost;
+		return value;
+	}
 
-		for (int i = 0; i < p.size(); i++) {
-			int[] temp_s = p.get(i).getArray();
-			int temp_cost = qap.evalSolution(p.get(i).getArray());
-			// System.out.println(p.get(i).getMethod());
-			qap.printSolution(temp_s, temp_cost);
-			// Tools.printArray(p.get(i).getParams());
-			// qap.printSolution(temp_s, temp_cost);
+	public static int[] transformParameter(int[] parameter, double delta, int type) {
+		int[] new_params = { 0, 0, 0 };
+
+		if (delta > 0) {
+			switch (type) {
+			// case MTLS keep equal
+			case ROTS:
+				if (delta <= 1.5) {
+					//is necessary diversify 
+					new_params[0] = parameter[0] + Math.floorDiv(qap_size, 2);
+					new_params[1] = parameter[1] + Math.floorDiv(qap_size* qap_size, 2);
+				} else {
+					//is necessary intensify 
+					new_params[0] = parameter[0] - Math.floorDiv(qap_size, 3);
+					new_params[1] = parameter[1] - Math.floorDiv(qap_size, 2);
+				}
+
+				if (new_params[0] > 20 * qap_size) {
+					new_params[0] = random.nextInt(16 * qap_size) + 4 * qap_size; // 4n to 20n
+				}
+
+				if (new_params[1] > 10 * qap_size * qap_size) {
+					new_params[1] = random.nextInt(9 * qap_size * qap_size) + qap_size * qap_size; // n*n to 10*n*n
+				}
+
+				break;
+
+			case EO:
+				// TODO should be add depending of the current pdf function
+				new_params[0] = parameter[0] + 5;
+
+				if (new_params[0] > 100) {
+					new_params[0] = random.nextInt(100); // tau*100
+				}
+
+				if (delta < 0.3) {
+					int new_pdf_function;
+					do {
+						new_pdf_function = random.nextInt(3);
+						new_params[1] = new_pdf_function;
+					} while (parameter[1] == new_pdf_function);
+
+				}
+				break;
+			}
+		} else {
+			// if the solution did not improve,so will be assign a new parameter
+			new_params = createParam(type);
 		}
 
+		return new_params;
 	}
 }

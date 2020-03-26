@@ -13,7 +13,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 	QAPData qap;
 	private int[] solution, initSolution;
 	private int[] params;
-	private int bestCost;
+	private int best_cost, init_cost;
 	public MultiStartLocalSearch(QAPData qapData, int seed) {
 		super();
 		this.random = new Random(seed);
@@ -37,7 +37,11 @@ public class MultiStartLocalSearch extends RecursiveAction {
 	}
 	
 	public int getBestCost() {
-		return bestCost;
+		return best_cost;
+	}
+	
+	public int getInitCost() {
+		return init_cost;
 	}
 
 	@Override
@@ -46,9 +50,10 @@ public class MultiStartLocalSearch extends RecursiveAction {
 		solution = Arrays.copyOf(initSolution, n);
 		int[] currentSolution = Arrays.copyOf(initSolution, n);
 		boolean improve = false; // this flag control when the solution no improve and we are in an optimo local
-		int currentIteration = 0;
+		//int currentIteration = 0;
 		int temporalDelta, bestDelta, cost = qap.evalSolution(initSolution);
-		bestCost = cost;
+		init_cost = cost;
+		best_cost = cost;
 		final boolean random_restart = params[0] == 0 ? true : false; // restart type 0: random restart, 1: swaps
 		// System.out.println(params[0] + " " +random_restart);
 		qap.initDeltas(initSolution);
@@ -86,11 +91,11 @@ public class MultiStartLocalSearch extends RecursiveAction {
 			if (improve) {
 				cost -= bestDelta;
 				currentSolution = qap.makeSwap(currentSolution, i_selected, j_selected);
-				if (cost < bestCost) {
-					bestCost = cost;
+				if (cost < best_cost) {
+					best_cost = cost;
 					solution = Arrays.copyOf(currentSolution, n);
 					//if the new solution is the bks the MainActivity should be know
-					if (bestCost == qap.getBKS()) {
+					if (best_cost == qap.getBKS()) {
 						MainActivity.findBKS();
 					}
 				}
@@ -112,7 +117,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 				qap.initDeltas(currentSolution);
 				cost = qap.evalSolution(currentSolution);
 			}
-			currentIteration++;
+			//currentIteration++;
 			time = System.currentTimeMillis();
 
 		}

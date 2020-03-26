@@ -17,7 +17,7 @@ public class RobustTabuSearch extends RecursiveAction {
 	final int n;
 	private int[] solution, initSolution;
 	private int[] params;
-	private int bestCost;
+	private int best_cost, init_cost;
 
 	public RobustTabuSearch(QAPData qapData, int seed) {
 		super();
@@ -42,7 +42,11 @@ public class RobustTabuSearch extends RecursiveAction {
 	}
 	
 	public int getBestCost() {
-		return bestCost;
+		return best_cost;
+	}
+	
+	public int getInitCost() {
+		return init_cost;
 	}
 
 	@Override
@@ -56,16 +60,14 @@ public class RobustTabuSearch extends RecursiveAction {
 		qap.initDeltas(initSolution);
 		// qap.showData();
 
-		// System.out.println("Total iteraciones: " + totalIterations);
-		// System.out.println("Iteraciones Tabu para un movimiento: " + tabuDuration);
-
 		initTabuMatrix(n);
 
 		int[] bestNeighbor, currentSolution;
 		currentSolution = Arrays.copyOf(initSolution, n);
 		solution = Arrays.copyOf(initSolution, n);
 		int bestNeighborCost;
-		bestCost = qap.evalSolution(initSolution);
+		init_cost = qap.evalSolution(initSolution);
+		best_cost = init_cost;
 		// int bestFoundCounter = 0; // this counter has the value where the best was
 		
 		//System.out.println("ROTS");
@@ -76,19 +78,19 @@ public class RobustTabuSearch extends RecursiveAction {
 		// this while find the best solution during totalIterations or until BKS will be found
 		while (time - start < MainActivity.getExecutionTime()  && MainActivity.is_BKS_was_not_found()) {
 
-			bestNeighbor = getBestNeighbor(currentSolution, currentIteration, bestCost);
+			bestNeighbor = getBestNeighbor(currentSolution, currentIteration, best_cost);
 			bestNeighborCost = qap.evalSolution(bestNeighbor);
 			// qap.printSolution(bestNeighbor);
 
 			// update the best solution found if is the best of the moment
 			// at the end this block help to save the best of the best
-			if (bestNeighborCost < bestCost) {
+			if (bestNeighborCost < best_cost) {
 				solution = Arrays.copyOf(bestNeighbor, n);
-				bestCost = bestNeighborCost;
+				best_cost = bestNeighborCost;
 				// bestFoundCounter = currentIteration;
 				
 				//if the new solution is the bks the MainActivity should be know
-				if (bestCost == qap.getBKS()) {
+				if (best_cost == qap.getBKS()) {
 					MainActivity.findBKS();
 				}
 			}

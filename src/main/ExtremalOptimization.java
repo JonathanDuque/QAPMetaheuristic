@@ -26,9 +26,9 @@ public class ExtremalOptimization extends RecursiveAction {
 	Random random;
 	private final int n;
 	QAPData qap;
-	private int[] solution, initSolution;
+	private int[] solution, init_solution;
 	private int[] params;
-	private int bestCost;
+	private int best_cost, init_cost;
 
 	public ExtremalOptimization(QAPData qapData, int seed) {
 		super();
@@ -41,7 +41,7 @@ public class ExtremalOptimization extends RecursiveAction {
 	// always before compute function, is necessary set the environment
 	public void setEnvironment(int[] initSolution, int[] params) {
 		this.params = params.clone();
-		this.initSolution = initSolution.clone();
+		this.init_solution = initSolution.clone();
 	}
 
 	public int[] getSolution() {
@@ -53,7 +53,11 @@ public class ExtremalOptimization extends RecursiveAction {
 	}
 
 	public int getBestCost() {
-		return bestCost;
+		return best_cost;
+	}
+	
+	public int getInitCost() {
+		return init_cost;
 	}
 
 	@Override
@@ -62,7 +66,7 @@ public class ExtremalOptimization extends RecursiveAction {
 		pdf = new double[n];
 		// int currentIteration = 1;
 		// int totalIterations = 1000;
-		int[] currentSolution = Arrays.copyOf(initSolution, n);
+		int[] currentSolution = Arrays.copyOf(init_solution, n);
 		int tempDelta, bestDelta;
 		List<Delta> deltaList = new ArrayList<>();
 		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
@@ -88,10 +92,11 @@ public class ExtremalOptimization extends RecursiveAction {
 			break;
 		}
 
-		currentCost = qap.evalSolution(initSolution);
-		bestCost = currentCost;
-		solution = Arrays.copyOf(initSolution, n);
-		qap.initDeltas(initSolution);
+		init_cost = qap.evalSolution(init_solution);
+		currentCost = init_cost;
+		best_cost = init_cost;
+		solution = Arrays.copyOf(init_solution, n);
+		qap.initDeltas(init_solution);
 
 		int counterBest = 0;
 
@@ -142,12 +147,12 @@ public class ExtremalOptimization extends RecursiveAction {
 			// System.out.println("curr: " + currentCost );
 			// System.out.println("delta: " + delta.cost + "\n");
 
-			if (currentCost < bestCost) {
+			if (currentCost < best_cost) {
 				solution = Arrays.copyOf(currentSolution, n);
-				bestCost = currentCost;
+				best_cost = currentCost;
 
 				// if the new solution is the bks the MainActivity should be know
-				if (bestCost == qap.getBKS()) {
+				if (best_cost == qap.getBKS()) {
 					MainActivity.findBKS();
 				}
 
