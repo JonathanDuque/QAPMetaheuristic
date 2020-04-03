@@ -44,10 +44,14 @@ public class ExtremalOptimization extends RecursiveAction {
 		this.init_solution = initSolution.clone();
 	}
 
+	public int[] getInitSolution() {
+		return init_solution;
+	}
+
 	public int[] getSolution() {
 		return solution;
 	}
-	
+
 	public int[] getParams() {
 		return params;
 	}
@@ -55,7 +59,7 @@ public class ExtremalOptimization extends RecursiveAction {
 	public int getBestCost() {
 		return best_cost;
 	}
-	
+
 	public int getInitCost() {
 		return init_cost;
 	}

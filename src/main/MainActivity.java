@@ -3,7 +3,6 @@ package main;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,13 +11,16 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity {
+	private static QAPData qap;
 	private static int qap_size;
-	private static Random random;
+
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
 	static final String[] mh_text = { "MTLS", "ROTS", "EO", "GA" };
 	private static final int DIFFERENT_MH = 3;
-	private static QAPData qap;
+
+	private static Random random;
 	private static int execution_time = 10000;
+
 	// atomic variable to avoid race condition reading and writing it throw threads
 	private static AtomicBoolean no_find_BKS = new AtomicBoolean(true);
 	private static List<Solution> solution_population;
@@ -106,12 +108,6 @@ public class MainActivity {
 		List<List<Params>> params_population = generateInitialParamsPopulation(number_workes_by_mh);
 		solution_population = generateInitialSolutionPopulation(workers, constructive);
 
-		// create params class for each mh
-		Params p_MTLS_1, p_MTLS_2;
-		Params p_ROTS_1, p_ROTS_2;
-		Params p_EO_1, p_EO_2;
-		// Params p_GA_1, p_GA_2;
-
 		// create array params for each mh
 		int[] paramsMTLS = new int[3];
 		int[] paramsROTS = new int[3];
@@ -186,16 +182,16 @@ public class MainActivity {
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				// init_cost, final cost order matter
-				double delta_solution_mtls = compareSolutionCost(list_mtls.get(i).getInitCost(),
-						list_mtls.get(i).getBestCost());
-				double delta_solution_rots = compareSolutionCost(list_rots.get(i).getInitCost(),
-						list_rots.get(i).getBestCost());
-				double delta_solution_eo = compareSolutionCost(list_eo.get(i).getInitCost(),
-						list_eo.get(i).getBestCost());
+				double[] behavior_mtls = compareSolution(list_mtls.get(i).getInitCost(), list_mtls.get(i).getBestCost(),
+						list_mtls.get(i).getInitSolution(), list_mtls.get(i).getSolution());
+				double[] behavior_rots = compareSolution(list_rots.get(i).getInitCost(), list_rots.get(i).getBestCost(),
+						list_rots.get(i).getInitSolution(), list_rots.get(i).getSolution());
+				double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
+						list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
 
-				paramsMTLS = transformParameter(list_mtls.get(i).getParams(), delta_solution_mtls, MTLS);
-				paramsROTS = transformParameter(list_rots.get(i).getParams(), delta_solution_rots, ROTS);
-				paramsEO = transformParameter(list_eo.get(i).getParams(), delta_solution_eo, EO);
+				paramsMTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS);
+				paramsROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS);
+				paramsEO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO);
 
 				// insert the new parameters into params population
 				insertParam(params_population.get(MTLS), new Params(paramsMTLS, list_mtls.get(i).getBestCost()), MTLS);
@@ -607,26 +603,41 @@ public class MainActivity {
 
 	}
 
-	public static double compareSolutionCost(int init_cost, int final_cost) {
+	public static double[] compareSolution(int init_cost, int final_cost, int[] init_solution, int[] final_solution) {
 		// init_cost - 100%
 		// init_cost-final_cost - x
-		double value = (init_cost - final_cost) * 100.0 / init_cost;
-		return value;
+		double difference_percentage = (init_cost - final_cost) * 100.0 / init_cost;
+
+		int distance = 0;
+
+		for (int i = 0; i < init_solution.length; i++) {
+			if (init_solution[i] != final_solution[i]) {
+				distance++;
+			}
+		}
+
+		// System.out.println("p:" + difference_percentage + " d: " + distance);
+
+		double[] comparison = { difference_percentage, distance };
+		return comparison;
 	}
 
-	public static int[] transformParameter(int[] parameter, double delta, int type) {
+	public static int[] improveParameter(int[] parameter, double[] behavior_mh, int type) {
+		// behavior_mh[0] = percentage difference
+		// behavior_mh[1] = distance
+
 		int[] new_params = { 0, 0, 0 };
 
-		if (delta > 0) {
+		if (behavior_mh[0] > 0) {
 			switch (type) {
 			// case MTLS keep equal
 			case ROTS:
-				if (delta <= 1.5) {
-					//is necessary diversify 
+				if (behavior_mh[0] <= 1.5 && behavior_mh[1] <= qap_size / 3) {
+					// is necessary diversify
 					new_params[0] = parameter[0] + Math.floorDiv(qap_size, 2);
-					new_params[1] = parameter[1] + Math.floorDiv(qap_size* qap_size, 2);
+					new_params[1] = parameter[1] + Math.floorDiv(qap_size * qap_size, 2);
 				} else {
-					//is necessary intensify 
+					// is necessary intensify
 					new_params[0] = parameter[0] - Math.floorDiv(qap_size, 3);
 					new_params[1] = parameter[1] - Math.floorDiv(qap_size, 2);
 				}
@@ -642,14 +653,40 @@ public class MainActivity {
 				break;
 
 			case EO:
-				// TODO should be add depending of the current pdf function
-				new_params[0] = parameter[0] + 5;
+				// parameter[0] : tau
+				// parameter[1] : probability function
+
+				if (behavior_mh[0] <= 1.5 && behavior_mh[1] <= qap_size / 3) {
+					// is necessary diversify
+					switch (parameter[1]) {
+					case 2:// gamma tau: 0 to 1 means intensify to diversify
+						new_params[0] = parameter[0] + 6;
+						break;
+					default:
+						// Exponential tau: 0 to 1 means diversify to intensify
+						// Power tau: 0 to 1 means diversify to intensify
+						new_params[0] = parameter[0] - 6;
+						break;
+					}
+				} else {
+					// is necessary intensify
+					switch (parameter[1]) {
+					case 2:// gamma tau: 0 to 1 means intensify to diversify
+						new_params[0] = parameter[0] - 6;
+						break;
+					default:
+						// Exponential tau: 0 to 1 means diversify to intensify
+						// Power tau: 0 to 1 means diversify to intensify
+						new_params[0] = parameter[0] + 6;
+						break;
+					}
+				}
 
 				if (new_params[0] > 100) {
 					new_params[0] = random.nextInt(100); // tau*100
 				}
 
-				if (delta < 0.3) {
+				if (behavior_mh[0] < 0.3) {
 					int new_pdf_function;
 					do {
 						new_pdf_function = random.nextInt(3);
@@ -666,4 +703,17 @@ public class MainActivity {
 
 		return new_params;
 	}
+
+	public static double[] initExp(int total_generations, double tau) {
+		double[] y = new double[total_generations];
+
+		double t;
+		for (int i = 1; i <= total_generations; i++) {
+			// t = t /(1+ 0.1*t);
+			y[i - 1] = Math.exp(tau / i);
+		}
+
+		return y;
+	}
+
 }

@@ -15,7 +15,7 @@ public class RobustTabuSearch extends RecursiveAction {
 	private Random random;
 	private int aspiration;
 	final int n;
-	private int[] solution, initSolution;
+	private int[] solution, init_solution;
 	private int[] params;
 	private int best_cost, init_cost;
 
@@ -30,7 +30,11 @@ public class RobustTabuSearch extends RecursiveAction {
 	// always before compute function, is neccesary set the enviroment
 	public void setEnvironment(int[] initSolution, int[] params) {
 		this.params = params.clone();
-		this.initSolution = initSolution.clone();
+		this.init_solution = initSolution.clone();
+	}
+
+	public int[] getInitSolution() {
+		return init_solution;
 	}
 
 	public int[] getSolution() {
@@ -57,16 +61,16 @@ public class RobustTabuSearch extends RecursiveAction {
 		int currentIteration = 1;
 		// int totalIterations = 1000;
 		// random = new Random(MainActivity.getSeed());// set the seed
-		qap.initDeltas(initSolution);
+		qap.initDeltas(init_solution);
 		// qap.showData();
 
 		initTabuMatrix(n);
 
 		int[] bestNeighbor, currentSolution;
-		currentSolution = Arrays.copyOf(initSolution, n);
-		solution = Arrays.copyOf(initSolution, n);
+		currentSolution = Arrays.copyOf(init_solution, n);
+		solution = Arrays.copyOf(init_solution, n);
 		int bestNeighborCost;
-		init_cost = qap.evalSolution(initSolution);
+		init_cost = qap.evalSolution(init_solution);
 		best_cost = init_cost;
 		// int bestFoundCounter = 0; // this counter has the value where the best was
 		

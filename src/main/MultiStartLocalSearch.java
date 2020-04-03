@@ -11,7 +11,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 	private final int n;
 	
 	QAPData qap;
-	private int[] solution, initSolution;
+	private int[] solution, init_solution;
 	private int[] params;
 	private int best_cost, init_cost;
 	public MultiStartLocalSearch(QAPData qapData, int seed) {
@@ -25,21 +25,25 @@ public class MultiStartLocalSearch extends RecursiveAction {
 	// always before compute function, is necessary set the environment
 	public void setEnvironment(int[] initSolution, int[] params) {
 		this.params = params.clone();
-		this.initSolution = initSolution.clone();
+		this.init_solution = initSolution.clone();
+	}
+
+	public int[] getInitSolution() {
+		return init_solution;
 	}
 
 	public int[] getSolution() {
 		return solution;
 	}
-	
+
 	public int[] getParams() {
 		return params;
 	}
-	
+
 	public int getBestCost() {
 		return best_cost;
 	}
-	
+
 	public int getInitCost() {
 		return init_cost;
 	}
@@ -47,16 +51,16 @@ public class MultiStartLocalSearch extends RecursiveAction {
 	@Override
 	protected void compute() {
 		// this initial block define the variable needed
-		solution = Arrays.copyOf(initSolution, n);
-		int[] currentSolution = Arrays.copyOf(initSolution, n);
+		solution = Arrays.copyOf(init_solution, n);
+		int[] currentSolution = Arrays.copyOf(init_solution, n);
 		boolean improve = false; // this flag control when the solution no improve and we are in an optimo local
 		//int currentIteration = 0;
-		int temporalDelta, bestDelta, cost = qap.evalSolution(initSolution);
+		int temporalDelta, bestDelta, cost = qap.evalSolution(init_solution);
 		init_cost = cost;
 		best_cost = cost;
 		final boolean random_restart = params[0] == 0 ? true : false; // restart type 0: random restart, 1: swaps
 		// System.out.println(params[0] + " " +random_restart);
-		qap.initDeltas(initSolution);
+		qap.initDeltas(init_solution);
 		
 		//System.out.println("MTLS");
 		//Tools.printArray(currentSolution);

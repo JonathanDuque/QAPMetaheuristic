@@ -13,7 +13,7 @@ public class Params {
 	public int[] getParams() {
 		return p.clone();
 	}
-	
+
 	public int getFitness() {
 		return score;
 	}

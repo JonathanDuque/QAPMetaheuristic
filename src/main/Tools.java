@@ -17,6 +17,16 @@ public class Tools {
 		// System.out.println("\n");
 	}
 
+	public static void printArray(double[] array) {
+		String array_s = "";
+		for (double i : array) {
+			System.out.println(i );
+			//array_s = array_s + i + " ";
+		}
+		//System.out.print(array_s + "\n");
+
+	}
+
 	public static void printMatrix(int[][] matrix, String label) {
 		System.out.println("\n" + label);
 		for (int[] row : matrix) {
