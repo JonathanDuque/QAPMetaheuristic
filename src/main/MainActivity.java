@@ -189,9 +189,9 @@ public class MainActivity {
 				double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
 						list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
 
-				paramsMTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS);
-				paramsROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS);
-				paramsEO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO);
+				paramsMTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, count_generations);
+				paramsROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, count_generations);
+				paramsEO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, count_generations);
 
 				// insert the new parameters into params population
 				insertParam(params_population.get(MTLS), new Params(paramsMTLS, list_mtls.get(i).getBestCost()), MTLS);
@@ -622,7 +622,11 @@ public class MainActivity {
 		return comparison;
 	}
 
-	public static int[] improveParameter(int[] parameter, double[] behavior_mh, int type) {
+	public static int[] improveParameter(final int[] parameter, final double[] behavior_mh, final int type,
+			final int current_iteration) {
+		final double[] diversify_percentage_limit = { 70, 50, 35, 25, 20, 15, 12, 10, 7, 4, 2, 1.5, 1.2, 0.8, 0.5 };
+		final double[] change_pdf_percentage_limit = { 10, 5, 1, 0.5, 0.3 };
+
 		// behavior_mh[0] = percentage difference
 		// behavior_mh[1] = distance
 
@@ -632,7 +636,7 @@ public class MainActivity {
 			switch (type) {
 			// case MTLS keep equal
 			case ROTS:
-				if (behavior_mh[0] <= 1.5 && behavior_mh[1] <= qap_size / 3) {
+				if (behavior_mh[0] <= diversify_percentage_limit[current_iteration] && behavior_mh[1] <= qap_size / 3) {
 					// is necessary diversify
 					new_params[0] = parameter[0] + Math.floorDiv(qap_size, 2);
 					new_params[1] = parameter[1] + Math.floorDiv(qap_size * qap_size, 2);
@@ -656,7 +660,7 @@ public class MainActivity {
 				// parameter[0] : tau
 				// parameter[1] : probability function
 
-				if (behavior_mh[0] <= 1.5 && behavior_mh[1] <= qap_size / 3) {
+				if (behavior_mh[0] <= diversify_percentage_limit[current_iteration] && behavior_mh[1] <= qap_size / 3) {
 					// is necessary diversify
 					switch (parameter[1]) {
 					case 2:// gamma tau: 0 to 1 means intensify to diversify
@@ -686,7 +690,7 @@ public class MainActivity {
 					new_params[0] = random.nextInt(100); // tau*100
 				}
 
-				if (behavior_mh[0] < 0.3) {
+				if (behavior_mh[0] < change_pdf_percentage_limit[current_iteration / 3]) {
 					int new_pdf_function;
 					do {
 						new_pdf_function = random.nextInt(3);
