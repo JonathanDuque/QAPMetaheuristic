@@ -19,14 +19,14 @@ public class MainActivity {
 	private static final int DIFFERENT_MH = 3;
 
 	private static Random random;
-	private static int execution_time = 10000;
+	private static int execution_time;//by iteration
 
 	// atomic variable to avoid race condition reading and writing it throw threads
 	private static AtomicBoolean no_find_BKS = new AtomicBoolean(true);
 	private static List<Solution> solution_population;
 
 	public static void main(String[] args) {
-		final int generations;
+		final int total_iterations;
 		final long start = System.currentTimeMillis();
 		final String problem;
 		final int workers;
@@ -37,42 +37,42 @@ public class MainActivity {
 			problem = args[0];
 			workers = Integer.parseInt(args[1]);
 			execution_time = Integer.parseInt(args[2]);
-			generations = Integer.parseInt(args[3]);
+			total_iterations = Integer.parseInt(args[3]);
 			global_seed = Integer.parseInt(args[4]);
 			break;
 		case 4:
 			problem = args[0];
 			workers = Integer.parseInt(args[1]);
 			execution_time = Integer.parseInt(args[2]);
-			generations = Integer.parseInt(args[3]);
+			total_iterations = Integer.parseInt(args[3]);
 			global_seed = 1;
 			break;
 		case 3:
 			problem = args[0];
 			workers = Integer.parseInt(args[1]);
 			execution_time = Integer.parseInt(args[2]);
-			generations = 15;
+			total_iterations = 15;
 			global_seed = 1;
 			break;
 		case 2:
 			problem = args[0];
 			workers = Integer.parseInt(args[1]);
 			execution_time = 20000;
-			generations = 15;
+			total_iterations = 15;
 			global_seed = 1;
 			break;
 		case 1:
 			problem = args[0];
 			workers = 3;
 			execution_time = 20000;
-			generations = 15;
+			total_iterations = 15;
 			global_seed = 1;
 			break;
 		default:
 			problem = "tai40a.qap";
 			workers = 3;
 			execution_time = 20000;
-			generations = 15;
+			total_iterations = 15;
 			global_seed = 1;
 			break;
 		}
@@ -86,12 +86,13 @@ public class MainActivity {
 		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
 		System.out.println("Threads: " + workers);
 		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
-		System.out.println("Generations: " + generations);
+		System.out.println("Iterations: " + total_iterations);
+		System.out.println("Time out: " + total_iterations*execution_time/ 1000.0 + " seconds");
 		System.out.println("Seed for random values: " + global_seed + "\n");
 
 		final ReadFile readFile = new ReadFile("Data/" + problem);
 
-		// initialize qap data, i.e matrix of flow and distance matrix [row][col]
+		// initialize qap data, flow and distance matrix, format [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
 		qap = new QAPData(distance, flow, readFile.getTarget());
 		qap_size = qap.getSize();
@@ -109,21 +110,19 @@ public class MainActivity {
 		solution_population = generateInitialSolutionPopulation(workers, constructive);
 
 		// create array params for each mh
-		int[] paramsMTLS = new int[3];
-		int[] paramsROTS = new int[3];
-		int[] paramsEO = new int[3];
-		// int[] paramsGA = new int[3];
+		int[] params_MTLS = new int[3];
+		int[] params_ROTS = new int[3];
+		int[] params_EO = new int[3];
 
-		// these lists are necessary for executing in parallel
+		// these lists are necessary for the executing in parallel
 		List<MultiStartLocalSearch> list_mtls = new ArrayList<>(number_workes_by_mh);
 		List<RobustTabuSearch> list_rots = new ArrayList<>(number_workes_by_mh);
 		List<ExtremalOptimization> list_eo = new ArrayList<>(number_workes_by_mh);
-		// List<GeneticAlgorithm> list_ga = new ArrayList<>();
 
-		int count_generations = 0;
+		int current_iteration = 0;
 
 		// create and initiate variables for results
-		int[] best_solution = constructive.createRandomSolution(qap_size, count_generations);
+		int[] best_solution = constructive.createRandomSolution(qap_size, current_iteration);
 		int[] best_params = { -1, -1, -1 };
 		String method = "";
 		int best_cost = qap.evalSolution(best_solution);
@@ -132,7 +131,7 @@ public class MainActivity {
 		init_time /= 1000.0;
 		// System.out.println("Initiate time: " + init_time + " sec");
 
-		while (count_generations < generations && no_find_BKS.get()) {
+		while (current_iteration < total_iterations && no_find_BKS.get()) {
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
@@ -144,7 +143,6 @@ public class MainActivity {
 				list_eo.add(eo);
 			}
 
-			// System.out.println( count_generations );
 			List<Params> list_params_MTLS = new ArrayList<>(params_population.get(MTLS));
 			List<Params> list_params_ROST = new ArrayList<>(params_population.get(ROTS));
 			List<Params> list_params_EO = new ArrayList<>(params_population.get(EO));
@@ -152,16 +150,16 @@ public class MainActivity {
 			// is necessary a copy because after solution population will be update
 			List<Solution> solution_population_copy = new ArrayList<>(solution_population);
 
+			// setting environment variables for each method
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 
-				paramsMTLS = selectParam(list_params_MTLS).getParams();
-				paramsROTS = selectParam(list_params_ROST).getParams();
-				paramsEO = selectParam(list_params_EO).getParams();
+				params_MTLS = selectParam(list_params_MTLS).getParams();
+				params_ROTS = selectParam(list_params_ROST).getParams();
+				params_EO = selectParam(list_params_EO).getParams();
 
-				// setting variables for each method
-				list_mtls.get(i).setEnvironment(getSolution(solution_population_copy), paramsMTLS);
-				list_rots.get(i).setEnvironment(getSolution(solution_population_copy), paramsROTS);
-				list_eo.get(i).setEnvironment(getSolution(solution_population_copy), paramsEO);
+				list_mtls.get(i).setEnvironment(getSolution(solution_population_copy), params_MTLS);
+				list_rots.get(i).setEnvironment(getSolution(solution_population_copy), params_ROTS);
+				list_eo.get(i).setEnvironment(getSolution(solution_population_copy), params_EO);
 			}
 
 			// launch execution in parallel for all workers
@@ -189,26 +187,20 @@ public class MainActivity {
 				double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
 						list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
 
-				paramsMTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, count_generations);
-				paramsROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, count_generations);
-				paramsEO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, count_generations);
+				params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration);
+				params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration);
+				params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration);
 
 				// insert the new parameters into params population
-				insertParam(params_population.get(MTLS), new Params(paramsMTLS, list_mtls.get(i).getBestCost()), MTLS);
-				insertParam(params_population.get(ROTS), new Params(paramsROTS, list_rots.get(i).getBestCost()), ROTS);
-				insertParam(params_population.get(EO), new Params(paramsEO, list_eo.get(i).getBestCost()), EO);
+				insertParam(params_population.get(MTLS), new Params(params_MTLS, list_mtls.get(i).getBestCost()), MTLS);
+				insertParam(params_population.get(ROTS), new Params(params_ROTS, list_rots.get(i).getBestCost()), ROTS);
+				insertParam(params_population.get(EO), new Params(params_EO, list_eo.get(i).getBestCost()), EO);
 
 				// inserts solution into solution population
-				updateSolutionPopulation(list_mtls.get(i).getSolution(), paramsMTLS, mh_text[MTLS]);
-				updateSolutionPopulation(list_rots.get(i).getSolution(), paramsROTS, mh_text[ROTS]);
-				updateSolutionPopulation(list_eo.get(i).getSolution(), paramsEO, mh_text[EO]);
+				updateSolutionPopulation(list_mtls.get(i).getSolution(), params_MTLS, mh_text[MTLS]);
+				updateSolutionPopulation(list_rots.get(i).getSolution(), params_ROTS, mh_text[ROTS]);
+				updateSolutionPopulation(list_eo.get(i).getSolution(), params_EO, mh_text[EO]);
 			}
-
-			// diverse_population.clear();
-			// int ga_population = random.nextInt(number_workes_by_mh);
-			// diverse_population = list_ga.get(ga_population).getFinalPopulation();
-
-			count_generations++;
 
 			// System.out.println("Solution Population");
 			// printSolutionPopulation(solution_population);
@@ -216,7 +208,8 @@ public class MainActivity {
 			list_mtls.clear();
 			list_rots.clear();
 			list_eo.clear();
-
+			
+			current_iteration++;
 		}
 
 		// update final results variables
@@ -240,7 +233,6 @@ public class MainActivity {
 		double total_time = (System.currentTimeMillis() - start);
 		total_time /= 1000.0;
 		System.out.println("Total time: " + total_time + " sec");
-		// System.out.println("Generations: " + count_generations);
 
 		final String dir_file = "Results/";
 
@@ -280,7 +272,7 @@ public class MainActivity {
 
 		try {
 			fileWriter = new FileWriter(dir_file + file_name + ".csv", true);
-			// solution - cost- deviation - time - generations
+			// solution - cost- deviation - time
 			fileWriter.append(Arrays.toString(best_solution));
 			fileWriter.append(";");
 			fileWriter.append(Integer.toString(best_cost));
@@ -289,7 +281,7 @@ public class MainActivity {
 			fileWriter.append(";");
 			fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(total_time));
 			fileWriter.append(";");
-			fileWriter.append(Integer.toString(count_generations));
+			fileWriter.append(Integer.toString(current_iteration));
 			fileWriter.append(";");
 			fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(init_time));
 			fileWriter.append(";");
@@ -701,7 +693,7 @@ public class MainActivity {
 				break;
 			}
 		} else {
-			// if the solution did not improve,so will be assign a new parameter
+			// if the solution did not improve, so will be assign a new parameter
 			new_params = createParam(type);
 		}
 
