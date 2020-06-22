@@ -19,7 +19,7 @@ public class MainActivity {
 	private static final int DIFFERENT_MH = 3;
 
 	private static Random random;
-	private static int execution_time;//by iteration
+	private static int execution_time;// by iteration
 
 	// atomic variable to avoid race condition reading and writing it throw threads
 	private static AtomicBoolean no_find_BKS = new AtomicBoolean(true);
@@ -87,10 +87,11 @@ public class MainActivity {
 		System.out.println("Threads: " + workers);
 		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
 		System.out.println("Iterations: " + total_iterations);
-		System.out.println("Time out: " + total_iterations*execution_time/ 1000.0 + " seconds");
+		System.out.println("Time out: " + total_iterations * execution_time / 1000.0 + " seconds");
 		System.out.println("Seed for random values: " + global_seed + "\n");
 
-		final ReadFile readFile = new ReadFile("Data/" + problem);
+		//final ReadFile readFile = new ReadFile("Data/" + problem);
+		final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
 		// initialize qap data, flow and distance matrix, format [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
@@ -208,7 +209,7 @@ public class MainActivity {
 			list_mtls.clear();
 			list_rots.clear();
 			list_eo.clear();
-			
+
 			current_iteration++;
 		}
 
@@ -234,7 +235,8 @@ public class MainActivity {
 		total_time /= 1000.0;
 		System.out.println("Total time: " + total_time + " sec");
 
-		final String dir_file = "Results/";
+		// final String dir_file = "Results-others/";
+		final String dir_file = "../Results-others/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file + file_name + ".csv");
