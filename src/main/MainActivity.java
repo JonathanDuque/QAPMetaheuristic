@@ -17,7 +17,7 @@ public class MainActivity {
 	private static String[] mh_text = { "MTLS", "ROTS", "EO", "GA" };
 	private static int DIFFERENT_MH = 3;
 	private static QAPData qap;
-	private static int execution_time = 10000;
+	private static int execution_time; // for the whole execution
 	// atomic variable to avoid race condition reading and writing it throw threads
 	private static AtomicBoolean no_find_BKS = new AtomicBoolean(true);
 	private static List<Solution> result_population;
@@ -76,9 +76,10 @@ public class MainActivity {
 		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
 		System.out.println("Seed for random values: " + global_seed + "\n");
 
+		//final ReadFile readFile = new ReadFile("Data/" + problem);
 		final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
-		// initialize qap data, i.e matrix of flow and distance matrix [row][col]
+		// initialize qap data, flow and distance matrix, format [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
 		qap = new QAPData(distance, flow, readFile.getTarget());
 		qap_size = qap.getSize();
@@ -92,11 +93,11 @@ public class MainActivity {
 		List<List<Params>> params_population = generateInitialPopulation(number_workes_by_mh, constructive);
 
 		// create array params for each mh
-		int[] paramsMTLS = new int[3];
-		int[] paramsROTS = new int[3];
-		int[] paramsEO = new int[3];
+		int[] params_MTLS = new int[3];
+		int[] params_ROTS = new int[3];
+		int[] params_EO = new int[3];
 
-		// these lists are necessary for executing in parallel
+		// these lists are necessary for the executing in parallel
 		List<MultiStartLocalSearch> list_mtls = new ArrayList<>();
 		List<RobustTabuSearch> list_rots = new ArrayList<>();
 		List<ExtremalOptimization> list_eo = new ArrayList<>();
@@ -120,16 +121,16 @@ public class MainActivity {
 		List<Params> list_params_EO = new ArrayList<>(params_population.get(EO));
 
 		for (int i = 0; i < number_workes_by_mh; i += 1) {
-			paramsMTLS = selectIndividual(list_params_MTLS).getParams();
-			paramsROTS = selectIndividual(list_params_ROST).getParams();
-			paramsEO = selectIndividual(list_params_EO).getParams();
+			params_MTLS = selectIndividual(list_params_MTLS).getParams();
+			params_ROTS = selectIndividual(list_params_ROST).getParams();
+			params_EO = selectIndividual(list_params_EO).getParams();
 
 			// setting variables for each method
 			// list_ga.get(i).setEnvironment(paramsGA); // GA environment is necessary make
 			// the first
-			list_mtls.get(i).setEnvironment(getSolution(init_solutions_population), paramsMTLS);
-			list_rots.get(i).setEnvironment(getSolution(init_solutions_population), paramsROTS);
-			list_eo.get(i).setEnvironment(getSolution(init_solutions_population), paramsEO);
+			list_mtls.get(i).setEnvironment(getSolution(init_solutions_population), params_MTLS);
+			list_rots.get(i).setEnvironment(getSolution(init_solutions_population), params_ROTS);
+			list_eo.get(i).setEnvironment(getSolution(init_solutions_population), params_EO);
 		}
 
 		// launch execution in parallel for all workers
@@ -149,9 +150,9 @@ public class MainActivity {
 		result_population = new ArrayList<>();
 
 		for (int i = 0; i < number_workes_by_mh; i += 1) {
-			result_population.add(new Solution(list_mtls.get(i).getSolution(), paramsMTLS, mh_text[MTLS]));
-			result_population.add(new Solution(list_rots.get(i).getSolution(), paramsROTS, mh_text[ROTS]));
-			result_population.add(new Solution(list_eo.get(i).getSolution(), paramsEO, mh_text[EO]));
+			result_population.add(new Solution(list_mtls.get(i).getSolution(), params_MTLS, mh_text[MTLS]));
+			result_population.add(new Solution(list_rots.get(i).getSolution(), params_ROTS, mh_text[ROTS]));
+			result_population.add(new Solution(list_eo.get(i).getSolution(), params_EO, mh_text[EO]));
 		}
 
 		System.out.println("\n*****************    Results                ********************************");
@@ -199,7 +200,9 @@ public class MainActivity {
 		 * printMetaheuristic(i, best, listParams.get(c).getParams(),
 		 * Tools.DECIMAL_FORMAT); }
 		 */
-		final String dir_file = "../Results/";
+		
+		//final String dir_file = "Results/";
+		final String dir_file = "Result-others/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file, file_name + ".csv");
