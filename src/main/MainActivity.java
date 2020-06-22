@@ -252,7 +252,7 @@ public class MainActivity {
 				fileWriter.append(";");
 				fileWriter.append("time");
 				fileWriter.append(";");
-				fileWriter.append("generations");
+				fileWriter.append("iteration");
 				fileWriter.append(";");
 				fileWriter.append("init_time");
 				fileWriter.append(";");
