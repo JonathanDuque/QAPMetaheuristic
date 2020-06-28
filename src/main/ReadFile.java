@@ -16,9 +16,13 @@ public class ReadFile {
 			scanner = new Scanner(new File(fileName));
 
 			int n = Integer.parseInt(scanner.next());
-			scanner.next(); //skip a data no necessary
+			// scanner.next(); //skip a data no necessary
 			target = Integer.parseInt(scanner.next());
-			//System.out.println(target);
+			if (target < 0) { // means there is no optimal
+				target = Integer.parseInt(scanner.next());
+			} else {
+				scanner.next(); // skip a data no necessary
+			}
 
 			flow = new int[n][n];
 			distance = new int[n][n];
@@ -63,7 +67,7 @@ public class ReadFile {
 	public int[][] getDistance() {
 		return distance;
 	}
-	
+
 	public int getTarget() {
 		return target;
 	}
