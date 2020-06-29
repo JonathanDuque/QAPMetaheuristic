@@ -235,8 +235,8 @@ public class MainActivity {
 		total_time /= 1000.0;
 		System.out.println("Total time: " + total_time + " sec");
 
-		// final String dir_file = "Results-others/";
-		final String dir_file = "../Results-others/";
+		// final String dir_file = "../Results-v2/";
+		final String dir_file = "../Result-others/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file + file_name + ".csv");
