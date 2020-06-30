@@ -57,13 +57,12 @@ public class MainActivity {
 		default:
 			problem = "tai40b.qap";
 			workers = 3;
-			execution_time = 10000;
+			execution_time = 300000;
 			global_seed = 1;
 			System.out.println("Default configuration execution");
 			break;
 		}
 
-		execution_time = 300000; // only for this independent execution
 
 		if ((workers % 3) != 0) {
 			System.out.println(
@@ -76,8 +75,8 @@ public class MainActivity {
 		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
 		System.out.println("Seed for random values: " + global_seed + "\n");
 
-		//final ReadFile readFile = new ReadFile("Data/" + problem);
-		final ReadFile readFile = new ReadFile("../../Data/" + problem);
+		final ReadFile readFile = new ReadFile("Data/" + problem);
+		//final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
 		// initialize qap data, flow and distance matrix, format [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
@@ -201,8 +200,8 @@ public class MainActivity {
 		 * Tools.DECIMAL_FORMAT); }
 		 */
 		
-		//final String dir_file = "Results/";
-		final String dir_file = "Result-others/";
+		final String dir_file = "Results/";
+		// final String dir_file = "Result-others/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file, file_name + ".csv");
