@@ -1,6 +1,7 @@
 #!/bin/bash
+source exec_sko72.sh
+source exec_sko100b.sh
 source exec_sko100c.sh
-source exec_tai40a.sh
-source exec_tai80a.sh
-source exec_tai100a.sh
+source exec_sko100e.sh
+
 

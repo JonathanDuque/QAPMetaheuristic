@@ -71,7 +71,7 @@ public class MainActivity {
 		default:
 			problem = "tai40a.qap";
 			workers = 3;
-			execution_time = 200;
+			execution_time = 20000;
 			total_iterations = 15;
 			global_seed = 1;
 			break;
@@ -180,22 +180,20 @@ public class MainActivity {
 			solution_population.clear();
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
-				// init_cost, final cost order matter
-				double[] behavior_mtls = compareSolution(list_mtls.get(i).getInitCost(), list_mtls.get(i).getBestCost(),
-						list_mtls.get(i).getInitSolution(), list_mtls.get(i).getSolution());
-				double[] behavior_rots = compareSolution(list_rots.get(i).getInitCost(), list_rots.get(i).getBestCost(),
-						list_rots.get(i).getInitSolution(), list_rots.get(i).getSolution());
-				double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
-						list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
-
-				params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration);
-				params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration);
-				params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration);
-
+				
+				params_MTLS = list_mtls.get(i).getParams(); //improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration);
+				params_ROTS = list_rots.get(i).getParams(); //improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration);
+				params_EO = list_eo.get(i).getParams();//improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration);
+				
+				//params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration);
+				//params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration);
+				//params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration);
+				
+			
 				// insert the new parameters into params population
-				insertParam(params_population.get(MTLS), new Params(params_MTLS, list_mtls.get(i).getBestCost()), MTLS);
-				insertParam(params_population.get(ROTS), new Params(params_ROTS, list_rots.get(i).getBestCost()), ROTS);
-				insertParam(params_population.get(EO), new Params(params_EO, list_eo.get(i).getBestCost()), EO);
+				//insertParam(params_population.get(MTLS), new Params(params_MTLS, list_mtls.get(i).getBestCost()), MTLS);
+				//insertParam(params_population.get(ROTS), new Params(params_ROTS, list_rots.get(i).getBestCost()), ROTS);
+				//insertParam(params_population.get(EO), new Params(params_EO, list_eo.get(i).getBestCost()), EO);
 
 				// inserts solution into solution population
 				updateSolutionPopulation(list_mtls.get(i).getSolution(), params_MTLS, mh_text[MTLS]);
@@ -209,6 +207,7 @@ public class MainActivity {
 			list_mtls.clear();
 			list_rots.clear();
 			list_eo.clear();
+			System.out.println("\n");
 
 			current_iteration++;
 		}
@@ -406,96 +405,8 @@ public class MainActivity {
 		return selected_solution.getArray();
 	}
 
-	public static int[] crossover(int[] params1, int[] params2, int mh_type) {
-		int[] p = { 0, 0, 0 };
-		switch (mh_type) {
-		case MTLS:
-			p[0] = params1[0]; // restart type
-			break;
-		case ROTS:
-			p[0] = params1[0];// tabu duration factor
-			p[1] = params2[1]; // aspiration factor
-			break;
-		case EO:
-			p[0] = params1[0];// tau*100
-			p[1] = params2[1];// type pdf
-			break;
-		case GA:
-			p[0] = params1[0];// population size
-			p[1] = params1[1];// mutation *1000
-			p[2] = params2[2]; // crossover type
-			break;
-		}
 
-		// Tools.printArray(p);
 
-		return p;
-	}
-
-	public static int[] mutate(int[] params, int mh_type, double mp) {
-		double mutation_number = random.nextDouble();
-
-		int[] p = params.clone();
-		// Tools.printArray(p);
-		if (mutation_number <= mp) {
-			final int param;
-			switch (mh_type) {
-			case MTLS:
-				p[0] = random.nextInt(2); // restart type 0 or 1
-				break;
-			case ROTS:
-				// getting what parameter to mutate
-				param = random.nextInt(2);
-				// System.out.println("param:" +param);
-				switch (param) {
-				case 0:
-					p[param] = random.nextInt(16 * qap_size) + 4 * qap_size; // 4n to 20n
-					break;
-				case 1:
-					p[param] = random.nextInt(9 * qap_size * qap_size) + qap_size * qap_size; // n*n to 10*n*n same
-																								// range dokeroglu
-																								// article
-					break;
-				}
-				break;
-			case EO:
-				param = random.nextInt(2);
-				// System.out.println("param:" +param);
-				switch (param) {
-				case 0:
-					p[param] = random.nextInt(100); // tau*100
-					break;
-				case 1:
-					p[param] = random.nextInt(3); // pdf function type
-					break;
-				}
-
-				break;
-			case GA:
-				param = random.nextInt(3);
-				// System.out.println("param:" +param);
-				switch (param) {
-				case 0:
-					p[param] = qap_size + qap_size * random.nextInt(5) / 2;// population size
-					if (qap_size > 60) {
-						p[param] = p[param] * 2 / 5;
-					}
-					break;
-				case 1:
-					p[param] = random.nextInt(1000); // mutation *1000
-					break;
-				case 2:
-					p[param] = random.nextInt(2);// crossover operator type
-					break;
-				}
-				break;
-			}
-		}
-
-		// Tools.printArray(p);
-		return p;
-
-	}
 
 	// insert new params and remove the worst
 	public static void insertParam(List<Params> listParams, Params new_params, final int type) {
@@ -700,18 +611,6 @@ public class MainActivity {
 		}
 
 		return new_params;
-	}
-
-	public static double[] initExp(int total_generations, double tau) {
-		double[] y = new double[total_generations];
-
-		double t;
-		for (int i = 1; i <= total_generations; i++) {
-			// t = t /(1+ 0.1*t);
-			y[i - 1] = Math.exp(tau / i);
-		}
-
-		return y;
 	}
 
 }
