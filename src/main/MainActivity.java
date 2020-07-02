@@ -181,19 +181,9 @@ public class MainActivity {
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				
-				params_MTLS = list_mtls.get(i).getParams(); //improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration);
-				params_ROTS = list_rots.get(i).getParams(); //improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration);
-				params_EO = list_eo.get(i).getParams();//improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration);
-				
-				//params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration);
-				//params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration);
-				//params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration);
-				
-			
-				// insert the new parameters into params population
-				//insertParam(params_population.get(MTLS), new Params(params_MTLS, list_mtls.get(i).getBestCost()), MTLS);
-				//insertParam(params_population.get(ROTS), new Params(params_ROTS, list_rots.get(i).getBestCost()), ROTS);
-				//insertParam(params_population.get(EO), new Params(params_EO, list_eo.get(i).getBestCost()), EO);
+				params_MTLS = list_mtls.get(i).getParams();
+				params_ROTS = list_rots.get(i).getParams();
+				params_EO = list_eo.get(i).getParams();
 
 				// inserts solution into solution population
 				updateSolutionPopulation(list_mtls.get(i).getSolution(), params_MTLS, mh_text[MTLS]);
@@ -207,7 +197,6 @@ public class MainActivity {
 			list_mtls.clear();
 			list_rots.clear();
 			list_eo.clear();
-			System.out.println("\n");
 
 			current_iteration++;
 		}
@@ -235,7 +224,7 @@ public class MainActivity {
 		System.out.println("Total time: " + total_time + " sec");
 
 		final String dir_file = "Results/";
-		//final String dir_file = "../Result-others/";
+		//final String dir_file = "../Results/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file + file_name + ".csv");
@@ -404,9 +393,6 @@ public class MainActivity {
 
 		return selected_solution.getArray();
 	}
-
-
-
 
 	// insert new params and remove the worst
 	public static void insertParam(List<Params> listParams, Params new_params, final int type) {
