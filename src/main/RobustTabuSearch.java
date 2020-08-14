@@ -1,33 +1,30 @@
 package main;
 
 import java.util.Arrays;
-import java.util.Random;
 import java.util.concurrent.RecursiveAction;
-
-import main.GeneticAlgorithm.GeneticAlgorithm;
-import main.GeneticAlgorithm.Results;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class RobustTabuSearch extends RecursiveAction {
 	private static final long serialVersionUID = 2L;
 	private int[][] tabuMemory; // this matrix will save the iteration number where a location change is denied
 	private int tabuDuration;// iterations tabu for a move
 	private QAPData qap;
-	private Random random;
+	private ThreadLocalRandom thread_local_random;
 	private int aspiration;
 	final int n;
 	private int[] solution, init_solution;
 	private int[] params;
 	private int best_cost, init_cost;
 
-	public RobustTabuSearch(QAPData qapData, int seed) {
+	public RobustTabuSearch(QAPData qapData) {
 		super();
-		this.random = new Random(seed);
-
+		thread_local_random = ThreadLocalRandom.current();
+		
 		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getBKS());
 		n = qap.getSize();
 	}
 
-	// always before compute function, is neccesary set the enviroment
+	// always before compute function, is necessary set the environment
 	public void setEnvironment(int[] initSolution, int[] params) {
 		this.params = params.clone();
 		this.init_solution = initSolution.clone();
@@ -60,7 +57,6 @@ public class RobustTabuSearch extends RecursiveAction {
 		aspiration = params[1]; // 5 * n * n
 		int currentIteration = 1;
 		// int totalIterations = 1000;
-		// random = new Random(MainActivity.getSeed());// set the seed
 		qap.initDeltas(init_solution);
 		// qap.showData();
 
@@ -156,9 +152,9 @@ public class RobustTabuSearch extends RecursiveAction {
 		qap.updateDeltas(currentSolution, i_selected, j_selected);
 
 		// update tabu matrix with values of the solution selected
-		// random.nextDouble() give decimal between 0 and 1
-		int t1 = (int) (Math.pow(random.nextDouble(), 3) * tabuDuration);
-		int t2 = (int) (Math.pow(random.nextDouble(), 3) * tabuDuration);
+		// give random decimal between 0 and 1
+		int t1 = (int) (Math.pow(thread_local_random.nextDouble(), 3) * tabuDuration);
+		int t2 = (int) (Math.pow(thread_local_random.nextDouble(), 3) * tabuDuration);
 
 		// make tabu this facilities during certain iterations
 		tabuMemory[i_selected][currentSolution[j_selected]] = currentIteration + t1;

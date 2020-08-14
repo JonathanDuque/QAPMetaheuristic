@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ExtremalOptimization extends RecursiveAction {
 	private static final long serialVersionUID = 3L;
@@ -23,16 +23,16 @@ public class ExtremalOptimization extends RecursiveAction {
 	}
 
 	double[] pdf;
-	Random random;
+	private ThreadLocalRandom thread_local_random;
 	private final int n;
 	QAPData qap;
 	private int[] solution, init_solution;
 	private int[] params;
 	private int best_cost, init_cost;
 
-	public ExtremalOptimization(QAPData qapData, int seed) {
+	public ExtremalOptimization(QAPData qapData) {
 		super();
-		this.random = new Random(seed);
+		thread_local_random = ThreadLocalRandom.current();
 
 		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getBKS());
 		n = qap.getSize();
@@ -75,11 +75,8 @@ public class ExtremalOptimization extends RecursiveAction {
 		List<Delta> deltaList = new ArrayList<>();
 		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
 
-		// System.out.println("EO");
-		// Tools.printArray(currentSolution);
-
 		// receive tau parameter
-		final double tau = params[0] / 100.0; // necesario para que la division de decimal
+		final double tau = params[0] / 100.0; // necessary due to is important that division get a decimal number
 
 		final int pdf_function_type = params[1];
 		// System.out.println("\ntau: " + tau + " pfd type: "+ pdf_function_type);
@@ -127,7 +124,7 @@ public class ExtremalOptimization extends RecursiveAction {
 						bestMove = j;
 						bestDelta = tempDelta;
 						counterBest = 1;
-					} else if (tempDelta == bestDelta && random.nextInt(++counterBest) == 0) {
+					} else if (tempDelta == bestDelta && thread_local_random.nextInt(++counterBest) == 0) {
 						bestMove = j;
 						bestDelta = tempDelta;
 					}
@@ -162,7 +159,6 @@ public class ExtremalOptimization extends RecursiveAction {
 
 			}
 
-			// currentIteration++;
 			deltaList.clear();// delete delta moves
 			time = System.currentTimeMillis();
 
@@ -219,7 +215,6 @@ public class ExtremalOptimization extends RecursiveAction {
 	}
 
 	public void initPdfGamma(int n, double tau) {
-
 		double sum = 0;
 		double y = 0;
 		// double k = tau;
@@ -252,7 +247,8 @@ public class ExtremalOptimization extends RecursiveAction {
 	}
 
 	public int pdfPick() {
-		double p = random.nextDouble(), fx;
+		double p = thread_local_random.nextDouble(), fx;
+		
 		// System.out.println("p " + p);
 
 		int index = 0;

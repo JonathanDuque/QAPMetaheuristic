@@ -26,7 +26,7 @@ public class MainActivity {
 	private static List<Solution> solution_population;
 
 	public static void main(String[] args) {
-		final int total_iterations;
+		int total_iterations;
 		final long start = System.currentTimeMillis();
 		final String problem;
 		final int workers;
@@ -77,6 +77,9 @@ public class MainActivity {
 			break;
 		}
 
+		execution_time = 1500;
+		total_iterations = 20;
+
 		if ((workers % DIFFERENT_MH) != 0) {
 			System.out.println(
 					"\n***************** Please enter workers multiple of 3     ********************************");
@@ -88,7 +91,7 @@ public class MainActivity {
 		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
 		System.out.println("Iterations: " + total_iterations);
 		System.out.println("Time out: " + total_iterations * execution_time / 1000.0 + " seconds");
-		System.out.println("Seed for random values: " + global_seed + "\n");
+		//System.out.println("Seed for random values: " + global_seed + "\n");
 
 		final ReadFile readFile = new ReadFile("Data/" + problem);
 		//final ReadFile readFile = new ReadFile("../../Data/" + problem);
@@ -97,7 +100,7 @@ public class MainActivity {
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
 		qap = new QAPData(distance, flow, readFile.getTarget());
 		qap_size = qap.getSize();
-		random = new Random(global_seed);
+		random = new Random();
 
 		ForkJoinPool pool = new ForkJoinPool(workers);
 		final Constructive constructive = new Constructive();
@@ -135,9 +138,9 @@ public class MainActivity {
 		while (current_iteration < total_iterations && no_find_BKS.get()) {
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
-				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
-				RobustTabuSearch rots = new RobustTabuSearch(qap, random.nextInt());
-				ExtremalOptimization eo = new ExtremalOptimization(qap, random.nextInt());
+				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap);
+				RobustTabuSearch rots = new RobustTabuSearch(qap);
+				ExtremalOptimization eo = new ExtremalOptimization(qap);
 
 				list_mtls.add(mtls);
 				list_rots.add(rots);
@@ -235,8 +238,8 @@ public class MainActivity {
 		total_time /= 1000.0;
 		System.out.println("Total time: " + total_time + " sec");
 
-		final String dir_file = "Results/";
-		//final String dir_file = "../Result-others/";
+		//final String dir_file = "Results/";
+		final String dir_file = "../Result-others-15sec/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file + file_name + ".csv");
@@ -618,13 +621,20 @@ public class MainActivity {
 
 	public static int[] improveParameter(final int[] parameter, final double[] behavior_mh, final int type,
 			final int current_iteration) {
-		final double[] diversify_percentage_limit = { 70, 50, 35, 25, 20, 15, 12, 10, 7, 4, 2, 1.5, 1.2, 0.8, 0.5 };
+		final double[] diversify_percentage_limit = { 70, 53, 41, 32, 25, 19, 15, 13, 11.4, 10 ,8.2 , 6.7, 5.3, 4.1, 3.3, 2.5, 1.9, 1.2, 0.75, 0.5};
+		//final double[] diversify_percentage_limit = { 70, 50, 35, 25, 20, 15, 12, 10, 7, 4, 2, 1.5, 1.2, 0.8, 0.5 };
+		//final double[] diversify_percentage_limit = { 50, 20, 10, 4, 1.5,  0.5 };
+		
 		final double[] change_pdf_percentage_limit = { 10, 5, 1, 0.5, 0.3 };
-
+		//final double[] change_pdf_percentage_limit = { 10, 5, 1, 0.5, 0.3 };
+		//final double[] change_pdf_percentage_limit = { 5, 1, 0.3 };
 		// behavior_mh[0] = percentage difference
 		// behavior_mh[1] = distance
 
 		int[] new_params = { 0, 0, 0 };
+		//System.out.println(" diversify_ " + diversify_percentage_limit[current_iteration]);
+		//System.out.println(" change_pdf_ " + change_pdf_percentage_limit[current_iteration / 4]);
+		//System.out.println("\n");
 
 		if (behavior_mh[0] > 0) {
 			switch (type) {
@@ -684,7 +694,7 @@ public class MainActivity {
 					new_params[0] = random.nextInt(100); // tau*100
 				}
 
-				if (behavior_mh[0] < change_pdf_percentage_limit[current_iteration / 3]) {
+				if (behavior_mh[0] < change_pdf_percentage_limit[current_iteration / 4]) {
 					int new_pdf_function;
 					do {
 						new_pdf_function = random.nextInt(3);
