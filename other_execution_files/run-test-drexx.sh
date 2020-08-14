@@ -1,6 +1,4 @@
 #!/bin/bash
-source exec_dre15.sh
-source exec_dre18.sh
 source exec_dre21.sh
 source exec_dre24.sh
 source exec_dre28.sh
