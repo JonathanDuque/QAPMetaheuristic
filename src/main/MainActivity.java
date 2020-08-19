@@ -17,6 +17,7 @@ public class MainActivity {
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
 	static final String[] mh_text = { "MTLS", "ROTS", "EO", "GA" };
 	private static final int DIFFERENT_MH = 3;
+	private static double[] diversify_percentage_limit;
 
 	private static Random random;
 	private static int execution_time;// by iteration
@@ -26,7 +27,7 @@ public class MainActivity {
 	private static List<Solution> solution_population;
 
 	public static void main(String[] args) {
-		int total_iterations;
+		final int total_iterations;
 		final long start = System.currentTimeMillis();
 		final String problem;
 		final int workers;
@@ -77,8 +78,10 @@ public class MainActivity {
 			break;
 		}
 
-		execution_time = 1500;
-		total_iterations = 20;
+		
+		//int step_time = 1000, current_time = 0;
+
+		diversify_percentage_limit = getDiversifyPercentageLimit(total_iterations);
 
 		if ((workers % DIFFERENT_MH) != 0) {
 			System.out.println(
@@ -91,10 +94,10 @@ public class MainActivity {
 		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
 		System.out.println("Iterations: " + total_iterations);
 		System.out.println("Time out: " + total_iterations * execution_time / 1000.0 + " seconds");
-		//System.out.println("Seed for random values: " + global_seed + "\n");
+		// System.out.println("Seed for random values: " + global_seed + "\n");
 
 		final ReadFile readFile = new ReadFile("Data/" + problem);
-		//final ReadFile readFile = new ReadFile("../../Data/" + problem);
+		// final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
 		// initialize qap data, flow and distance matrix, format [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
@@ -134,6 +137,24 @@ public class MainActivity {
 		double init_time = (System.currentTimeMillis() - start);
 		init_time /= 1000.0;
 		// System.out.println("Initiate time: " + init_time + " sec");
+
+		
+		/*
+		 * while (current_time > 300000) {
+		 * 
+		 * current_time += execution_time; execution_time += step_time; step_time +=
+		 * 1000;
+		 * 
+		 * System.out.println("\nexecution_time: " + execution_time); if (current_time +
+		 * execution_time + step_time > 300000) { execution_time = 300000 -
+		 * current_time; System.out.println("se paso ");
+		 * System.out.println("NEW execution_time: " + execution_time); }
+		 * 
+		 * System.out.println("Time: " + current_time); System.out.println("step_time: "
+		 * + step_time);
+		 * 
+		 * }
+		 */
 
 		while (current_iteration < total_iterations && no_find_BKS.get()) {
 
@@ -191,9 +212,9 @@ public class MainActivity {
 				double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
 						list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
 
-				params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration);
-				params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration);
-				params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration);
+				params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration, total_iterations);
+				params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration, total_iterations);
+				params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration, total_iterations);
 
 				// insert the new parameters into params population
 				insertParam(params_population.get(MTLS), new Params(params_MTLS, list_mtls.get(i).getBestCost()), MTLS);
@@ -214,6 +235,8 @@ public class MainActivity {
 			list_eo.clear();
 
 			current_iteration++;
+
+			// updating times
 		}
 
 		// update final results variables
@@ -238,8 +261,8 @@ public class MainActivity {
 		total_time /= 1000.0;
 		System.out.println("Total time: " + total_time + " sec");
 
-		//final String dir_file = "Results/";
-		final String dir_file = "../Result-others-15sec/";
+		final String dir_file = "Results/";
+		//final String dir_file = "../Result-others-15sec/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file + file_name + ".csv");
@@ -620,22 +643,15 @@ public class MainActivity {
 	}
 
 	public static int[] improveParameter(final int[] parameter, final double[] behavior_mh, final int type,
-			final int current_iteration) {
-		final double[] diversify_percentage_limit = { 70, 53, 41, 32, 25, 19, 15, 13, 11.4, 10 ,8.2 , 6.7, 5.3, 4.1, 3.3, 2.5, 1.9, 1.2, 0.75, 0.5};
-		//final double[] diversify_percentage_limit = { 70, 50, 35, 25, 20, 15, 12, 10, 7, 4, 2, 1.5, 1.2, 0.8, 0.5 };
-		//final double[] diversify_percentage_limit = { 50, 20, 10, 4, 1.5,  0.5 };
-		
+			final int current_iteration, final int total_iterations) {
+
 		final double[] change_pdf_percentage_limit = { 10, 5, 1, 0.5, 0.3 };
-		//final double[] change_pdf_percentage_limit = { 10, 5, 1, 0.5, 0.3 };
-		//final double[] change_pdf_percentage_limit = { 5, 1, 0.3 };
+		final double divisor = (float) total_iterations / 5;
+		int[] new_params = { 0, 0, 0 };
+		
 		// behavior_mh[0] = percentage difference
 		// behavior_mh[1] = distance
-
-		int[] new_params = { 0, 0, 0 };
-		//System.out.println(" diversify_ " + diversify_percentage_limit[current_iteration]);
-		//System.out.println(" change_pdf_ " + change_pdf_percentage_limit[current_iteration / 4]);
-		//System.out.println("\n");
-
+ 
 		if (behavior_mh[0] > 0) {
 			switch (type) {
 			// case MTLS keep equal
@@ -694,7 +710,7 @@ public class MainActivity {
 					new_params[0] = random.nextInt(100); // tau*100
 				}
 
-				if (behavior_mh[0] < change_pdf_percentage_limit[current_iteration / 4]) {
+				if (behavior_mh[0] < change_pdf_percentage_limit[(int) Math.floor(current_iteration / divisor)]) {
 					int new_pdf_function;
 					do {
 						new_pdf_function = random.nextInt(3);
@@ -712,16 +728,38 @@ public class MainActivity {
 		return new_params;
 	}
 
-	public static double[] initExp(int total_generations, double tau) {
-		double[] y = new double[total_generations];
+	public static double[] getDiversifyPercentageLimit(int iterations) {
+		int total_values = 20;
+		final double[] limits = new double[total_values];
 
-		double t;
-		for (int i = 1; i <= total_generations; i++) {
-			// t = t /(1+ 0.1*t);
-			y[i - 1] = Math.exp(tau / i);
+		double a = 94.67597;
+		double b = 0.31811;
+		double c = 0.15699;
+
+		double y = 0;
+
+		for (int x = 0; x < total_values; x++) {
+			y = a * Math.exp(-b * (x + 1)) + c;
+			// System.out.println("f(" + x + ") = " + (float) y);
+
+			limits[x] = y;
 		}
 
-		return y;
+		double m = (double) total_values / iterations;
+
+		// System.out.println("f(" + m + ") = " + (float) m);
+
+		final double[] definitive_limits = new double[iterations];
+
+		int index;
+
+		for (int x = 0; x < iterations; x++) {
+			index = (int) Math.round(m * x);
+			definitive_limits[x] = limits[index];
+			// System.out.println("f(" + x + ") = " + definitive_limits[x]);
+		}
+
+		return definitive_limits;
 	}
 
 }
