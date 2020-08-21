@@ -252,6 +252,7 @@ public class MainActivity {
 		}
 
 		final double std = best_cost * 100.0 / qap.getBKS() - 100;
+		System.out.println("*****************      Results     ********************************");
 		System.out.println("Best cost achieved: " + best_cost + " " + Tools.DECIMAL_FORMAT_2D.format(std) + "%");
 		System.out.println("Method: " + method);
 		System.out.println("Parameters:");
@@ -646,7 +647,7 @@ public class MainActivity {
 			final int current_iteration, final int total_iterations) {
 
 		final double[] change_pdf_percentage_limit = { 10, 5, 1, 0.5, 0.3 };
-		final double divisor = (float) total_iterations / 5;
+		final double divisor = (float) total_iterations / change_pdf_percentage_limit.length;
 		int[] new_params = { 0, 0, 0 };
 		
 		// behavior_mh[0] = percentage difference
