@@ -27,7 +27,7 @@ public class MainActivity {
 	private static List<Solution> solution_population;
 
 	public static void main(String[] args) {
-		final int total_iterations;
+		int total_iterations;
 		final long start = System.currentTimeMillis();
 		final String problem;
 		final int workers;
@@ -72,15 +72,17 @@ public class MainActivity {
 		default:
 			problem = "tai40a.qap";
 			workers = 3;
-			execution_time = 200;
+			execution_time = 20000;
 			total_iterations = 15;
 			global_seed = 1;
 			break;
 		}
-
 		
-		//int step_time = 1000, current_time = 0;
+		int step_time = 1000, current_time = 0, time_out = 300000;
+		execution_time = 1000;
+		total_iterations = calculateTotalIterations(time_out);
 
+		//the limits depends to the total iterations
 		diversify_percentage_limit = getDiversifyPercentageLimit(total_iterations);
 
 		if ((workers % DIFFERENT_MH) != 0) {
@@ -93,11 +95,11 @@ public class MainActivity {
 		System.out.println("Threads: " + workers);
 		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
 		System.out.println("Iterations: " + total_iterations);
-		System.out.println("Time out: " + total_iterations * execution_time / 1000.0 + " seconds");
+		System.out.println("Time out: " + time_out / 1000.0 + " seconds");
 		// System.out.println("Seed for random values: " + global_seed + "\n");
 
-		final ReadFile readFile = new ReadFile("Data/" + problem);
-		// final ReadFile readFile = new ReadFile("../../Data/" + problem);
+		 final ReadFile readFile = new ReadFile("Data/" + problem);
+		//final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
 		// initialize qap data, flow and distance matrix, format [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
@@ -137,24 +139,6 @@ public class MainActivity {
 		double init_time = (System.currentTimeMillis() - start);
 		init_time /= 1000.0;
 		// System.out.println("Initiate time: " + init_time + " sec");
-
-		
-		/*
-		 * while (current_time > 300000) {
-		 * 
-		 * current_time += execution_time; execution_time += step_time; step_time +=
-		 * 1000;
-		 * 
-		 * System.out.println("\nexecution_time: " + execution_time); if (current_time +
-		 * execution_time + step_time > 300000) { execution_time = 300000 -
-		 * current_time; System.out.println("se paso ");
-		 * System.out.println("NEW execution_time: " + execution_time); }
-		 * 
-		 * System.out.println("Time: " + current_time); System.out.println("step_time: "
-		 * + step_time);
-		 * 
-		 * }
-		 */
 
 		while (current_iteration < total_iterations && no_find_BKS.get()) {
 
@@ -212,9 +196,12 @@ public class MainActivity {
 				double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
 						list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
 
-				params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration, total_iterations);
-				params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration, total_iterations);
-				params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration, total_iterations);
+				params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration,
+						total_iterations);
+				params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration,
+						total_iterations);
+				params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration,
+						total_iterations);
 
 				// insert the new parameters into params population
 				insertParam(params_population.get(MTLS), new Params(params_MTLS, list_mtls.get(i).getBestCost()), MTLS);
@@ -235,8 +222,16 @@ public class MainActivity {
 			list_eo.clear();
 
 			current_iteration++;
-
+			
 			// updating times
+			current_time += execution_time;
+			execution_time += step_time;
+			step_time += 1000;
+
+			if (current_time + execution_time + step_time > time_out) {
+				execution_time = time_out - current_time;
+			}
+			
 		}
 
 		// update final results variables
@@ -262,8 +257,8 @@ public class MainActivity {
 		total_time /= 1000.0;
 		System.out.println("Total time: " + total_time + " sec");
 
-		final String dir_file = "Results/";
-		//final String dir_file = "../Result-others-15sec/";
+		// final String dir_file = "Results/";
+		final String dir_file = "../Result-test-15sec/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file + file_name + ".csv");
@@ -649,10 +644,10 @@ public class MainActivity {
 		final double[] change_pdf_percentage_limit = { 10, 5, 1, 0.5, 0.3 };
 		final double divisor = (float) total_iterations / change_pdf_percentage_limit.length;
 		int[] new_params = { 0, 0, 0 };
-		
+
 		// behavior_mh[0] = percentage difference
 		// behavior_mh[1] = distance
- 
+
 		if (behavior_mh[0] > 0) {
 			switch (type) {
 			// case MTLS keep equal
@@ -729,7 +724,7 @@ public class MainActivity {
 		return new_params;
 	}
 
-	public static double[] getDiversifyPercentageLimit(int iterations) {
+	public static double[] getDiversifyPercentageLimit(int total_iterations) {
 		int total_values = 20;
 		final double[] limits = new double[total_values];
 
@@ -746,21 +741,50 @@ public class MainActivity {
 			limits[x] = y;
 		}
 
-		double m = (double) total_values / iterations;
+		double m = (double) total_values / total_iterations;
 
 		// System.out.println("f(" + m + ") = " + (float) m);
 
-		final double[] definitive_limits = new double[iterations];
+		final double[] definitive_limits = new double[total_iterations];
 
 		int index;
 
-		for (int x = 0; x < iterations; x++) {
+		for (int x = 0; x < total_iterations; x++) {
 			index = (int) Math.round(m * x);
 			definitive_limits[x] = limits[index];
 			// System.out.println("f(" + x + ") = " + definitive_limits[x]);
 		}
 
 		return definitive_limits;
+	}
+	
+	
+	public static int calculateTotalIterations(int time_out) {
+		int total_iterations = 0;
+		int step_time = 1000, current_time = 0, execution_time = 1000;
+		
+		while (current_time < time_out) {
+			//System.out.println("\nexecution_time: " + execution_time);
+
+			current_time += execution_time;
+			execution_time += step_time;
+			step_time += 1000;
+
+			if (current_time + execution_time + step_time > time_out) {
+				execution_time = time_out - current_time;
+				//System.out.println("se paso ");
+				//System.out.println("NEW execution_time: " + execution_time);
+			}
+
+			//System.out.println("Time: " + current_time);
+			//System.out.println("step_time: " + step_time);
+			total_iterations++;
+
+		}
+		
+		
+		return total_iterations;
+		
 	}
 
 }
