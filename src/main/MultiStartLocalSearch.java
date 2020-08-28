@@ -14,6 +14,8 @@ public class MultiStartLocalSearch extends RecursiveAction {
 	private int[] solution, init_solution;
 	private int[] params;
 	private int best_cost, init_cost;
+	int execution_time ;
+	
 	public MultiStartLocalSearch(QAPData qapData) {
 		super();
 		thread_local_random = ThreadLocalRandom.current();
@@ -23,9 +25,10 @@ public class MultiStartLocalSearch extends RecursiveAction {
 	}
 
 	// always before compute function, is necessary set the environment
-	public void setEnvironment(int[] initSolution, int[] params) {
+	public void setEnvironment(int[] initSolution, int[] params, final int execution_time) {
 		this.params = params.clone();
 		this.init_solution = initSolution.clone();
+		this.execution_time = execution_time;
 	}
 
 	public int[] getInitSolution() {
@@ -53,7 +56,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 		// this initial block define the variable needed
 		solution = Arrays.copyOf(init_solution, n);
 		int[] currentSolution = Arrays.copyOf(init_solution, n);
-		boolean improve = false; // this flag control when the solution no improve and we are in an optimo local
+		boolean improve = false; // this flag control when the solution no improve and we are in an optimal local
 		//int currentIteration = 0;
 		int temporalDelta, bestDelta, cost = qap.evalSolution(init_solution);
 		init_cost = cost;
@@ -69,7 +72,6 @@ public class MultiStartLocalSearch extends RecursiveAction {
 		final Constructive constructive = new Constructive();
 		final long start = System.currentTimeMillis();
 		long time = 0;
-		final int execution_time = MainActivity.getExecutionTime();
 
 		// here find the best solution from the initSolution
 		while (time - start < execution_time && MainActivity.is_BKS_was_not_found()) { // execution during execution_time or until find bks
@@ -111,7 +113,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 				improve = false;
 				if (random_restart) {
 					// start in a new point
-					currentSolution = constructive.createRandomSolution(n, MainActivity.getSeed());
+					currentSolution = constructive.createRandomSolution(n, thread_local_random.nextInt());
 				} else {
 					// System.out.println("many swaps");
 					currentSolution = makeManySwaps(currentSolution, qap);
@@ -166,5 +168,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 
 		return currentSolution;
 	}
+	
+	
 
 }

@@ -15,6 +15,7 @@ public class RobustTabuSearch extends RecursiveAction {
 	private int[] solution, init_solution;
 	private int[] params;
 	private int best_cost, init_cost;
+	private int execution_time;
 
 	public RobustTabuSearch(QAPData qapData) {
 		super();
@@ -25,9 +26,10 @@ public class RobustTabuSearch extends RecursiveAction {
 	}
 
 	// always before compute function, is necessary set the environment
-	public void setEnvironment(int[] initSolution, int[] params) {
+	public void setEnvironment(int[] initSolution, int[] params, final int execution_time) {
 		this.params = params.clone();
 		this.init_solution = initSolution.clone();
+		this.execution_time = execution_time;
 	}
 
 	public int[] getInitSolution() {
@@ -76,7 +78,7 @@ public class RobustTabuSearch extends RecursiveAction {
 		final long start = System.currentTimeMillis();
 		long time = 0;
 		// this while find the best solution during totalIterations or until BKS will be found
-		while (time - start < MainActivity.getExecutionTime()  && MainActivity.is_BKS_was_not_found()) {
+		while (time - start < execution_time  && MainActivity.is_BKS_was_not_found()) {
 
 			bestNeighbor = getBestNeighbor(currentSolution, currentIteration, best_cost);
 			bestNeighborCost = qap.evalSolution(bestNeighbor);

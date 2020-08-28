@@ -29,6 +29,7 @@ public class ExtremalOptimization extends RecursiveAction {
 	private int[] solution, init_solution;
 	private int[] params;
 	private int best_cost, init_cost;
+	private int execution_time;
 
 	public ExtremalOptimization(QAPData qapData) {
 		super();
@@ -39,9 +40,10 @@ public class ExtremalOptimization extends RecursiveAction {
 	}
 
 	// always before compute function, is necessary set the environment
-	public void setEnvironment(int[] initSolution, int[] params) {
+	public void setEnvironment(int[] initSolution, int[] params, final int execution_time) {
 		this.params = params.clone();
 		this.init_solution = initSolution.clone();
+		this.execution_time = execution_time;
 	}
 
 	public int[] getInitSolution() {
@@ -103,7 +105,7 @@ public class ExtremalOptimization extends RecursiveAction {
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
-		while (time - start < MainActivity.getExecutionTime() && MainActivity.is_BKS_was_not_found()) {
+		while (time - start < execution_time && MainActivity.is_BKS_was_not_found()) {
 
 			for (int i = 0; i < n; i++) {
 				int bestMove = -1;
