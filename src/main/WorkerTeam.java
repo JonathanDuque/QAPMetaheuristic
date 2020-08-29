@@ -8,8 +8,11 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class WorkerTeam {
-	// private static final long serialVersionUID = 1L;
+public class WorkerTeam extends RecursiveAction{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private QAPData qap;
 	private int qap_size;
 	private int total_iterations;
@@ -23,7 +26,7 @@ public class WorkerTeam {
 	
 	private Solution team_best_solution;
 
-	public WorkerTeam(int workers, int execution_time, int total_iterations, QAPData qap) {
+	public WorkerTeam(int workers, int execution_time, int total_iterations, QAPData qap, int team_id) {
 		super();
 
 		this.qap = qap;
@@ -32,8 +35,15 @@ public class WorkerTeam {
 		this.execution_time = execution_time;
 		this.total_iterations = total_iterations;
 		thread_local_random = ThreadLocalRandom.current();
+		
+		System.out.println("\nTeam: " + team_id);
+		System.out.println("Threads: " + workers);
+		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
+		System.out.println("Iterations: " + total_iterations);
+		System.out.println("Time out: " + execution_time * total_iterations / 1000.0 + " seconds");
 	}
 
+	@Override
 	protected void compute() {
 
 		// int step_time = 1000, current_time = 0, time_out = 300000;
