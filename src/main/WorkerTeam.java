@@ -1,6 +1,5 @@
 package main;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -8,7 +7,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class WorkerTeam extends RecursiveAction{
+public class WorkerTeam extends RecursiveAction {
 	/**
 	 * 
 	 */
@@ -23,7 +22,7 @@ public class WorkerTeam extends RecursiveAction{
 	final int DIFFERENT_MH = 3;
 	private ThreadLocalRandom thread_local_random;
 	private int execution_time;// by iteration
-	
+
 	private Solution team_best_solution;
 
 	public WorkerTeam(int workers, int execution_time, int total_iterations, QAPData qap, int team_id) {
@@ -35,23 +34,31 @@ public class WorkerTeam extends RecursiveAction{
 		this.execution_time = execution_time;
 		this.total_iterations = total_iterations;
 		thread_local_random = ThreadLocalRandom.current();
-		
+
 		System.out.println("\nTeam: " + team_id);
-		System.out.println("Threads: " + workers);
-		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
-		System.out.println("Iterations: " + total_iterations);
-		System.out.println("Time out: " + execution_time * total_iterations / 1000.0 + " seconds");
+		//System.out.println("Threads: " + workers);
+		//System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
+		//System.out.println("Iterations: " + total_iterations);
+		//System.out.println("Time out: " + execution_time * total_iterations / 1000.0 + " seconds");
 	}
 
 	@Override
 	protected void compute() {
 
-		// int step_time = 1000, current_time = 0, time_out = 300000;
-		// execution_time = 1000;
-		// total_iterations = calculateTotalIterations(time_out);
+		//setting data for execution with dynamic times
+		//int step_time = 1000;
+		int current_time = 0, time_out = 300000;
+		execution_time = 1000; //this is the first value, after it changes through each iterations
+		total_iterations = calculateTotalIterations2(time_out);
 
 		// the limits depends to the total iterations
 		final double[] diversify_percentage_limit = getDiversifyPercentageLimit(total_iterations);
+		
+		
+		System.out.println("Threads: " + workers);
+		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
+		System.out.println("Iterations: " + total_iterations);
+		System.out.println("Time out: " + time_out / 1000.0 + " seconds");
 
 		ForkJoinPool pool = new ForkJoinPool(workers);
 		final Constructive constructive = new Constructive();
@@ -156,9 +163,10 @@ public class WorkerTeam extends RecursiveAction{
 			current_iteration++;
 
 			// updating times
+			current_time += execution_time;
+			execution_time = updateExecutionTime2(execution_time, current_time, time_out);
 			/*
-			 * current_time += execution_time; execution_time += step_time; step_time +=
-			 * 1000;
+			 * execution_time += step_time; step_time += 1000;
 			 * 
 			 * if (current_time + execution_time + step_time > time_out) { execution_time =
 			 * time_out - current_time; }
@@ -171,26 +179,23 @@ public class WorkerTeam extends RecursiveAction{
 		int best_cost = qap.evalSolution(best_solution);
 		final int[] empty_params = { -1, -1, -1 };
 		team_best_solution = new Solution(best_solution, empty_params, "N/A");
- 
+
 		// update final results variables
 		for (int i = 0; i < solution_population.size(); i++) {
 			int temp_cost = qap.evalSolution(solution_population.get(i).getArray());
-			
+
 			if (temp_cost < best_cost) {
 				best_cost = temp_cost;
 				team_best_solution = solution_population.get(i);
 			}
 		}
-		
-		
-		
 
 	}
 
 	public Solution getbestTeamSolution() {
 		return team_best_solution;
 	}
-	
+
 	public double[] getDiversifyPercentageLimit(int total_iterations) {
 		int total_values = 20;
 		final double[] limits = new double[total_values];
@@ -473,13 +478,11 @@ public class WorkerTeam extends RecursiveAction{
 		return s;
 	}
 
-	public static int calculateTotalIterations(int time_out) {
+	public  int calculateTotalIterations(int time_out) {
 		int total_iterations = 0;
 		int step_time = 1000, current_time = 0, execution_time = 1000;
 
 		while (current_time < time_out) {
-			// System.out.println("\nexecution_time: " + execution_time);
-
 			current_time += execution_time;
 			execution_time += step_time;
 			step_time += 1000;
@@ -494,4 +497,42 @@ public class WorkerTeam extends RecursiveAction{
 
 		return total_iterations;
 	}
+
+	public  int calculateTotalIterations2(int time_out) {
+		int total_iterations = 0;
+		int current_time = 0, execution_time = 1000;
+
+		while (current_time < time_out) {
+			//System.out.println("\nexecution_time: " + execution_time);
+
+			current_time += execution_time;
+
+			if (execution_time < 30000) {
+				execution_time *= 2;
+			}
+
+			if (current_time + 2 * execution_time > time_out) {
+				execution_time = time_out - current_time;
+			}
+
+			total_iterations++;
+
+		}
+
+		return total_iterations;
+	}
+
+	public int updateExecutionTime2(int execution_time, final int current_time, final int time_out) {
+
+		if (execution_time < 30000) {
+			execution_time *= 2;
+		}
+
+		if (current_time + 2 * execution_time > time_out) {
+			execution_time = time_out - current_time;
+		}
+
+		return execution_time;
+	}
+
 }

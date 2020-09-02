@@ -58,15 +58,15 @@ public class MainActivity {
 			break;
 		default:
 			problem = "tai40a.qap";
-			total_workers = 6;
-			execution_time = 1000;
+			total_workers = 3;
+			execution_time = 10000;
 			total_iterations = 15;
 			break;
 		}
 
-		int teams = 2;
+		int teams = 1;
 
-		//checking some conditions for execution
+		// checking some conditions for execution
 		if ((total_workers % DIFFERENT_MH) != 0) {
 			System.out.println(
 					"\n***************** Please enter workers multiple of 3     ********************************");
@@ -89,7 +89,7 @@ public class MainActivity {
 		System.out.println("Teams: " + teams);
 
 		final ReadFile readFile = new ReadFile("Data/" + problem);
-		// final ReadFile readFile = new ReadFile("../../Data/" + problem);
+		//final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
 		// initialize qap data, flow and distance matrix, format [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
@@ -101,10 +101,10 @@ public class MainActivity {
 		double init_time = (System.currentTimeMillis() - start);
 		init_time /= 1000.0;
 
-		for (int i = 0; i < teams; i += 1) {
-			WorkerTeam team = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, i);
-			list_teams.add(team);
-		}
+		WorkerTeam team1 = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, 0);
+		list_teams.add(team1);
+		//WorkerTeam team2 = new WorkerTeam(total_workers / teams, 15000, 20, qap, 1);
+		//list_teams.add(team2);
 
 		// launch execution in parallel for all teams
 		for (int i = 0; i < teams; i += 1) {
@@ -125,6 +125,7 @@ public class MainActivity {
 
 		Solution best_team_solution = list_teams_solutions.get(0);
 		int best_cost = qap.evalSolution(best_team_solution.getArray());
+		int team = 0;
 
 		// get the best result
 		for (int i = 0; i < list_teams_solutions.size(); i++) {
@@ -133,6 +134,7 @@ public class MainActivity {
 			if (temp_cost < best_cost) {
 				best_cost = temp_cost;
 				best_team_solution = list_teams_solutions.get(i);
+				team = i;
 			}
 		}
 
@@ -153,7 +155,7 @@ public class MainActivity {
 		System.out.println("Total time: " + total_time + " sec");
 
 		final String dir_file = "Results/";
-		// final String dir_file = "../Result-test-dynamic-time/";
+		//final String dir_file = "../Result-test-15-20-adaptations/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file + file_name + ".csv");
@@ -176,6 +178,8 @@ public class MainActivity {
 				fileWriter.append("params");
 				fileWriter.append(";");
 				fileWriter.append("method");
+				fileWriter.append(";");
+				fileWriter.append("team");
 				fileWriter.append("\n");
 
 				fileWriter.flush();
@@ -203,6 +207,8 @@ public class MainActivity {
 			fileWriter.append(Arrays.toString(best_params));
 			fileWriter.append(";");
 			fileWriter.append(best_method);
+			fileWriter.append(";");
+			fileWriter.append(Integer.toString(team));
 			fileWriter.append("\n");
 
 			fileWriter.flush();
