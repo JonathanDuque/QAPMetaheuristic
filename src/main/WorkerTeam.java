@@ -36,10 +36,10 @@ public class WorkerTeam extends RecursiveAction {
 		thread_local_random = ThreadLocalRandom.current();
 
 		System.out.println("\nTeam: " + team_id);
-		//System.out.println("Threads: " + workers);
-		//System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
-		//System.out.println("Iterations: " + total_iterations);
-		//System.out.println("Time out: " + execution_time * total_iterations / 1000.0 + " seconds");
+		System.out.println("Threads: " + workers);
+		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
+		System.out.println("Iterations: " + total_iterations);
+		System.out.println("Time out: " + execution_time * total_iterations / 1000.0 + " seconds");
 	}
 
 	@Override
@@ -47,18 +47,18 @@ public class WorkerTeam extends RecursiveAction {
 
 		//setting data for execution with dynamic times
 		//int step_time = 1000;
-		int current_time = 0, time_out = 300000;
-		execution_time = 1000; //this is the first value, after it changes through each iterations
-		total_iterations = calculateTotalIterations2(time_out);
+		//int current_time = 0, time_out = 300000;
+		//execution_time = 1000; //this is the first value, after it changes through each iterations
+		//total_iterations = calculateTotalIterations2(time_out);
 
 		// the limits depends to the total iterations
 		final double[] diversify_percentage_limit = getDiversifyPercentageLimit(total_iterations);
 		
 		
-		System.out.println("Threads: " + workers);
-		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
-		System.out.println("Iterations: " + total_iterations);
-		System.out.println("Time out: " + time_out / 1000.0 + " seconds");
+		//System.out.println("Threads: " + workers);
+		//System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
+		//System.out.println("Iterations: " + total_iterations);
+		//System.out.println("Time out: " + time_out / 1000.0 + " seconds");
 
 		ForkJoinPool pool = new ForkJoinPool(workers);
 		final Constructive constructive = new Constructive();
@@ -163,8 +163,8 @@ public class WorkerTeam extends RecursiveAction {
 			current_iteration++;
 
 			// updating times
-			current_time += execution_time;
-			execution_time = updateExecutionTime2(execution_time, current_time, time_out);
+			//current_time += execution_time;
+			//execution_time = updateExecutionTime2(execution_time, current_time, time_out);
 			/*
 			 * execution_time += step_time; step_time += 1000;
 			 * 

@@ -58,13 +58,13 @@ public class MainActivity {
 			break;
 		default:
 			problem = "tai40a.qap";
-			total_workers = 3;
-			execution_time = 10000;
+			total_workers = 30;
+			execution_time = 20000;
 			total_iterations = 15;
 			break;
 		}
 
-		int teams = 1;
+		final int teams = 5;
 
 		// checking some conditions for execution
 		if ((total_workers % DIFFERENT_MH) != 0) {
@@ -101,8 +101,11 @@ public class MainActivity {
 		double init_time = (System.currentTimeMillis() - start);
 		init_time /= 1000.0;
 
-		WorkerTeam team1 = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, 0);
-		list_teams.add(team1);
+		for (int i = 0; i < teams; i += 1) {
+			WorkerTeam team = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, i);
+			list_teams.add(team);
+		}
+
 		//WorkerTeam team2 = new WorkerTeam(total_workers / teams, 15000, 20, qap, 1);
 		//list_teams.add(team2);
 
@@ -155,7 +158,7 @@ public class MainActivity {
 		System.out.println("Total time: " + total_time + " sec");
 
 		final String dir_file = "Results/";
-		//final String dir_file = "../Result-test-15-20-adaptations/";
+		//final String dir_file = "../Result-test-5teams-15-adaptations/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file + file_name + ".csv");
@@ -193,7 +196,6 @@ public class MainActivity {
 
 		try {
 			fileWriter = new FileWriter(dir_file + file_name + ".csv", true);
-			// solution - cost- deviation - time
 			fileWriter.append(Arrays.toString(best_solution));
 			fileWriter.append(";");
 			fileWriter.append(Integer.toString(best_cost));
