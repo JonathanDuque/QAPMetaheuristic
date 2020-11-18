@@ -1,8 +1,8 @@
-package main.GeneticAlgorithm;
+package GeneticAlgorithm;
 
 import java.util.Arrays;
 
-import main.QAPData;
+import QAPData;
 
 public class Individual {
 	private int[] genes;

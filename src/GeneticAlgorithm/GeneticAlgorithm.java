@@ -1,4 +1,4 @@
-package main.GeneticAlgorithm;
+package GeneticAlgorithm;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.RecursiveAction;
 
-import main.MainActivity;
-import main.QAPData;
-import main.Solution;
+import MainActivity;
+import QAPData;
+import Solution;
 
 public class GeneticAlgorithm extends RecursiveAction {
 	/**
