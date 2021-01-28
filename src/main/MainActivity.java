@@ -22,7 +22,7 @@ public class MainActivity {
 		int total_iterations;
 		final long start = System.currentTimeMillis();
 		final String problem;
-		final int total_workers;
+		int total_workers;
 		int execution_time;// by iteration
 
 		switch (args.length) {
@@ -58,13 +58,16 @@ public class MainActivity {
 			break;
 		default:
 			problem = "tai40a.qap";
-			total_workers = 30;
+			total_workers = 63;
 			execution_time = 20000;
 			total_iterations = 15;
 			break;
 		}
 
-		final int teams = 5;
+		final int teams = 3;
+		total_workers = 63;
+		execution_time = 20000;
+		total_iterations = 15;
 
 		// checking some conditions for execution
 		if ((total_workers % DIFFERENT_MH) != 0) {
@@ -86,17 +89,17 @@ public class MainActivity {
 		}
 
 		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
-		System.out.println("Teams: " + teams);
+		System.out.println("Total Teams: " + teams);
 
-		final ReadFile readFile = new ReadFile("Data/" + problem);
-		//final ReadFile readFile = new ReadFile("../../Data/" + problem);
+		//final ReadFile readFile = new ReadFile("Data/" + problem);
+		final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
 		// initialize qap data, flow and distance matrix, format [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
 		qap = new QAPData(distance, flow, readFile.getTarget());
 
 		ForkJoinPool pool = new ForkJoinPool(teams);
-		List<WorkerTeam> list_teams = new ArrayList<>(teams);// these lists are necessary for the executing in parallel
+		List<WorkerTeam> list_teams = new ArrayList<>(teams);// these lists are necessary for the executing in parallel of each team
 
 		double init_time = (System.currentTimeMillis() - start);
 		init_time /= 1000.0;
@@ -106,6 +109,7 @@ public class MainActivity {
 			list_teams.add(team);
 		}
 
+		//this line is important if we want to execute teams with other setup
 		//WorkerTeam team2 = new WorkerTeam(total_workers / teams, 15000, 20, qap, 1);
 		//list_teams.add(team2);
 
@@ -157,8 +161,8 @@ public class MainActivity {
 		Tools.printArray(best_params);
 		System.out.println("Total time: " + total_time + " sec");
 
-		final String dir_file = "Results/";
-		//final String dir_file = "../Result-test-5teams-15-adaptations/";
+		//final String dir_file = "Results/";
+		final String dir_file = "../Result-test-3teams-21mh-15adaptations/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file + file_name + ".csv");

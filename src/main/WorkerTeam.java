@@ -45,7 +45,7 @@ public class WorkerTeam extends RecursiveAction {
 	@Override
 	protected void compute() {
 
-		//setting data for execution with dynamic times
+		/**** setting data for execution with dynamic times *******/
 		//int step_time = 1000;
 		//int current_time = 0, time_out = 300000;
 		//execution_time = 1000; //this is the first value, after it changes through each iterations
@@ -53,7 +53,6 @@ public class WorkerTeam extends RecursiveAction {
 
 		// the limits depends to the total iterations
 		final double[] diversify_percentage_limit = getDiversifyPercentageLimit(total_iterations);
-		
 		
 		//System.out.println("Threads: " + workers);
 		//System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
@@ -162,7 +161,7 @@ public class WorkerTeam extends RecursiveAction {
 
 			current_iteration++;
 
-			// updating times
+			/* updating times when is dynamic time */
 			//current_time += execution_time;
 			//execution_time = updateExecutionTime2(execution_time, current_time, time_out);
 			/*
@@ -234,9 +233,9 @@ public class WorkerTeam extends RecursiveAction {
 		List<List<Params>> params_population = new ArrayList<>(DIFFERENT_MH); // because there are # DIFFERENT_MH
 
 		for (int k = 0; k < DIFFERENT_MH; k++) {
-			List<Params> tempListParams = new ArrayList<>(params_of_each_mh);
+			List<Params> temp_list_params = new ArrayList<>(params_of_each_mh);
 			for (int i = 0; i < params_of_each_mh; i++) {
-				int[] p = { 0, 0, 0 }; // parameters array
+				int[] p = { 0, 0, 0 }; // parameters array empty
 
 				switch (k) {
 				case MTLS:
@@ -254,10 +253,10 @@ public class WorkerTeam extends RecursiveAction {
 					p[1] = thread_local_random.nextInt(3); // pdf function type
 					break;
 				}
-				tempListParams.add(new Params(p, Integer.MAX_VALUE));
+				temp_list_params.add(new Params(p, Integer.MAX_VALUE));
 			}
 
-			params_population.add(tempListParams);
+			params_population.add(temp_list_params);
 		}
 
 		// printParamsPopulation(params_population);
@@ -269,7 +268,7 @@ public class WorkerTeam extends RecursiveAction {
 		final int[] empty_params = { -1, -1, -1 };
 
 		for (int i = 0; i < total; i++) {
-			int[] s = constructive.createRandomSolution(qap_size, i);
+			int[] s = constructive.createRandomSolution(qap_size, i);// i stands for the seed
 			init_solution_population.add(new Solution(s, empty_params, "N/A"));
 		}
 
