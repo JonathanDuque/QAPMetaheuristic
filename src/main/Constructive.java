@@ -2,8 +2,12 @@ package main;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Constructive {
+	//before create more than one team this class only used Random instead of ThreadLocalRandom
+	//because there were not teams in parallel using random numbers, now is necessary use
+	//ThreadLocalRandom given that team in parallel could ask for solutions
 
 	// constructive algorithm for create init solution intelligently
 	public int[] createInitSolution(QAPData qap) {
@@ -109,15 +113,16 @@ public class Constructive {
 	public int[] createRandomSolution(int size, final int seed) {
 		//System.out.println("Seed: " + seed);
 		int[] s = new int[size];
-		Random random = new Random(seed);
+		ThreadLocalRandom thread_local_rando = ThreadLocalRandom.current();
+		//Random random = new Random(seed);
 
-		s[0] = random.nextInt(size);
+		s[0] = thread_local_rando.nextInt(size);
 		
 		for (int i = 1; i < size; i++) {
 			boolean isEqual = true;
 			while (isEqual) {
 				isEqual = false;
-				int x = random.nextInt(size);
+				int x = thread_local_rando.nextInt(size);
 				for (int j = 0; j <i; j++) {
 					if (x == s[j]) {
 						isEqual = true;
