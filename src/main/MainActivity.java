@@ -104,14 +104,17 @@ public class MainActivity {
 		double init_time = (System.currentTimeMillis() - start);
 		init_time /= 1000.0;
 
-		for (int i = 0; i < teams; i += 1) {
-			WorkerTeam team = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, i);
-			list_teams.add(team);
-		}
+		// for (int i = 0; i < teams; i += 1) {
+		WorkerTeam team1 = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, false, 0);
+		list_teams.add(team1);
+		// }
 
-		//this line is important if we want to execute teams with other setup
-		//WorkerTeam team2 = new WorkerTeam(total_workers / teams, 15000, 20, qap, 1);
-		//list_teams.add(team2);
+		// this line is important if we want to execute teams with other setup
+		WorkerTeam team2 = new WorkerTeam(total_workers / teams, 15000, 20, qap, false, 1);
+		list_teams.add(team2);
+
+		WorkerTeam team3 = new WorkerTeam(total_workers / teams, 15000, 20, qap, true, 2);
+		list_teams.add(team3);
 
 		// launch execution in parallel for all teams
 		for (int i = 0; i < teams; i += 1) {
