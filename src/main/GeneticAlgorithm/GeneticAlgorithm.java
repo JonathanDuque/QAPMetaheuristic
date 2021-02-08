@@ -22,6 +22,7 @@ public class GeneticAlgorithm extends RecursiveAction {
 	private Random random;
 	private int[] params;
 	private List<Individual> population;
+	int execution_time;
 
 	public GeneticAlgorithm(QAPData qapData, int seed) {
 		super();
@@ -38,9 +39,10 @@ public class GeneticAlgorithm extends RecursiveAction {
 	}
 	
 	// always before compute function, is necessary set the environment
-		public void setEnvironment(int[] params, int population_size) {
+		public void setEnvironment(int[] params, int population_size, final int execution_time) {
 			this.params = params.clone();
 			population = createFirstGeneration(population_size);
+			this.execution_time = execution_time;
 		}
 
 	@Override
@@ -66,7 +68,7 @@ public class GeneticAlgorithm extends RecursiveAction {
 		final long start = System.currentTimeMillis();
 		long time = 0;
 		// this cycle finish when complete all generations
-		while (time - start < MainActivity.getExecutionTime() && MainActivity.is_BKS_was_not_found()) { // execution during 10 milliseconds = 0.01 seconds
+		while (time - start < execution_time && MainActivity.is_BKS_was_not_found()) { // execution during 10 milliseconds = 0.01 seconds
 			temp_generation = new ArrayList<>(population);
 
 			for (int i = 0; i < pop_size / 2; i++) {

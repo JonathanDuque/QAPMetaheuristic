@@ -1,36 +1,36 @@
 package main;
 
 import java.util.Arrays;
-import java.util.Random;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.ThreadLocalRandom;
 
-import main.GeneticAlgorithm.GeneticAlgorithm;
-import main.GeneticAlgorithm.Results;
 
 public class RobustTabuSearch extends RecursiveAction {
 	private static final long serialVersionUID = 2L;
 	private int[][] tabuMemory; // this matrix will save the iteration number where a location change is denied
 	private int tabuDuration;// iterations tabu for a move
 	private QAPData qap;
-	private Random random;
+	private ThreadLocalRandom thread_local_random;
 	private int aspiration;
 	final int n;
 	private int[] solution, init_solution;
 	private int[] params;
 	private int best_cost, init_cost;
+	int execution_time;
 
-	public RobustTabuSearch(QAPData qapData, int seed) {
+	public RobustTabuSearch(QAPData qapData) {
 		super();
-		this.random = new Random(seed);
+		thread_local_random = ThreadLocalRandom.current();
 
 		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getBKS());
 		n = qap.getSize();
 	}
 
 	// always before compute function, is neccesary set the enviroment
-	public void setEnvironment(int[] initSolution, int[] params) {
+	public void setEnvironment(int[] initSolution, int[] params, final int execution_time) {
 		this.params = params.clone();
 		this.init_solution = initSolution.clone();
+		this.execution_time = execution_time;
 	}
 
 	public int[] getInitSolution() {
@@ -40,15 +40,15 @@ public class RobustTabuSearch extends RecursiveAction {
 	public int[] getSolution() {
 		return solution;
 	}
-	
+
 	public int[] getParams() {
 		return params;
 	}
-	
+
 	public int getBestCost() {
 		return best_cost;
 	}
-	
+
 	public int getInitCost() {
 		return init_cost;
 	}
@@ -73,14 +73,15 @@ public class RobustTabuSearch extends RecursiveAction {
 		init_cost = qap.evalSolution(init_solution);
 		best_cost = init_cost;
 		// int bestFoundCounter = 0; // this counter has the value where the best was
-		
-		//System.out.println("ROTS");
-		//Tools.printArray(currentSolution);
+
+		// System.out.println("ROTS");
+		// Tools.printArray(currentSolution);
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
-		// this while find the best solution during totalIterations or until BKS will be found
-		while (time - start < MainActivity.getExecutionTime()  && MainActivity.is_BKS_was_not_found()) {
+		// this while find the best solution during totalIterations or until BKS will be
+		// found
+		while (time - start < execution_time && MainActivity.is_BKS_was_not_found()) {
 
 			bestNeighbor = getBestNeighbor(currentSolution, currentIteration, best_cost);
 			bestNeighborCost = qap.evalSolution(bestNeighbor);
@@ -92,8 +93,8 @@ public class RobustTabuSearch extends RecursiveAction {
 				solution = Arrays.copyOf(bestNeighbor, n);
 				best_cost = bestNeighborCost;
 				// bestFoundCounter = currentIteration;
-				
-				//if the new solution is the bks the MainActivity should be know
+
+				// if the new solution is the bks the MainActivity should be know
 				if (best_cost == qap.getBKS()) {
 					MainActivity.findBKS();
 				}
@@ -104,13 +105,14 @@ public class RobustTabuSearch extends RecursiveAction {
 			currentIteration++;
 			time = System.currentTimeMillis();
 		}
-		
-		//MainActivity.listCost.get(1).add(bestCost);
 
-		//System.out.println("Fin ROTS");
-		//System.out.println("ROTS : " + bestCost);
-		//System.out.println("ROTS2 : " + qap.evalSolution(solution));
+		// MainActivity.listCost.get(1).add(bestCost);
+
+		// System.out.println("Fin ROTS");
+		// System.out.println("ROTS : " + bestCost);
+		// System.out.println("ROTS2 : " + qap.evalSolution(solution));
 	}
+
 	// this function simply give the solution no tabu with the minor cost,
 	// unless it satisfies the aspiration criteria.
 	public int[] getBestNeighbor(int[] currentSolution, int currentIteration, int bestCost) {
@@ -157,8 +159,8 @@ public class RobustTabuSearch extends RecursiveAction {
 
 		// update tabu matrix with values of the solution selected
 		// random.nextDouble() give decimal between 0 and 1
-		int t1 = (int) (Math.pow(random.nextDouble(), 3) * tabuDuration);
-		int t2 = (int) (Math.pow(random.nextDouble(), 3) * tabuDuration);
+		int t1 = (int) (Math.pow(thread_local_random.nextDouble(), 3) * tabuDuration);
+		int t2 = (int) (Math.pow(thread_local_random.nextDouble(), 3) * tabuDuration);
 
 		// make tabu this facilities during certain iterations
 		tabuMemory[i_selected][currentSolution[j_selected]] = currentIteration + t1;

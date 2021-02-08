@@ -1,31 +1,34 @@
 package main;
 
 import java.util.Arrays;
-import java.util.Random;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MultiStartLocalSearch extends RecursiveAction {
 
 	private static final long serialVersionUID = 1L;
-	private Random random;
+	private ThreadLocalRandom thread_local_random;
 	private final int n;
-	
+
 	QAPData qap;
 	private int[] solution, init_solution;
 	private int[] params;
 	private int best_cost, init_cost;
-	public MultiStartLocalSearch(QAPData qapData, int seed) {
-		super();
-		this.random = new Random(seed);
+	int execution_time;
 
-		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(),qapData.getBKS());
+	public MultiStartLocalSearch(QAPData qapData) {
+		super();
+		thread_local_random = ThreadLocalRandom.current();
+
+		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getBKS());
 		n = qap.getSize();
 	}
 
 	// always before compute function, is necessary set the environment
-	public void setEnvironment(int[] initSolution, int[] params) {
+	public void setEnvironment(int[] initSolution, int[] params, final int execution_time) {
 		this.params = params.clone();
 		this.init_solution = initSolution.clone();
+		this.execution_time = execution_time;
 	}
 
 	public int[] getInitSolution() {
@@ -54,25 +57,26 @@ public class MultiStartLocalSearch extends RecursiveAction {
 		solution = Arrays.copyOf(init_solution, n);
 		int[] currentSolution = Arrays.copyOf(init_solution, n);
 		boolean improve = false; // this flag control when the solution no improve and we are in an optimo local
-		//int currentIteration = 0;
+		// int currentIteration = 0;
 		int temporalDelta, bestDelta, cost = qap.evalSolution(init_solution);
 		init_cost = cost;
 		best_cost = cost;
 		final boolean random_restart = params[0] == 0 ? true : false; // restart type 0: random restart, 1: swaps
 		// System.out.println(params[0] + " " +random_restart);
 		qap.initDeltas(init_solution);
-		
-		//System.out.println("MTLS");
-		//Tools.printArray(currentSolution);
+
+		// System.out.println("MTLS");
+		// Tools.printArray(currentSolution);
 		// qap.showData();
 
 		final Constructive constructive = new Constructive();
 		final long start = System.currentTimeMillis();
 		long time = 0;
-		final int execution_time = MainActivity.getExecutionTime();
 
 		// here find the best solution from the initSolution
-		while (time - start < execution_time && MainActivity.is_BKS_was_not_found()) { // execution during execution_time or until find bks
+		while (time - start < execution_time && MainActivity.is_BKS_was_not_found()) { // execution during
+																						// execution_time or until find
+																						// bks
 			improve = false;
 			bestDelta = 0;
 
@@ -98,7 +102,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 				if (cost < best_cost) {
 					best_cost = cost;
 					solution = Arrays.copyOf(currentSolution, n);
-					//if the new solution is the bks the MainActivity should be know
+					// if the new solution is the bks the MainActivity should be know
 					if (best_cost == qap.getBKS()) {
 						MainActivity.findBKS();
 					}
@@ -112,7 +116,7 @@ public class MultiStartLocalSearch extends RecursiveAction {
 				if (random_restart) {
 					// System.out.println("restart");
 					// start in a new point
-					currentSolution = constructive.createRandomSolution(n, MainActivity.getSeed());
+					currentSolution = constructive.createRandomSolution(n);
 				} else {
 					// System.out.println("many swaps");
 					currentSolution = makeManySwaps(currentSolution, qap);
@@ -121,30 +125,30 @@ public class MultiStartLocalSearch extends RecursiveAction {
 				qap.initDeltas(currentSolution);
 				cost = qap.evalSolution(currentSolution);
 			}
-			//currentIteration++;
+			// currentIteration++;
 			time = System.currentTimeMillis();
 
 		}
-		
-		//MainActivity.listCost.get(0).add(bestCost);
+
+		// MainActivity.listCost.get(0).add(bestCost);
 		// qap.showData();
-		//System.out.println(name + " " + currentIteration );
-		//System.out.println("Fin MTLS");
+		// System.out.println(name + " " + currentIteration );
+		// System.out.println("Fin MTLS");
 	}
 
 	public int[] makeManySwaps(int[] currentSolution, QAPData qap) {
 		int max_swaps = Math.floorDiv(n, 2); // maybe n is no pair
-		int num_swaps = 2 * (random.nextInt(max_swaps - 1) + 1);
+		int num_swaps = 2 * (thread_local_random.nextInt(max_swaps - 1) + 1);
 
 		int[] order_swaps = new int[num_swaps];
 
-		order_swaps[0] = random.nextInt(n);
+		order_swaps[0] = thread_local_random.nextInt(n);
 
 		for (int i = 1; i < num_swaps; i++) {
 			boolean isEqual = true;
 			while (isEqual) {
 				isEqual = false;
-				int x = random.nextInt(n);
+				int x = thread_local_random.nextInt(n);
 				for (int j = 0; j < i; j++) {
 					if (x == order_swaps[j]) {
 						isEqual = true;

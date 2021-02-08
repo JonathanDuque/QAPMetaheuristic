@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ExtremalOptimization extends RecursiveAction {
 	private static final long serialVersionUID = 3L;
@@ -23,25 +23,27 @@ public class ExtremalOptimization extends RecursiveAction {
 	}
 
 	double[] pdf;
-	Random random;
+	private ThreadLocalRandom thread_local_random;
 	private final int n;
 	QAPData qap;
 	private int[] solution, init_solution;
 	private int[] params;
 	private int best_cost, init_cost;
+	int execution_time;
 
-	public ExtremalOptimization(QAPData qapData, int seed) {
+	public ExtremalOptimization(QAPData qapData) {
 		super();
-		this.random = new Random(seed);
+		thread_local_random = ThreadLocalRandom.current();
 
 		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getBKS());
 		n = qap.getSize();
 	}
 
 	// always before compute function, is necessary set the environment
-	public void setEnvironment(int[] initSolution, int[] params) {
+	public void setEnvironment(int[] initSolution, int[] params, final int execution_time) {
 		this.params = params.clone();
 		this.init_solution = initSolution.clone();
+		this.execution_time = execution_time;
 	}
 
 	public int[] getInitSolution() {
@@ -106,7 +108,7 @@ public class ExtremalOptimization extends RecursiveAction {
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
-		while (time - start < MainActivity.getExecutionTime() && MainActivity.is_BKS_was_not_found()) {
+		while (time - start < execution_time && MainActivity.is_BKS_was_not_found()) {
 
 			for (int i = 0; i < n; i++) {
 				int bestMove = -1;
@@ -127,7 +129,7 @@ public class ExtremalOptimization extends RecursiveAction {
 						bestMove = j;
 						bestDelta = tempDelta;
 						counterBest = 1;
-					} else if (tempDelta == bestDelta && random.nextInt(++counterBest) == 0) {
+					} else if (tempDelta == bestDelta && thread_local_random.nextInt(++counterBest) == 0) {
 						bestMove = j;
 						bestDelta = tempDelta;
 					}
@@ -252,7 +254,7 @@ public class ExtremalOptimization extends RecursiveAction {
 	}
 
 	public int pdfPick() {
-		double p = random.nextDouble(), fx;
+		double p = thread_local_random.nextDouble(), fx;
 		// System.out.println("p " + p);
 
 		int index = 0;
