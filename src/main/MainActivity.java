@@ -99,22 +99,25 @@ public class MainActivity {
 		qap = new QAPData(distance, flow, readFile.getTarget());
 
 		ForkJoinPool pool = new ForkJoinPool(teams);
-		List<WorkerTeam> list_teams = new ArrayList<>(teams);// these lists are necessary for the executing in parallel of each team
+		List<WorkerTeam> list_teams = new ArrayList<>(teams);// these lists are necessary for the executing in parallel
+																// of each team
 
 		double init_time = (System.currentTimeMillis() - start);
 		init_time /= 1000.0;
 
-		// for (int i = 0; i < teams; i += 1) {
-		WorkerTeam team1 = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, false, 0);
-		list_teams.add(team1);
-		// }
+		for (int i = 0; i < teams; i += 1) {
+			WorkerTeam team1 = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, false, i);
+			list_teams.add(team1);
+		}
 
 		// this line is important if we want to execute teams with other setup
-		WorkerTeam team2 = new WorkerTeam(total_workers / teams, 15000, 20, qap, false, 1);
-		list_teams.add(team2);
+		// WorkerTeam team2 = new WorkerTeam(total_workers / teams, 15000, 20, qap,
+		// false, 1);
+		// list_teams.add(team2);
 
-		WorkerTeam team3 = new WorkerTeam(total_workers / teams, 15000, 20, qap, true, 2);
-		list_teams.add(team3);
+		// WorkerTeam team3 = new WorkerTeam(total_workers / teams, 15000, 20, qap,
+		// true, 2);
+		// list_teams.add(team3);
 
 		// launch execution in parallel for all teams
 		for (int i = 0; i < teams; i += 1) {

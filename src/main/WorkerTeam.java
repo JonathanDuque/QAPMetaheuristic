@@ -23,6 +23,7 @@ public class WorkerTeam extends RecursiveAction {
 	private ThreadLocalRandom thread_local_random;
 	private int execution_time;// by iteration
 	private final boolean dynamic_time;
+	private final int team_id;
 
 	private Solution team_best_solution;
 
@@ -33,8 +34,8 @@ public class WorkerTeam extends RecursiveAction {
 		this.qap = qap;
 		qap_size = qap.getSize();
 		this.workers = workers;
-		thread_local_random = ThreadLocalRandom.current();
 		this.dynamic_time = dynamic_time;
+		this.team_id = team_id;
 
 		System.out.println("\nTeam: " + team_id);
 		System.out.println("Threads: " + workers);
@@ -59,6 +60,9 @@ public class WorkerTeam extends RecursiveAction {
 
 	@Override
 	protected void compute() {
+		//is necessary init here because in the constructor generate the same random values for the params
+		thread_local_random = ThreadLocalRandom.current();
+		
 		// int step_time = 1000;
 		int current_time = 0, time_out = 300000; // 5 minutes
 
@@ -75,7 +79,9 @@ public class WorkerTeam extends RecursiveAction {
 		List<ExtremalOptimization> list_eo = new ArrayList<>(number_workes_by_mh);
 
 		List<List<Params>> params_population = generateInitialParamsPopulation(number_workes_by_mh);
+		//Tools.printParamsPopulation(params_population, team_id);
 		solution_population = generateInitialSolutionPopulation(workers, constructive);
+		//Tools.printSolutionPopulation(solution_population, qap, team_id);
 
 		// create array parameters for each metaheuristic
 		int[] params_MTLS = new int[3];
@@ -180,6 +186,9 @@ public class WorkerTeam extends RecursiveAction {
 			}
 
 		}
+		
+		//Tools.printParamsPopulation(params_population, team_id);
+		//Tools.printSolutionPopulation(solution_population, qap, team_id);
 
 		// create and initiate variables for team results
 		int[] best_solution = constructive.createRandomSolution(qap_size, current_iteration);
