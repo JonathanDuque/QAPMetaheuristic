@@ -18,10 +18,10 @@ public class MainActivity {
 
 	public static void main(String[] args) {
 		QAPData qap;
-		final int total_iterations;
+		int total_iterations;
 		final long start = System.currentTimeMillis();
 		final String problem;
-		final int total_workers;
+		int total_workers;
 		int execution_time;// by iteration
 
 		switch (args.length) {
@@ -70,6 +70,9 @@ public class MainActivity {
 		}
 
 		final int teams = 3;
+		total_workers = 63;
+		execution_time = 20000;
+		total_iterations = 15;
 
 		// checking some conditions for execution
 		if ((total_workers % DIFFERENT_MH) != 0) {
@@ -93,8 +96,8 @@ public class MainActivity {
 		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
 		System.out.println("Total Teams: " + teams);
 
-		final ReadFile readFile = new ReadFile("Data/" + problem);
-		// final ReadFile readFile = new ReadFile("../../Data/" + problem);
+		//final ReadFile readFile = new ReadFile("Data/" + problem);
+		final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
 		// initialize qap data, flow and distance matrix, format [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
@@ -108,7 +111,7 @@ public class MainActivity {
 		init_time /= 1000.0;
 
 		for (int i = 0; i < teams; i += 1) {
-			WorkerTeam team = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, 0);
+			WorkerTeam team = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, i);
 			list_teams.add(team);
 		}
 

@@ -22,20 +22,20 @@ public class WorkerTeam extends RecursiveAction {
 	final int DIFFERENT_MH = 3;
 	private ThreadLocalRandom thread_local_random;
 	private int execution_time;// by iteration
-	
+	int team_id;
+
 	private Solution team_best_solution;
-	
-	public WorkerTeam(int workers, int execution_time, int total_iterations, QAPData qap,
-			int team_id) {
+
+	public WorkerTeam(int workers, int execution_time, int total_iterations, QAPData qap, int team_id) {
 		super();
 
 		this.qap = qap;
 		qap_size = qap.getSize();
 		this.workers = workers;
-		thread_local_random = ThreadLocalRandom.current();
 		this.execution_time = execution_time;
 		this.total_iterations = total_iterations;
-		
+		this.team_id = team_id;
+
 		System.out.println("\nTeam: " + team_id);
 		System.out.println("Threads: " + workers);
 		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
@@ -45,31 +45,33 @@ public class WorkerTeam extends RecursiveAction {
 
 	@Override
 	protected void compute() {
+		thread_local_random = ThreadLocalRandom.current();
 		// TODO Auto-generated method stub
 		ForkJoinPool pool = new ForkJoinPool(workers);
 		final Constructive constructive = new Constructive();
 
 		final int number_workes_by_mh = workers / DIFFERENT_MH;
 		// final int params_of_each_mh = 3 * number_workes_by_mh;
-		
+
 		// these lists are necessary for the executing in parallel
-				List<MultiStartLocalSearch> list_mtls = new ArrayList<>(number_workes_by_mh);
-				List<RobustTabuSearch> list_rots = new ArrayList<>(number_workes_by_mh);
-				List<ExtremalOptimization> list_eo = new ArrayList<>(number_workes_by_mh);
+		List<MultiStartLocalSearch> list_mtls = new ArrayList<>(number_workes_by_mh);
+		List<RobustTabuSearch> list_rots = new ArrayList<>(number_workes_by_mh);
+		List<ExtremalOptimization> list_eo = new ArrayList<>(number_workes_by_mh);
 
-
-		// List<List<Params>> params_population_one = generateInitialParamsPopulation(params_of_each_mh);
+		// List<List<Params>> params_population_one =
+		// generateInitialParamsPopulation(params_of_each_mh);
 		List<List<Params>> params_population = generateInitialParamsPopulation(number_workes_by_mh);
+		//Tools.printParamsPopulation(params_population, team_id);
 		solution_population = generateInitialSolutionPopulation(workers, constructive);
+		//Tools.printSolutionPopulation(solution_population, qap, team_id);
 
-		//  create array parameters for each metaheuristic
+		// create array parameters for each metaheuristic
 		int[] params_MTLS = new int[3];
 		int[] params_ROTS = new int[3];
 		int[] params_EO = new int[3];
 
-		
 		int current_iteration = 0;
-		
+
 		while (current_iteration < total_iterations && MainActivity.is_BKS_was_not_found()) {
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
@@ -122,7 +124,7 @@ public class WorkerTeam extends RecursiveAction {
 				params_MTLS = list_mtls.get(i).getParams();
 				params_ROTS = list_rots.get(i).getParams();
 				params_EO = list_eo.get(i).getParams();
-				//this version parameters don't improve
+				// this version parameters don't improve
 
 				// inserts solution into solution population
 				updateSolutionPopulation(list_mtls.get(i).getSolution(), params_MTLS, mh_text[MTLS]);
@@ -139,29 +141,32 @@ public class WorkerTeam extends RecursiveAction {
 
 			current_iteration++;
 		}
-		
+		//System.out.println("\nDespues" );
+		//Tools.printParamsPopulation(params_population);
+		//Tools.printSolutionPopulation(solution_population, qap, team_id);
+
 		// create and initiate variables for results
-		int[] best_solution = constructive.createRandomSolution(qap_size);
+		int[] best_solution = constructive.createRandomSolution(qap_size );
 		int best_cost = qap.evalSolution(best_solution);
 		int[] empty_params = { -1, -1, -1 };
 		team_best_solution = new Solution(best_solution, empty_params, "N/A");
-		
+
 		// update final results variables
 		for (int i = 0; i < solution_population.size(); i++) {
 			int temp_cost = qap.evalSolution(solution_population.get(i).getArray());
-			
+
 			if (temp_cost < best_cost) {
 				best_cost = temp_cost;
 				team_best_solution = solution_population.get(i);
 			}
 		}
-		
+
 	}
-	
+
 	public Solution getBestTeamSolution() {
 		return team_best_solution;
 	}
-	
+
 	public List<List<Params>> generateInitialParamsPopulation(int params_of_each_mh) {
 		List<List<Params>> params_population = new ArrayList<>(DIFFERENT_MH); // because there are # DIFFERENT_MH
 
@@ -175,9 +180,11 @@ public class WorkerTeam extends RecursiveAction {
 					p[0] = thread_local_random.nextInt(2); // restart type 0: random restart, 1: swaps
 					break;
 				case ROTS:
-					p[0] = (thread_local_random.nextInt(16) + 4) * qap_size;// 4 * (i + 1) * qap_size;// tabu duration factor
-					p[1] = (thread_local_random.nextInt(10) + 1) * qap_size * qap_size;// 2 * (i + 1) * qap_size * qap_size; //
-																			// aspiration factor
+					p[0] = (thread_local_random.nextInt(16) + 4) * qap_size;// 4 * (i + 1) * qap_size;// tabu duration
+																			// factor
+					p[1] = (thread_local_random.nextInt(10) + 1) * qap_size * qap_size;// 2 * (i + 1) * qap_size *
+																						// qap_size; //
+					// aspiration factor
 					break;
 				case EO:
 					p[0] = thread_local_random.nextInt(100); // tau*100
@@ -201,7 +208,7 @@ public class WorkerTeam extends RecursiveAction {
 		// printParamsPopulation(params_population);
 		return params_population;
 	}
-	
+
 	public List<Solution> generateInitialSolutionPopulation(final int total, Constructive constructive) {
 		List<Solution> init_solution_population = new ArrayList<>();
 		final int[] empty_params = { -1, -1, -1 };
@@ -213,7 +220,7 @@ public class WorkerTeam extends RecursiveAction {
 
 		return init_solution_population;
 	}
-	
+
 	public Params selectParam(List<Params> p) {
 		Params selected;
 		// obtain a number between 0 - size population
@@ -234,7 +241,7 @@ public class WorkerTeam extends RecursiveAction {
 
 		return selected_solution.getArray();
 	}
-	
+
 	public void updateSolutionPopulation(int[] s, int[] params, String method) {
 		// solution_population.add(new Solution(s, params, method));
 
@@ -266,7 +273,7 @@ public class WorkerTeam extends RecursiveAction {
 		solution_population.add(new Solution(s, params, method));
 
 	}
-	
+
 	private int[] mutate(int[] s) {
 		int posX, posY, temp;
 

@@ -168,12 +168,12 @@ public class QAPData implements Cloneable {
 
 	}
 	
-	public void printSolution(int[] array, int cost) {
+	public void printSolution(int[] array, int cost, int team_id) {
 		String locations = "";
 		for (int i : array) {
 			locations = locations + ((i + 1) + " ");// +1 because the index in java start with 0
 		}
-		System.out.println(locations + " " + cost);
+		System.out.println(locations + " " + cost + " team: " + team_id);
 	}
 
 	// para imorimir solucion en formato ubicaciones - facilidades
