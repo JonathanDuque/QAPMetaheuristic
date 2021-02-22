@@ -60,9 +60,10 @@ public class WorkerTeam extends RecursiveAction {
 
 	@Override
 	protected void compute() {
-		//is necessary init here because in the constructor generate the same random values for the params
+		// is necessary init here because in the constructor generate the same random
+		// values for the params
 		thread_local_random = ThreadLocalRandom.current();
-		
+
 		// int step_time = 1000;
 		int current_time = 0, time_out = 300000; // 5 minutes
 
@@ -79,9 +80,9 @@ public class WorkerTeam extends RecursiveAction {
 		List<ExtremalOptimization> list_eo = new ArrayList<>(number_workes_by_mh);
 
 		List<List<Params>> params_population = generateInitialParamsPopulation(number_workes_by_mh);
-		//Tools.printParamsPopulation(params_population, team_id);
+		// Tools.printParamsPopulation(params_population, team_id);
 		solution_population = generateInitialSolutionPopulation(workers, constructive);
-		//Tools.printSolutionPopulation(solution_population, qap, team_id);
+		// Tools.printSolutionPopulation(solution_population, qap, team_id);
 
 		// create array parameters for each metaheuristic
 		int[] params_MTLS = new int[3];
@@ -147,6 +148,10 @@ public class WorkerTeam extends RecursiveAction {
 				double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
 						list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
 
+				// params_MTLS = createParam(MTLS);
+				// params_ROTS = createParam(ROTS);
+				// params_EO = createParam(EO);
+
 				params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration,
 						total_iterations, diversify_percentage_limit);
 				params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration,
@@ -176,7 +181,7 @@ public class WorkerTeam extends RecursiveAction {
 			/* updating times when is dynamic time */
 			if (dynamic_time) {
 				current_time += execution_time;
-				execution_time = updateExecutionTime2(execution_time, current_time,time_out);
+				execution_time = updateExecutionTime2(execution_time, current_time, time_out);
 				/*
 				 * execution_time += step_time; step_time += 1000;
 				 *
@@ -186,9 +191,9 @@ public class WorkerTeam extends RecursiveAction {
 			}
 
 		}
-		
-		//Tools.printParamsPopulation(params_population, team_id);
-		//Tools.printSolutionPopulation(solution_population, qap, team_id);
+
+		// Tools.printParamsPopulation(params_population, team_id);
+		// Tools.printSolutionPopulation(solution_population, qap, team_id);
 
 		// create and initiate variables for team results
 		int[] best_solution = constructive.createRandomSolution(qap_size, current_iteration);
@@ -339,8 +344,11 @@ public class WorkerTeam extends RecursiveAction {
 		// behavior_mh[0] = percentage difference
 		// behavior_mh[1] = distance
 
-		if (behavior_mh[0] > 0) {
+		//if (behavior_mh[0] > 0) {
 			switch (type) {
+			case MTLS:
+				new_params = createParam(MTLS);
+				break;
 			// case MTLS keep equal
 			case ROTS:
 				if (behavior_mh[0] <= diversify_percentage_limit[current_iteration] && behavior_mh[1] <= qap_size / 3) {
@@ -354,11 +362,21 @@ public class WorkerTeam extends RecursiveAction {
 				}
 
 				if (new_params[0] > 20 * qap_size) {
-					new_params[0] = thread_local_random.nextInt(16 * qap_size) + 4 * qap_size; // 4n to 20n
+					new_params[0] = 4 * qap_size + thread_local_random.nextInt(16 * qap_size); // 4n to 20n
+				}
+
+				if (new_params[0] < 4 * qap_size) {
+					new_params[0] = 4 * qap_size + thread_local_random.nextInt(16 * qap_size); // 4n to 20n
 				}
 
 				if (new_params[1] > 10 * qap_size * qap_size) {
-					new_params[1] = thread_local_random.nextInt(9 * qap_size * qap_size) + qap_size * qap_size; // n*n
+					new_params[1] = qap_size * qap_size + thread_local_random.nextInt(9 * qap_size * qap_size); // n*n
+																												// to
+																												// 10*n*n
+				}
+
+				if (new_params[1] < qap_size * qap_size) {
+					new_params[1] = qap_size * qap_size + thread_local_random.nextInt(9 * qap_size * qap_size); // n*n
 																												// to
 																												// 10*n*n
 				}
@@ -399,6 +417,10 @@ public class WorkerTeam extends RecursiveAction {
 					new_params[0] = thread_local_random.nextInt(100); // tau*100
 				}
 
+				if (new_params[0] <= 0) {
+					new_params[0] = thread_local_random.nextInt(100); // tau*100
+				}
+
 				if (behavior_mh[0] < change_pdf_percentage_limit[(int) Math.floor(current_iteration / divisor)]) {
 					int new_pdf_function;
 					do {
@@ -409,10 +431,10 @@ public class WorkerTeam extends RecursiveAction {
 				}
 				break;
 			}
-		} else {
+		//} else {
 			// if the solution did not improve, so will be assign a new parameter
-			new_params = createParam(type);
-		}
+			//new_params = createParam(type);
+		//}
 
 		return new_params;
 	}
@@ -519,7 +541,7 @@ public class WorkerTeam extends RecursiveAction {
 		int current_time = 0, execution_time = 1000;
 
 		while (current_time < time_out) {
-			//System.out.println("\nexecution_time: " + execution_time);
+			// System.out.println("\nexecution_time: " + execution_time);
 
 			current_time += execution_time;
 

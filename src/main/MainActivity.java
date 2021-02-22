@@ -111,13 +111,11 @@ public class MainActivity {
 		}
 
 		// this line is important if we want to execute teams with other setup
-		// WorkerTeam team2 = new WorkerTeam(total_workers / teams, 15000, 20, qap,
-		// false, 1);
-		// list_teams.add(team2);
+		//WorkerTeam team2 = new WorkerTeam(total_workers / teams, 15000, 20, qap,false, 1);
+		//list_teams.add(team2);
 
-		// WorkerTeam team3 = new WorkerTeam(total_workers / teams, 15000, 20, qap,
-		// true, 2);
-		// list_teams.add(team3);
+		//WorkerTeam team3 = new WorkerTeam(total_workers / teams, 15000, 20, qap, true, 2);
+		//list_teams.add(team3);
 
 		// launch execution in parallel for all teams
 		for (int i = 0; i < teams; i += 1) {
@@ -168,7 +166,7 @@ public class MainActivity {
 		System.out.println("Total time: " + total_time + " sec");
 
 		//final String dir_file = "Results/";
-		final String dir_file = "../Result-test-3teams-21mh-15adaptations/";
+		final String dir_file = "../Result-test-3teams-15-adaptations/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file + file_name + ".csv");
