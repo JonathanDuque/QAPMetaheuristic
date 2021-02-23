@@ -24,6 +24,7 @@ public class WorkerTeam extends RecursiveAction {
 	private int execution_time;// by iteration
 	private final boolean dynamic_time;
 	private final int team_id;
+	private Params best_global_params;
 
 	private Solution team_best_solution;
 
@@ -80,6 +81,8 @@ public class WorkerTeam extends RecursiveAction {
 		List<ExtremalOptimization> list_eo = new ArrayList<>(number_workes_by_mh);
 
 		List<List<Params>> params_population = generateInitialParamsPopulation(number_workes_by_mh);
+		best_global_params = new Params(params_population.get(0).get(0).getParams(),
+				params_population.get(0).get(0).getFitness(), 0);
 		// Tools.printParamsPopulation(params_population, team_id);
 		solution_population = generateInitialSolutionPopulation(workers, constructive);
 		// Tools.printSolutionPopulation(solution_population, qap, team_id);
@@ -147,6 +150,10 @@ public class WorkerTeam extends RecursiveAction {
 						list_rots.get(i).getInitSolution(), list_rots.get(i).getSolution());
 				double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
 						list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
+
+				best_global_params = updateBestGlobalParams(behavior_mtls, list_mtls.get(i).getParams(), behavior_rots,
+						list_rots.get(i).getParams(), behavior_eo, list_eo.get(i).getParams());
+				System.out.println("Gain: " + best_global_params.getGain() + "\n");
 
 				// params_MTLS = createParam(MTLS);
 				// params_ROTS = createParam(ROTS);
@@ -321,7 +328,7 @@ public class WorkerTeam extends RecursiveAction {
 	public double[] compareSolution(int init_cost, int final_cost, int[] init_solution, int[] final_solution) {
 		// init_cost - 100%
 		// init_cost-final_cost - x
-		double difference_percentage = (init_cost - final_cost) * 100.0 / init_cost;
+		double difference_percentage = (init_cost - final_cost) * 100.0 / init_cost; // or gain
 
 		int distance = 0;
 		for (int i = 0; i < init_solution.length; i++) {
@@ -341,100 +348,100 @@ public class WorkerTeam extends RecursiveAction {
 		final double divisor = (float) total_iterations / change_pdf_percentage_limit.length;
 		int[] new_params = { 0, 0, 0 };
 
-		// behavior_mh[0] = percentage difference
+		// behavior_mh[0] = percentage difference or gain
 		// behavior_mh[1] = distance
 
-		//if (behavior_mh[0] > 0) {
-			switch (type) {
-			case MTLS:
-				new_params = createParam(MTLS);
-				break;
-			// case MTLS keep equal
-			case ROTS:
-				if (behavior_mh[0] <= diversify_percentage_limit[current_iteration] && behavior_mh[1] <= qap_size / 3) {
-					// is necessary diversify
-					new_params[0] = parameter[0] + Math.floorDiv(qap_size, 2);
-					new_params[1] = parameter[1] + Math.floorDiv(qap_size * qap_size, 2);
-				} else {
-					// is necessary intensify
-					new_params[0] = parameter[0] - Math.floorDiv(qap_size, 3);
-					new_params[1] = parameter[1] - Math.floorDiv(qap_size, 2);
-				}
-
-				if (new_params[0] > 20 * qap_size) {
-					new_params[0] = 4 * qap_size + thread_local_random.nextInt(16 * qap_size); // 4n to 20n
-				}
-
-				if (new_params[0] < 4 * qap_size) {
-					new_params[0] = 4 * qap_size + thread_local_random.nextInt(16 * qap_size); // 4n to 20n
-				}
-
-				if (new_params[1] > 10 * qap_size * qap_size) {
-					new_params[1] = qap_size * qap_size + thread_local_random.nextInt(9 * qap_size * qap_size); // n*n
-																												// to
-																												// 10*n*n
-				}
-
-				if (new_params[1] < qap_size * qap_size) {
-					new_params[1] = qap_size * qap_size + thread_local_random.nextInt(9 * qap_size * qap_size); // n*n
-																												// to
-																												// 10*n*n
-				}
-
-				break;
-
-			case EO:
-				// parameter[0] : tau
-				// parameter[1] : probability function
-
-				if (behavior_mh[0] <= diversify_percentage_limit[current_iteration] && behavior_mh[1] <= qap_size / 3) {
-					// is necessary diversify
-					switch (parameter[1]) {
-					case 2:// gamma tau: 0 to 1 means intensify to diversify
-						new_params[0] = parameter[0] + 6;
-						break;
-					default:
-						// Exponential tau: 0 to 1 means diversify to intensify
-						// Power tau: 0 to 1 means diversify to intensify
-						new_params[0] = parameter[0] - 6;
-						break;
-					}
-				} else {
-					// is necessary intensify
-					switch (parameter[1]) {
-					case 2:// gamma tau: 0 to 1 means intensify to diversify
-						new_params[0] = parameter[0] - 6;
-						break;
-					default:
-						// Exponential tau: 0 to 1 means diversify to intensify
-						// Power tau: 0 to 1 means diversify to intensify
-						new_params[0] = parameter[0] + 6;
-						break;
-					}
-				}
-
-				if (new_params[0] > 100) {
-					new_params[0] = thread_local_random.nextInt(100); // tau*100
-				}
-
-				if (new_params[0] <= 0) {
-					new_params[0] = thread_local_random.nextInt(100); // tau*100
-				}
-
-				if (behavior_mh[0] < change_pdf_percentage_limit[(int) Math.floor(current_iteration / divisor)]) {
-					int new_pdf_function;
-					do {
-						new_pdf_function = thread_local_random.nextInt(3);
-						new_params[1] = new_pdf_function;
-					} while (parameter[1] == new_pdf_function);
-
-				}
-				break;
+		// if (behavior_mh[0] > 0) {
+		switch (type) {
+		case MTLS:
+			new_params = createParam(MTLS);
+			break;
+		// case MTLS keep equal
+		case ROTS:
+			if (behavior_mh[0] <= diversify_percentage_limit[current_iteration] && behavior_mh[1] <= qap_size / 3) {
+				// is necessary diversify
+				new_params[0] = parameter[0] + Math.floorDiv(qap_size, 2);
+				new_params[1] = parameter[1] + Math.floorDiv(qap_size * qap_size, 2);
+			} else {
+				// is necessary intensify
+				new_params[0] = parameter[0] - Math.floorDiv(qap_size, 3);
+				new_params[1] = parameter[1] - Math.floorDiv(qap_size, 2);
 			}
-		//} else {
-			// if the solution did not improve, so will be assign a new parameter
-			//new_params = createParam(type);
-		//}
+
+			if (new_params[0] > 20 * qap_size) {
+				new_params[0] = 4 * qap_size + thread_local_random.nextInt(16 * qap_size); // 4n to 20n
+			}
+
+			if (new_params[0] < 4 * qap_size) {
+				new_params[0] = 4 * qap_size + thread_local_random.nextInt(16 * qap_size); // 4n to 20n
+			}
+
+			if (new_params[1] > 10 * qap_size * qap_size) {
+				new_params[1] = qap_size * qap_size + thread_local_random.nextInt(9 * qap_size * qap_size); // n*n
+																											// to
+																											// 10*n*n
+			}
+
+			if (new_params[1] < qap_size * qap_size) {
+				new_params[1] = qap_size * qap_size + thread_local_random.nextInt(9 * qap_size * qap_size); // n*n
+																											// to
+																											// 10*n*n
+			}
+
+			break;
+
+		case EO:
+			// parameter[0] : tau
+			// parameter[1] : probability function
+
+			if (behavior_mh[0] <= diversify_percentage_limit[current_iteration] && behavior_mh[1] <= qap_size / 3) {
+				// is necessary diversify
+				switch (parameter[1]) {
+				case 2:// gamma tau: 0 to 1 means intensify to diversify
+					new_params[0] = parameter[0] + 6;
+					break;
+				default:
+					// Exponential tau: 0 to 1 means diversify to intensify
+					// Power tau: 0 to 1 means diversify to intensify
+					new_params[0] = parameter[0] - 6;
+					break;
+				}
+			} else {
+				// is necessary intensify
+				switch (parameter[1]) {
+				case 2:// gamma tau: 0 to 1 means intensify to diversify
+					new_params[0] = parameter[0] - 6;
+					break;
+				default:
+					// Exponential tau: 0 to 1 means diversify to intensify
+					// Power tau: 0 to 1 means diversify to intensify
+					new_params[0] = parameter[0] + 6;
+					break;
+				}
+			}
+
+			if (new_params[0] > 100) {
+				new_params[0] = thread_local_random.nextInt(100); // tau*100
+			}
+
+			if (new_params[0] <= 0) {
+				new_params[0] = thread_local_random.nextInt(100); // tau*100
+			}
+
+			if (behavior_mh[0] < change_pdf_percentage_limit[(int) Math.floor(current_iteration / divisor)]) {
+				int new_pdf_function;
+				do {
+					new_pdf_function = thread_local_random.nextInt(3);
+					new_params[1] = new_pdf_function;
+				} while (parameter[1] == new_pdf_function);
+
+			}
+			break;
+		}
+		// } else {
+		// if the solution did not improve, so will be assign a new parameter
+		// new_params = createParam(type);
+		// }
 
 		return new_params;
 	}
@@ -570,6 +577,48 @@ public class WorkerTeam extends RecursiveAction {
 		}
 
 		return execution_time;
+	}
+
+	public Params updateBestGlobalParams(double[] mtls, int[] params_mtls, double[] rots, int[] params_rots,
+			double[] eo, int[] params_eo) {
+
+		// behavior_mh[0] = gain
+		// behavior_mh[1] = distance
+
+		int method = -1;
+		int[] best_params = { 0, 0, 0 };
+		double best_gain = best_global_params.getGain();
+		System.out.println("Gain mtls: " + mtls[0]);
+		System.out.println("Gain rots: " + rots[0]);
+		System.out.println("Gain eo: " + eo[0]);
+
+		if (mtls[0] > best_gain) {
+			best_gain = mtls[0];
+			method = MTLS;
+			best_params = params_mtls.clone();
+		}
+
+		if (rots[0] > best_gain) {
+			best_gain = rots[0];
+			method = ROTS;
+			best_params = params_rots.clone();
+		}
+
+		if (eo[0] > best_gain) {
+			best_gain = eo[0];
+			method = EO;
+			best_params = params_eo.clone();
+		}
+
+		if (method == -1) {
+			return best_global_params;
+		} else {
+			return new Params(best_params, 0, best_gain);
+		}
+	}
+
+	public void adaptParameterPSO() {
+		// function should be implemented
 	}
 
 }
