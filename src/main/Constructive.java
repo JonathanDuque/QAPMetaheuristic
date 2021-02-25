@@ -2,6 +2,7 @@ package main;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Constructive {
 
@@ -109,15 +110,15 @@ public class Constructive {
 	public int[] createRandomSolution(int size, final int seed) {
 		//System.out.println("Seed: " + seed);
 		int[] s = new int[size];
-		Random random = new Random(seed);
+		ThreadLocalRandom thread_local_random = ThreadLocalRandom.current();
 
-		s[0] = random.nextInt(size);
+		s[0] = thread_local_random.nextInt(size);
 		
 		for (int i = 1; i < size; i++) {
 			boolean isEqual = true;
 			while (isEqual) {
 				isEqual = false;
-				int x = random.nextInt(size);
+				int x = thread_local_random.nextInt(size);
 				for (int j = 0; j <i; j++) {
 					if (x == s[j]) {
 						isEqual = true;

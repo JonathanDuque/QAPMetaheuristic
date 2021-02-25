@@ -3,20 +3,21 @@ package main;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MultiStartLocalSearch extends RecursiveAction {
 
 	private static final long serialVersionUID = 1L;
-	private Random random;
+	private ThreadLocalRandom thread_local_random;
 	private final int n;
 	
 	QAPData qap;
 	private int[] solution, initSolution;
 	private int[] params;
 	private int bestCost;
-	public MultiStartLocalSearch(QAPData qapData, int seed) {
+	public MultiStartLocalSearch(QAPData qapData) {
 		super();
-		this.random = new Random(seed);
+		this.thread_local_random =  ThreadLocalRandom.current();
 
 		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(),qapData.getBKS());
 		n = qap.getSize();
@@ -121,17 +122,17 @@ public class MultiStartLocalSearch extends RecursiveAction {
 
 	public int[] makeManySwaps(int[] currentSolution, QAPData qap) {
 		int max_swaps = Math.floorDiv(n, 2); // maybe n is no pair
-		int num_swaps = 2 * (random.nextInt(max_swaps - 1) + 1);
+		int num_swaps = 2 * (thread_local_random.nextInt(max_swaps - 1) + 1);
 
 		int[] order_swaps = new int[num_swaps];
 
-		order_swaps[0] = random.nextInt(n);
+		order_swaps[0] = thread_local_random.nextInt(n);
 
 		for (int i = 1; i < num_swaps; i++) {
 			boolean isEqual = true;
 			while (isEqual) {
 				isEqual = false;
-				int x = random.nextInt(n);
+				int x = thread_local_random.nextInt(n);
 				for (int j = 0; j < i; j++) {
 					if (x == order_swaps[j]) {
 						isEqual = true;

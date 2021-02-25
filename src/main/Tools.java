@@ -2,9 +2,12 @@ package main;
 
 import java.text.DecimalFormat;
 
+import java.util.List;
+
 public class Tools {
 	public static DecimalFormat DECIMAL_FORMAT_2D = new DecimalFormat("#.##");
 	public static DecimalFormat DECIMAL_FORMAT_3D = new DecimalFormat("#.###");
+	private static String[] mh_text = { "MTLS", "ROTS", "EO", "GA" };
 
 	public static void printArray(int[] array) {
 		String array_s = "";
@@ -99,6 +102,18 @@ public class Tools {
 			return f3;
 		}
 
+	}
+
+	public static void printParamsPopulation(List<List<Params>> params_population) {
+		for (int i = 0; i < params_population.size(); i++) {
+			List<Params> list_params = params_population.get(i);
+			System.out.println(mh_text[i]);
+			for (int l = 0; l < list_params.size(); l++) {
+				Tools.printArray(list_params.get(l).getParams());
+				// System.out.println("fitnes " + list_params.get(l).getFitness());
+			}
+
+		}
 	}
 
 }

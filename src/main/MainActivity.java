@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity {
 	private static int qap_size;
-	private static Random random;
+	private static ThreadLocalRandom thread_local_random;
 	private static final int MTLS = 0, ROTS = 1, EO = 2, GA = 3;
 	private static String[] mh_text = { "MTLS", "ROTS", "EO", "GA" };
 	private static int DIFFERENT_MH = 3;
@@ -82,7 +82,7 @@ public class MainActivity {
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
 		qap = new QAPData(distance, flow, readFile.getTarget());
 		qap_size = qap.getSize();
-		random = new Random(global_seed);
+		thread_local_random = ThreadLocalRandom.current();
 
 		ForkJoinPool pool = new ForkJoinPool(workers);
 
@@ -90,6 +90,7 @@ public class MainActivity {
 		// final int number_of_each_mh = 5 * number_workes_by_mh;
 		final Constructive constructive = new Constructive();
 		List<List<Params>> params_population = generateInitialPopulation(number_workes_by_mh, constructive);
+		Tools.printParamsPopulation(params_population);
 
 		// create array params for each mh
 		int[] params_MTLS = new int[3];
@@ -102,9 +103,9 @@ public class MainActivity {
 		List<ExtremalOptimization> list_eo = new ArrayList<>();
 
 		for (int i = 0; i < number_workes_by_mh; i += 1) {
-			MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap, random.nextInt());
-			RobustTabuSearch rots = new RobustTabuSearch(qap, random.nextInt());
-			ExtremalOptimization eo = new ExtremalOptimization(qap, random.nextInt());
+			MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap);
+			RobustTabuSearch rots = new RobustTabuSearch(qap);
+			ExtremalOptimization eo = new ExtremalOptimization(qap);
 
 			list_mtls.add(mtls);
 			list_rots.add(rots);
@@ -278,15 +279,15 @@ public class MainActivity {
 
 				switch (k) {
 				case MTLS:
-					p[0] = random.nextInt(2); // restart type 0: random restart, 1: swaps
+					p[0] = thread_local_random.nextInt(2); // restart type 0: random restart, 1: swaps
 					break;
 				case ROTS:
-					p[0] = (random.nextInt(16) + 4) * qap_size;// tabu duration factor
-					p[1] = (random.nextInt(10) + 1) * qap_size * qap_size; // aspiration factor
+					p[0] = (thread_local_random.nextInt(16) + 4) * qap_size;// tabu duration factor
+					p[1] = (thread_local_random.nextInt(10) + 1) * qap_size * qap_size; // aspiration factor
 					break;
 				case EO:
-					p[0] = random.nextInt(100); // tau*100
-					p[1] = random.nextInt(3); // 3 pdf function types
+					p[0] = thread_local_random.nextInt(100); // tau*100
+					p[1] = thread_local_random.nextInt(3); // 3 pdf function types
 					break;
 				}
 				tempListParams.add(new Params(p, Integer.MAX_VALUE));
@@ -303,7 +304,7 @@ public class MainActivity {
 	public static Params selectIndividual(List<Params> p) {
 		Params selected;
 		// obtain a number between 0 - size population
-		int index = random.nextInt(p.size());
+		int index = thread_local_random.nextInt(p.size());
 		selected = p.get(index);
 		p.remove(index);// delete for no selecting later
 		// System.out.println("selected : " + index);
@@ -313,7 +314,7 @@ public class MainActivity {
 
 	public static int[] getSolution(List<Solution> p) {
 		Solution selected_solution;
-		final int index = random.nextInt(p.size());
+		final int index = thread_local_random.nextInt(p.size());
 		selected_solution = p.get(index);
 		p.remove(index);// delete for no selecting later
 		// System.out.println("selected : " + index);
@@ -389,9 +390,9 @@ public class MainActivity {
 		int posX, posY, temp;
 
 		// first decide what value change randomly
-		posX = random.nextInt(qap_size);// with this value we put the range of number
+		posX = thread_local_random.nextInt(qap_size);// with this value we put the range of number
 		do {
-			posY = random.nextInt(qap_size);// check that the position to change are different
+			posY = thread_local_random.nextInt(qap_size);// check that the position to change are different
 		} while (posX == posY);
 
 		// swapping - making the mutation
@@ -402,7 +403,7 @@ public class MainActivity {
 	}
 
 	public static int getSeed() {
-		return random.nextInt();
+		return thread_local_random.nextInt();
 	}
 
 	public static int getExecutionTime() {

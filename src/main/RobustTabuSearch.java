@@ -3,6 +3,7 @@ package main;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.ThreadLocalRandom;
 
 import main.GeneticAlgorithm.GeneticAlgorithm;
 import main.GeneticAlgorithm.Results;
@@ -12,16 +13,16 @@ public class RobustTabuSearch extends RecursiveAction {
 	private int[][] tabuMemory; // this matrix will save the iteration number where a location change is denied
 	private int tabuDuration;// iterations tabu for a move
 	private QAPData qap;
-	private Random random;
+	private ThreadLocalRandom thread_local_random;
 	private int aspiration;
 	final int n;
 	private int[] solution, initSolution;
 	private int[] params;
 	private int bestCost;
 
-	public RobustTabuSearch(QAPData qapData, int seed) {
+	public RobustTabuSearch(QAPData qapData) {
 		super();
-		this.random = new Random(seed);
+		this.thread_local_random =  ThreadLocalRandom.current();
 
 		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getBKS());
 		n = qap.getSize();
@@ -147,8 +148,8 @@ public class RobustTabuSearch extends RecursiveAction {
 
 		// update tabu matrix with values of the solution selected
 		// random.nextDouble() give decimal between 0 and 1
-		int t1 = (int) (Math.pow(random.nextDouble(), 3) * tabuDuration);
-		int t2 = (int) (Math.pow(random.nextDouble(), 3) * tabuDuration);
+		int t1 = (int) (Math.pow(thread_local_random.nextDouble(), 3) * tabuDuration);
+		int t2 = (int) (Math.pow(thread_local_random.nextDouble(), 3) * tabuDuration);
 
 		// make tabu this facilities during certain iterations
 		tabuMemory[i_selected][currentSolution[j_selected]] = currentIteration + t1;
