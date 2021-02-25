@@ -118,14 +118,16 @@ public class Tools {
 		for (int i = 0; i < params_population.size(); i++) {
 
 			List<Params> list_params = params_population.get(i);
-			params_details = "Team: " + team_id + " " + MainActivity.mh_text[i];
 
 			for (int l = 0; l < list_params.size(); l++) {
+				params_details = "Team: " + team_id + " " + MainActivity.mh_text[i];
 				String array_s = "";
 				for (int j : list_params.get(l).getParams()) {
 					params_details = params_details + " " + j;
 				}
-				System.out.print(params_details + "\n");// +1 because the index in java start with 0
+				System.out.print(params_details + " gain " + list_params.get(l).getGain() + "\n");// +1 because the
+																									// index in java
+																									// start with 0
 				// Tools.printArray(list_params.get(l).getParams());
 				// System.out.println("fitnes " + list_params.get(l).getFitness());
 			}

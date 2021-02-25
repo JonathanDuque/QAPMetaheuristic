@@ -83,7 +83,13 @@ public class WorkerTeam extends RecursiveAction {
 		List<List<Params>> params_population = generateInitialParamsPopulation(number_workes_by_mh);
 		best_global_params = new Params(params_population.get(0).get(0).getParams(),
 				params_population.get(0).get(0).getFitness(), 0);
-		// Tools.printParamsPopulation(params_population, team_id);
+
+		List<List<Params>> best_mh_params_population = new ArrayList<>(DIFFERENT_MH);
+		for (int k = 0; k < DIFFERENT_MH; k++) {
+			best_mh_params_population.add(new ArrayList<>(params_population.get(k)));
+		}
+
+		Tools.printParamsPopulation(best_mh_params_population, team_id);
 		solution_population = generateInitialSolutionPopulation(workers, constructive);
 		// Tools.printSolutionPopulation(solution_population, qap, team_id);
 
@@ -153,7 +159,9 @@ public class WorkerTeam extends RecursiveAction {
 
 				best_global_params = updateBestGlobalParams(behavior_mtls, list_mtls.get(i).getParams(), behavior_rots,
 						list_rots.get(i).getParams(), behavior_eo, list_eo.get(i).getParams());
-				System.out.println("Gain: " + best_global_params.getGain() + "\n");
+				updateBestParamsByMH(best_mh_params_population, i, behavior_mtls, list_mtls.get(i).getParams(),
+						behavior_rots, list_rots.get(i).getParams(), behavior_eo, list_eo.get(i).getParams());
+				// System.out.println("Gain: " + best_global_params.getGain() + "\n");
 
 				// params_MTLS = createParam(MTLS);
 				// params_ROTS = createParam(ROTS);
@@ -199,7 +207,7 @@ public class WorkerTeam extends RecursiveAction {
 
 		}
 
-		// Tools.printParamsPopulation(params_population, team_id);
+		Tools.printParamsPopulation(best_mh_params_population, team_id);
 		// Tools.printSolutionPopulation(solution_population, qap, team_id);
 
 		// create and initiate variables for team results
@@ -288,7 +296,7 @@ public class WorkerTeam extends RecursiveAction {
 			params_population.add(temp_list_params);
 		}
 
-		// printParamsPopulation(params_population);
+		// Tools.printParamsPopulation(params_population, 2);
 		return params_population;
 	}
 
@@ -588,9 +596,9 @@ public class WorkerTeam extends RecursiveAction {
 		int method = -1;
 		int[] best_params = { 0, 0, 0 };
 		double best_gain = best_global_params.getGain();
-		System.out.println("Gain mtls: " + mtls[0]);
-		System.out.println("Gain rots: " + rots[0]);
-		System.out.println("Gain eo: " + eo[0]);
+		// System.out.println("Gain mtls: " + mtls[0]);
+		// System.out.println("Gain rots: " + rots[0]);
+		// System.out.println("Gain eo: " + eo[0]);
 
 		if (mtls[0] > best_gain) {
 			best_gain = mtls[0];
@@ -621,4 +629,39 @@ public class WorkerTeam extends RecursiveAction {
 		// function should be implemented
 	}
 
+	public void updateBestParamsByMH(List<List<Params>> best_mh_params_population, int mh_index, double[] mtls,
+			int[] params_mtls, double[] rots, int[] params_rots, double[] eo, int[] params_eo) {
+
+		// behavior_mh[0] = gain
+		List<Params> best_list_params_MTLS = best_mh_params_population.get(MTLS);
+		List<Params> best_list_params_ROTS = best_mh_params_population.get(ROTS);
+		List<Params> best_list_params_EO = best_mh_params_population.get(EO);
+
+		Params best_params_MTLS = best_list_params_MTLS.get(mh_index); // for this index
+		Params best_params_ROTS = best_list_params_ROTS.get(mh_index); // for this index
+		Params best_params_EO = best_list_params_EO.get(mh_index); // for this index
+
+		if (best_params_MTLS.getGain() < mtls[0]) {
+			best_params_MTLS.setParams(params_mtls);
+			best_params_MTLS.setGain(mtls[0]);
+			Tools.printArray(params_mtls);
+			System.out.println("gain " + mtls[0]);
+		}
+
+		if (best_params_ROTS.getGain() < rots[0]) {
+			best_params_ROTS.setParams(params_rots);
+			best_params_ROTS.setGain(rots[0]);
+			Tools.printArray(params_rots);
+			System.out.println("gain " + rots[0]);
+		}
+
+		if (best_params_EO.getGain() < eo[0]) {
+			best_params_EO.setParams(params_eo);
+			best_params_EO.setGain(eo[0]);
+			Tools.printArray(params_eo);
+			System.out.println("gain " + eo[0]);
+		}
+
+		return;
+	}
 }

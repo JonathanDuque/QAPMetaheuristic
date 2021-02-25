@@ -1,9 +1,9 @@
 package main;
 
 public class Params {
-	int[] p;
-	int score;
-	double gain;
+	private int[] p;
+	private int score;
+	private double gain;
 
 	public Params(final int[] params, int score) {
 		p = params.clone();
@@ -28,5 +28,14 @@ public class Params {
 	public double getGain() {
 		return gain;
 	}
+
+	public void setParams(int[] p) {
+		this.p = p.clone();
+	}
+
+	public void setGain(double gain) {
+		this.gain = gain;
+	}
+	
 
 }
