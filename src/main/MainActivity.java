@@ -25,8 +25,8 @@ public class MainActivity {
 
 	public static void main(String[] args) {
 		final long start = System.currentTimeMillis();
-		final String problem;
-		final int workers;
+		String problem;
+		int workers;
 		final int global_seed;
 
 		switch (args.length) {
@@ -62,6 +62,10 @@ public class MainActivity {
 			System.out.println("Default configuration execution");
 			break;
 		}
+		
+		problem = args[0];
+		workers = 63;
+		execution_time = 300000;
 
 
 		if ((workers % 3) != 0) {
@@ -73,10 +77,10 @@ public class MainActivity {
 		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
 		System.out.println("Threads: " + workers);
 		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
-		System.out.println("Seed for random values: " + global_seed + "\n");
+		//System.out.println("Seed for random values: " + global_seed + "\n");
 
-		final ReadFile readFile = new ReadFile("Data/" + problem);
-		//final ReadFile readFile = new ReadFile("../../Data/" + problem);
+		//final ReadFile readFile = new ReadFile("Data/" + problem);
+		final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
 		// initialize qap data, flow and distance matrix, format [row][col]
 		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
@@ -90,7 +94,6 @@ public class MainActivity {
 		// final int number_of_each_mh = 5 * number_workes_by_mh;
 		final Constructive constructive = new Constructive();
 		List<List<Params>> params_population = generateInitialPopulation(number_workes_by_mh, constructive);
-		Tools.printParamsPopulation(params_population);
 
 		// create array params for each mh
 		int[] params_MTLS = new int[3];
@@ -201,8 +204,8 @@ public class MainActivity {
 		 * Tools.DECIMAL_FORMAT); }
 		 */
 		
-		final String dir_file = "Results/";
-		// final String dir_file = "Result-others/";
+		//final String dir_file = "Results/";
+		final String dir_file = "../Result-test-63mh";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file, file_name + ".csv");
