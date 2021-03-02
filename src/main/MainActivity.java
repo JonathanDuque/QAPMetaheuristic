@@ -205,7 +205,7 @@ public class MainActivity {
 		 */
 		
 		//final String dir_file = "Results/";
-		final String dir_file = "../Result-test-63mh";
+		final String dir_file = "../Result-test-63mh/";
 
 		final String file_name = problem.replace(".qap", "");
 		File idea = new File(dir_file, file_name + ".csv");
