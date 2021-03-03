@@ -64,7 +64,7 @@ public class MainActivity {
 			break;
 		}
 
-		final int teams = 3;
+		final int teams = 1;
 		total_workers = 63;
 		execution_time = 20000;
 		total_iterations = 15;

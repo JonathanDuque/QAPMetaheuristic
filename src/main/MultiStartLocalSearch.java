@@ -65,9 +65,9 @@ public class MultiStartLocalSearch extends RecursiveAction {
 		// System.out.println(params[0] + " " +random_restart);
 		qap.initDeltas(init_solution);
 		
-		//System.out.println("MTLS");
+		//System.out.println("\nMTLS init");
 		//Tools.printArray(currentSolution);
-		// qap.showData();
+		//Tools.printArray(params);
 
 		final Constructive constructive = new Constructive();
 		final long start = System.currentTimeMillis();
@@ -127,9 +127,9 @@ public class MultiStartLocalSearch extends RecursiveAction {
 
 		}
 		
-		// qap.showData();
 		//System.out.println(name + " " + currentIteration );
-		//System.out.println("Fin MTLS");
+		//System.out.println("MTLS final");
+		//Tools.printArray(solution);
 	}
 
 	public int[] makeManySwaps(int[] currentSolution, QAPData qap) {

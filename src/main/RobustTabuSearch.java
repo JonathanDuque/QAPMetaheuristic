@@ -72,8 +72,9 @@ public class RobustTabuSearch extends RecursiveAction {
 		best_cost = init_cost;
 		// int bestFoundCounter = 0; // this counter has the value where the best was
 		
-		//System.out.println("ROTS");
+		//System.out.println("\nROTS init");
 		//Tools.printArray(currentSolution);
+		//Tools.printArray(params);
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
