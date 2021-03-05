@@ -482,13 +482,16 @@ public class WorkerTeam extends RecursiveAction {
 		// new_params = createParam(type);
 		// }
 		
-		/*
-		 * if (behavior_mh[0] < 0) { not_improve[type]++; }
-		 * 
-		 * if (not_improve[type] > 5) { new_params = createParam(type);
-		 * not_improve[type] = 0;
-		} */
+		if (behavior_mh[0] == 0) {
+			not_improve[type]++;
+		}else {
+			not_improve[type] = 0;
+		}
 		
+		if (not_improve[type] == 5) {
+			new_params = createParam(type);
+			not_improve[type] = 0;
+		}
 
 		return new_params;
 	}
