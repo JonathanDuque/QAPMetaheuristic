@@ -155,12 +155,14 @@ public class WorkerTeam extends RecursiveAction {
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				// init_cost, final cost order matter
+				
 				double[] behavior_mtls = compareSolution(list_mtls.get(i).getInitCost(), list_mtls.get(i).getBestCost(),
 						list_mtls.get(i).getInitSolution(), list_mtls.get(i).getSolution());
 				double[] behavior_rots = compareSolution(list_rots.get(i).getInitCost(), list_rots.get(i).getBestCost(),
 						list_rots.get(i).getInitSolution(), list_rots.get(i).getSolution());
 				double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
 						list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
+				 
 
 				// best_global_params = updateBestGlobalParams(behavior_mtls,
 				// list_mtls.get(i).getParams(), behavior_rots,
@@ -171,9 +173,9 @@ public class WorkerTeam extends RecursiveAction {
 				// list_eo.get(i).getParams());
 				// System.out.println("Gain: " + best_global_params.getGain() + "\n");
 
-				// params_MTLS = createParam(MTLS);
-				// params_ROTS = createParam(ROTS);
-				// params_EO = createParam(EO);
+				//params_MTLS = createParam(MTLS);
+				//params_ROTS = createParam(ROTS);
+				//params_EO = createParam(EO);
 
 				params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration,
 						total_iterations, diversify_percentage_limit);
@@ -181,6 +183,7 @@ public class WorkerTeam extends RecursiveAction {
 						total_iterations, diversify_percentage_limit);
 				params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration,
 						total_iterations, diversify_percentage_limit);
+				 
 
 				// insert the new parameters into parameters population, each one in the same
 				// position
@@ -216,6 +219,7 @@ public class WorkerTeam extends RecursiveAction {
 				 * time_out - current_time; }
 				 */
 			}
+			System.out.println();
 
 		}
 
@@ -481,17 +485,23 @@ public class WorkerTeam extends RecursiveAction {
 		// if the solution did not improve, so will be assign a new parameter
 		// new_params = createParam(type);
 		// }
+		//System.out.println( mh_text[type] + " Gain: " + behavior_mh[0] + " Counter:" +not_improve[type]);
 		
 		if (behavior_mh[0] == 0) {
 			not_improve[type]++;
-		}else {
+		} else {
 			not_improve[type] = 0;
 		}
-		
-		if (not_improve[type] == 5) {
+
+		if (not_improve[type] == 3) {
+			// System.out.println("New parameter for " + mh_text[type]);
 			new_params = createParam(type);
 			not_improve[type] = 0;
 		}
+		
+		//System.out.println( mh_text[type] + " Gain: " + Tools.DECIMAL_FORMAT_2D.format(behavior_mh[0] ) + " Counter:" +not_improve[type]);
+
+		
 
 		return new_params;
 	}
