@@ -25,7 +25,7 @@ public class WorkerTeam extends RecursiveAction {
 	private final boolean dynamic_time;
 	private final int team_id;
 	private Params best_global_params;
-	int []not_improve = {0,0,0};
+	int[] not_improve = { 0, 0, 0 };
 
 	private Solution team_best_solution;
 
@@ -162,7 +162,6 @@ public class WorkerTeam extends RecursiveAction {
 						list_rots.get(i).getInitSolution(), list_rots.get(i).getSolution());
 				double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
 						list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
-				 
 
 				// best_global_params = updateBestGlobalParams(behavior_mtls,
 				// list_mtls.get(i).getParams(), behavior_rots,
@@ -183,7 +182,6 @@ public class WorkerTeam extends RecursiveAction {
 						total_iterations, diversify_percentage_limit);
 				params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration,
 						total_iterations, diversify_percentage_limit);
-				 
 
 				// insert the new parameters into parameters population, each one in the same
 				// position
@@ -219,7 +217,6 @@ public class WorkerTeam extends RecursiveAction {
 				 * time_out - current_time; }
 				 */
 			}
-			System.out.println();
 
 		}
 
@@ -252,9 +249,13 @@ public class WorkerTeam extends RecursiveAction {
 		int total_values = 20;
 		final double[] limits = new double[total_values];
 
-		double a = 94.67597;
-		double b = 0.31811;
-		double c = 0.15699;
+		// double a = 94.67597;
+		// double b = 0.31811;
+		// double c = 0.15699;
+
+		double a = 8.46744;
+		double b = 0.55246;
+		double c = 0.122;
 
 		double y = 0;
 
@@ -401,7 +402,8 @@ public class WorkerTeam extends RecursiveAction {
 			break;
 
 		case ROTS:
-			if (behavior_mh[0] <= diversify_percentage_limit[current_iteration] && behavior_mh[1] <= qap_size / 3) {
+			if (behavior_mh[0] > 0 && behavior_mh[0] <= diversify_percentage_limit[current_iteration]
+					&& behavior_mh[1] <= qap_size / 3) {
 				// is necessary diversify
 				new_params[0] = parameter[0] + Math.floorDiv(qap_size, 2);
 				new_params[1] = parameter[1] + Math.floorDiv(qap_size * qap_size, 2);
@@ -437,7 +439,8 @@ public class WorkerTeam extends RecursiveAction {
 			// parameter[0] : tau
 			// parameter[1] : probability function
 
-			if (behavior_mh[0] <= diversify_percentage_limit[current_iteration] && behavior_mh[1] <= qap_size / 3) {
+			if (behavior_mh[0] > 0 && behavior_mh[0] <= diversify_percentage_limit[current_iteration]
+					&& behavior_mh[1] <= qap_size / 3) {
 				// is necessary diversify
 				switch (parameter[1]) {
 				case 2:// gamma tau: 0 to 1 means intensify to diversify
@@ -485,23 +488,25 @@ public class WorkerTeam extends RecursiveAction {
 		// if the solution did not improve, so will be assign a new parameter
 		// new_params = createParam(type);
 		// }
-		//System.out.println( mh_text[type] + " Gain: " + behavior_mh[0] + " Counter:" +not_improve[type]);
-		
+		// System.out.println( mh_text[type] + " Gain: " + behavior_mh[0] + " Counter:"
+		// +not_improve[type]);
+
 		if (behavior_mh[0] == 0) {
 			not_improve[type]++;
 		} else {
+			// System.out.println("Gain " + behavior_mh[0] + " for " + mh_text[type]);
 			not_improve[type] = 0;
 		}
 
 		if (not_improve[type] == 3) {
-			// System.out.println("New parameter for " + mh_text[type]);
+			// System.out.print(" New parameter for " + mh_text[type] );
 			new_params = createParam(type);
 			not_improve[type] = 0;
 		}
-		
-		//System.out.println( mh_text[type] + " Gain: " + Tools.DECIMAL_FORMAT_2D.format(behavior_mh[0] ) + " Counter:" +not_improve[type]);
 
-		
+		// System.out.println( mh_text[type] + " Gain: " +
+		// Tools.DECIMAL_FORMAT_2D.format(behavior_mh[0] ) + " Counter:"
+		// +not_improve[type]);
 
 		return new_params;
 	}
