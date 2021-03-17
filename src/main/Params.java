@@ -4,6 +4,7 @@ public class Params {
 	private int[] p;
 	private int score;
 	private double gain;
+	private double distance;
 
 	public Params(final int[] params, int score) {
 		p = params.clone();
@@ -11,12 +12,16 @@ public class Params {
 		// Tools.printArray(genes);
 	}
 
-	public Params(final int[] params, int score, double gain) {
+	public Params(final int[] params, int score, double [] behavior_mh) {
 		p = params.clone();
 		this.score = score;
-		this.gain = gain;
+		this.gain = behavior_mh[0];
+		distance = behavior_mh[1];
 	}
 
+	public double getDistance() {
+		return distance;
+	}
 	public int[] getParams() {
 		return p.clone();
 	}
