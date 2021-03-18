@@ -175,22 +175,9 @@ public class WorkerTeam extends RecursiveAction {
 				// list_eo.get(i).getParams());
 				// System.out.println("Gain: " + best_global_params.getGain() + "\n");
 
-				// params_MTLS = createParam(MTLS);
-				// params_ROTS = createParam(ROTS);
-				// params_EO = createParam(EO);
-
-				// params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls,
-				// MTLS, current_iteration,
-				// total_iterations, diversify_percentage_limit);
-				// params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots,
-				// ROTS, current_iteration,
-				// total_iterations, diversify_percentage_limit);
-				// params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO,
-				// current_iteration,
-				// total_iterations, diversify_percentage_limit);
-
 				// insert the new parameters into parameters population, each one in the same
 				// position
+				// here is just for update the behavior and cost
 				insertParameter(params_population.get(MTLS),
 						new Params(params_MTLS, list_mtls.get(i).getBestCost(), behavior_mtls), MTLS, i);
 				insertParameter(params_population.get(ROTS),
@@ -214,17 +201,26 @@ public class WorkerTeam extends RecursiveAction {
 				Collections.sort(params_population.get(EO), compareByGain);
 			}
 
+			// Tools.printParamsPopulation(params_population, 0);
+
 			int index_for_adapt = number_workes_by_mh / 3;
 			int index_for_discard = 2 * index_for_adapt;
 
 			for (int i = index_for_adapt; i < index_for_discard; i += 1) {
+				Params p_MTLS = params_population.get(MTLS).get(i);
+				Params p_ROTS = params_population.get(ROTS).get(i);
+				Params p_EO = params_population.get(EO).get(i);
 
-				int[] params_MTLS = improveParameter(list_mtls.get(i).getParams(), MTLS, current_iteration,
+				int[] params_MTLS = improveParameter(p_MTLS.getParams(), p_MTLS.getBehavior(), MTLS, current_iteration,
 						total_iterations, diversify_percentage_limit);
-				int[] params_ROTS = improveParameter(list_rots.get(i).getParams(), ROTS, current_iteration,
+				int[] params_ROTS = improveParameter(p_ROTS.getParams(), p_ROTS.getBehavior(), ROTS, current_iteration,
 						total_iterations, diversify_percentage_limit);
-				int[] params_EO = improveParameter(list_eo.get(i).getParams(), EO, current_iteration, total_iterations,
-						diversify_percentage_limit);
+				int[] params_EO = improveParameter(p_EO.getParams(), p_EO.getBehavior(), EO, current_iteration,
+						total_iterations, diversify_percentage_limit);
+
+				insertParameter(params_population.get(MTLS), new Params(params_MTLS, Integer.MAX_VALUE), MTLS, i);
+				insertParameter(params_population.get(ROTS), new Params(params_ROTS, Integer.MAX_VALUE), ROTS, i);
+				insertParameter(params_population.get(EO), new Params(params_EO, Integer.MAX_VALUE), EO, i);
 			}
 
 			// replace params for a new one
@@ -233,9 +229,11 @@ public class WorkerTeam extends RecursiveAction {
 				int[] params_ROTS = createParam(ROTS);
 				int[] params_EO = createParam(EO);
 
-				insertParameter(params_population.get(MTLS), new Params(params_MTLS, Integer.MAX_VALUE, 0), MTLS, i);
-				insertParameter(params_population.get(ROTS), new Params(params_ROTS, Integer.MAX_VALUE, 0), ROTS, i);
-				insertParameter(params_population.get(EO), new Params(params_EO, Integer.MAX_VALUE, 0), EO, i);
+				insertParameter(params_population.get(MTLS), new Params(params_MTLS, Integer.MAX_VALUE), MTLS, i);
+				insertParameter(params_population.get(ROTS), new Params(params_ROTS, Integer.MAX_VALUE), ROTS, i);
+				insertParameter(params_population.get(EO), new Params(params_EO, Integer.MAX_VALUE), EO, i);
+
+				// Tools.printParam(params_population.get(MTLS).get(i), mh_text[MTLS], 1);
 			}
 
 			list_mtls.clear();
@@ -549,11 +547,6 @@ public class WorkerTeam extends RecursiveAction {
 		return new_params;
 	}
 
-	public int[] improveParameter(Params param, final int type, final int current_iteration, final int total_iterations,
-			final double[] diversify_percentage_limit) {
-
-	}
-
 	// insert new parameter and remove the worst
 	public void insertParameter(List<Params> listParams, Params new_params, final int type) {
 
@@ -702,43 +695,29 @@ public class WorkerTeam extends RecursiveAction {
 		return execution_time;
 	}
 
-	public Params updateBestGlobalParams(double[] mtls, int[] params_mtls, double[] rots, int[] params_rots,
-			double[] eo, int[] params_eo) {
-
-		// behavior_mh[0] = gain
-		// behavior_mh[1] = distance
-
-		int method = -1;
-		int[] best_params = { 0, 0, 0 };
-		double best_gain = best_global_params.getGain();
-		// System.out.println("Gain mtls: " + mtls[0]);
-		// System.out.println("Gain rots: " + rots[0]);
-		// System.out.println("Gain eo: " + eo[0]);
-
-		if (mtls[0] > best_gain) {
-			best_gain = mtls[0];
-			method = MTLS;
-			best_params = params_mtls.clone();
-		}
-
-		if (rots[0] > best_gain) {
-			best_gain = rots[0];
-			method = ROTS;
-			best_params = params_rots.clone();
-		}
-
-		if (eo[0] > best_gain) {
-			best_gain = eo[0];
-			method = EO;
-			best_params = params_eo.clone();
-		}
-
-		if (method == -1) {
-			return best_global_params;
-		} else {
-			return new Params(best_params, 0, best_gain);
-		}
-	}
+	/*
+	 * public Params updateBestGlobalParams(double[] mtls, int[] params_mtls,
+	 * double[] rots, int[] params_rots, double[] eo, int[] params_eo) {
+	 * 
+	 * // behavior_mh[0] = gain // behavior_mh[1] = distance
+	 * 
+	 * int method = -1; int[] best_params = { 0, 0, 0 }; double best_gain =
+	 * best_global_params.getGain(); // System.out.println("Gain mtls: " + mtls[0]);
+	 * // System.out.println("Gain rots: " + rots[0]); //
+	 * System.out.println("Gain eo: " + eo[0]);
+	 * 
+	 * if (mtls[0] > best_gain) { best_gain = mtls[0]; method = MTLS; best_params =
+	 * params_mtls.clone(); }
+	 * 
+	 * if (rots[0] > best_gain) { best_gain = rots[0]; method = ROTS; best_params =
+	 * params_rots.clone(); }
+	 * 
+	 * if (eo[0] > best_gain) { best_gain = eo[0]; method = EO; best_params =
+	 * params_eo.clone(); }
+	 * 
+	 * if (method == -1) { return best_global_params; } else { return new
+	 * Params(best_params, 0, best_gain); } }
+	 */
 
 	public void adaptParameterPSO() {
 		// function should be implemented

@@ -3,8 +3,8 @@ package main;
 public class Params {
 	private int[] p;
 	private int score;
-	private double gain;
-	private double distance;
+	private double gain = -1;
+	private double distance = -1;
 
 	public Params(final int[] params, int score) {
 		p = params.clone();
@@ -12,16 +12,17 @@ public class Params {
 		// Tools.printArray(genes);
 	}
 
-	public Params(final int[] params, int score, double [] behavior_mh) {
+	public Params(final int[] params, int score, double[] behavior_mh) {
 		p = params.clone();
 		this.score = score;
-		this.gain = behavior_mh[0];
+		gain = behavior_mh[0];
 		distance = behavior_mh[1];
 	}
 
 	public double getDistance() {
 		return distance;
 	}
+
 	public int[] getParams() {
 		return p.clone();
 	}
@@ -41,6 +42,10 @@ public class Params {
 	public void setGain(double gain) {
 		this.gain = gain;
 	}
-	
+
+	public double[] getBehavior() {
+		double[] behavior = { gain, distance };
+		return behavior;
+	}
 
 }
