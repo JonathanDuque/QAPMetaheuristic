@@ -426,6 +426,12 @@ public class WorkerTeam extends RecursiveAction {
 		// behavior_mh[0] = percentage difference or gain
 		// behavior_mh[1] = distance
 
+		if (behavior_mh[0] == 0) {
+			not_improve[type]++;
+		} else {
+			not_improve[type] = 0;
+		}
+
 		// if (behavior_mh[0] > 0) {
 		switch (type) {
 		case MTLS:
@@ -510,14 +516,24 @@ public class WorkerTeam extends RecursiveAction {
 				new_params[0] = thread_local_random.nextInt(100); // tau*100
 			}
 
-			if (behavior_mh[0] < change_pdf_percentage_limit[(int) Math.floor(current_iteration / divisor)]) {
+			/*
+			 * if (behavior_mh[0] < change_pdf_percentage_limit[(int)
+			 * Math.floor(current_iteration / divisor)]) { int new_pdf_function; do {
+			 * new_pdf_function = thread_local_random.nextInt(3); new_params[1] =
+			 * new_pdf_function; } while (parameter[1] == new_pdf_function);
+			 * 
+			 * }
+			 */
+
+			if (not_improve[type] == 3) {
 				int new_pdf_function;
 				do {
 					new_pdf_function = thread_local_random.nextInt(3);
 					new_params[1] = new_pdf_function;
 				} while (parameter[1] == new_pdf_function);
-
+				not_improve[type] = 0;
 			}
+
 			break;
 		}
 		// } else {
@@ -525,23 +541,6 @@ public class WorkerTeam extends RecursiveAction {
 		// new_params = createParam(type);
 		// }
 		// System.out.println( mh_text[type] + " Gain: " + behavior_mh[0] + " Counter:"
-		// +not_improve[type]);
-
-		if (behavior_mh[0] == 0) {
-			not_improve[type]++;
-		} else {
-			// System.out.println("Gain " + behavior_mh[0] + " for " + mh_text[type]);
-			not_improve[type] = 0;
-		}
-
-		if (not_improve[type] == 3) {
-			// System.out.print(" New parameter for " + mh_text[type] );
-			new_params = createParam(type);
-			not_improve[type] = 0;
-		}
-
-		// System.out.println( mh_text[type] + " Gain: " +
-		// Tools.DECIMAL_FORMAT_2D.format(behavior_mh[0] ) + " Counter:"
 		// +not_improve[type]);
 
 		return new_params;
