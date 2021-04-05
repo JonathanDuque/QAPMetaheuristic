@@ -24,7 +24,6 @@ public class MainActivity {
 	private static List<Solution> init_solutions_population;
 
 	public static void main(String[] args) {
-		final long start = System.currentTimeMillis();
 		String problem;
 		int workers;
 		final int global_seed;
@@ -55,18 +54,17 @@ public class MainActivity {
 			global_seed = 1;
 			break;
 		default:
-			problem = "tai40b.qap";
+			problem = "tai20a.qap";
 			workers = 3;
 			execution_time = 300000;
 			global_seed = 1;
 			System.out.println("Default configuration execution");
 			break;
 		}
-		
-		problem = args[0];
+
+		// problem = args[0];
 		workers = 63;
 		execution_time = 300000;
-
 
 		if ((workers % 3) != 0) {
 			System.out.println(
@@ -74,124 +72,195 @@ public class MainActivity {
 			return;
 		}
 
-		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
-		System.out.println("Threads: " + workers);
-		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
-		//System.out.println("Seed for random values: " + global_seed + "\n");
+		for (int k = 0; k < 30; k += 1) {
 
-		//final ReadFile readFile = new ReadFile("Data/" + problem);
-		final ReadFile readFile = new ReadFile("../../Data/" + problem);
+			long start = System.currentTimeMillis();
 
-		// initialize qap data, flow and distance matrix, format [row][col]
-		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
-		qap = new QAPData(distance, flow, readFile.getTarget());
-		qap_size = qap.getSize();
-		thread_local_random = ThreadLocalRandom.current();
+			System.out.println("\n*****************    Problem: " + problem + "    ********************************");
+			System.out.println("Threads: " + workers);
+			System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
+			System.out.println("execution: " + k + "\n");
 
-		ForkJoinPool pool = new ForkJoinPool(workers);
+			// final ReadFile readFile = new ReadFile("Data/" + problem);
+			final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
-		final int number_workes_by_mh = workers / DIFFERENT_MH;
-		// final int number_of_each_mh = 5 * number_workes_by_mh;
-		final Constructive constructive = new Constructive();
-		List<List<Params>> params_population = generateInitialPopulation(number_workes_by_mh, constructive);
+			// initialize qap data, flow and distance matrix, format [row][col]
+			final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
+			qap = new QAPData(distance, flow, readFile.getTarget());
+			qap_size = qap.getSize();
+			thread_local_random = ThreadLocalRandom.current();
 
-		// create array params for each mh
-		int[] params_MTLS = new int[3];
-		int[] params_ROTS = new int[3];
-		int[] params_EO = new int[3];
+			ForkJoinPool pool = new ForkJoinPool(workers);
 
-		// these lists are necessary for the executing in parallel
-		List<MultiStartLocalSearch> list_mtls = new ArrayList<>();
-		List<RobustTabuSearch> list_rots = new ArrayList<>();
-		List<ExtremalOptimization> list_eo = new ArrayList<>();
+			final int number_workes_by_mh = workers / DIFFERENT_MH;
+			// final int number_of_each_mh = 5 * number_workes_by_mh;
+			final Constructive constructive = new Constructive();
+			List<List<Params>> params_population = generateInitialPopulation(number_workes_by_mh, constructive);
 
-		for (int i = 0; i < number_workes_by_mh; i += 1) {
-			MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap);
-			RobustTabuSearch rots = new RobustTabuSearch(qap);
-			ExtremalOptimization eo = new ExtremalOptimization(qap);
+			// create array params for each mh
+			int[] params_MTLS = new int[3];
+			int[] params_ROTS = new int[3];
+			int[] params_EO = new int[3];
 
-			list_mtls.add(mtls);
-			list_rots.add(rots);
-			list_eo.add(eo);
-		}
+			// these lists are necessary for the executing in parallel
+			List<MultiStartLocalSearch> list_mtls = new ArrayList<>();
+			List<RobustTabuSearch> list_rots = new ArrayList<>();
+			List<ExtremalOptimization> list_eo = new ArrayList<>();
 
-		double init_time = (System.currentTimeMillis() - start);
-		init_time /= 1000.0;
-		System.out.println("Initiate time: " + init_time + " sec");
+			for (int i = 0; i < number_workes_by_mh; i += 1) {
+				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap);
+				RobustTabuSearch rots = new RobustTabuSearch(qap);
+				ExtremalOptimization eo = new ExtremalOptimization(qap);
 
-		List<Params> list_params_MTLS = new ArrayList<>(params_population.get(MTLS));
-		List<Params> list_params_ROST = new ArrayList<>(params_population.get(ROTS));
-		List<Params> list_params_EO = new ArrayList<>(params_population.get(EO));
-
-		for (int i = 0; i < number_workes_by_mh; i += 1) {
-			params_MTLS = selectIndividual(list_params_MTLS).getParams();
-			params_ROTS = selectIndividual(list_params_ROST).getParams();
-			params_EO = selectIndividual(list_params_EO).getParams();
-
-			// setting variables for each method
-			// list_ga.get(i).setEnvironment(paramsGA); // GA environment is necessary make
-			// the first
-			list_mtls.get(i).setEnvironment(getSolution(init_solutions_population), params_MTLS);
-			list_rots.get(i).setEnvironment(getSolution(init_solutions_population), params_ROTS);
-			list_eo.get(i).setEnvironment(getSolution(init_solutions_population), params_EO);
-		}
-
-		// launch execution in parallel for all workers
-		for (int i = 0; i < number_workes_by_mh; i += 1) {
-			pool.submit(list_mtls.get(i));
-			pool.submit(list_rots.get(i));
-			pool.submit(list_eo.get(i));
-		}
-
-		// wait for each method
-		for (int i = 0; i < number_workes_by_mh; i += 1) {
-			list_mtls.get(i).join();
-			list_rots.get(i).join();
-			list_eo.get(i).join();
-		}
-
-		result_population = new ArrayList<>();
-
-		for (int i = 0; i < number_workes_by_mh; i += 1) {
-			result_population.add(new Solution(list_mtls.get(i).getSolution(), params_MTLS, mh_text[MTLS]));
-			result_population.add(new Solution(list_rots.get(i).getSolution(), params_ROTS, mh_text[ROTS]));
-			result_population.add(new Solution(list_eo.get(i).getSolution(), params_EO, mh_text[EO]));
-		}
-
-		System.out.println("\n*****************    Results                ********************************");
-		// System.out.println("Result Population");
-		// printSolutionPopulation(result_population);
-
-		list_mtls.clear();
-		list_rots.clear();
-		list_eo.clear();
-
-		// get results
-		int[] best_solution = result_population.get(0).getArray();
-		int best_cost = Integer.MAX_VALUE;
-		int[] best_params = { -1, -1, -1 };
-		String method = "";
-		for (int i = 0; i < result_population.size(); i++) {
-			int[] temp_s = result_population.get(i).getArray();
-			int temp_cost = qap.evalSolution(result_population.get(i).getArray());
-			if (temp_cost < best_cost) {
-				best_solution = temp_s;
-				best_cost = temp_cost;
-				best_params = result_population.get(i).getParams();
-				method = result_population.get(i).getMethod();
+				list_mtls.add(mtls);
+				list_rots.add(rots);
+				list_eo.add(eo);
 			}
+
+			double init_time = (System.currentTimeMillis() - start);
+			init_time /= 1000.0;
+			System.out.println("Initiate time: " + init_time + " sec");
+
+			List<Params> list_params_MTLS = new ArrayList<>(params_population.get(MTLS));
+			List<Params> list_params_ROST = new ArrayList<>(params_population.get(ROTS));
+			List<Params> list_params_EO = new ArrayList<>(params_population.get(EO));
+
+			for (int i = 0; i < number_workes_by_mh; i += 1) {
+				params_MTLS = selectIndividual(list_params_MTLS).getParams();
+				params_ROTS = selectIndividual(list_params_ROST).getParams();
+				params_EO = selectIndividual(list_params_EO).getParams();
+
+				// setting variables for each method
+				// list_ga.get(i).setEnvironment(paramsGA); // GA environment is necessary make
+				// the first
+				list_mtls.get(i).setEnvironment(getSolution(init_solutions_population), params_MTLS);
+				list_rots.get(i).setEnvironment(getSolution(init_solutions_population), params_ROTS);
+				list_eo.get(i).setEnvironment(getSolution(init_solutions_population), params_EO);
+			}
+
+			// launch execution in parallel for all workers
+			for (int i = 0; i < number_workes_by_mh; i += 1) {
+				pool.submit(list_mtls.get(i));
+				pool.submit(list_rots.get(i));
+				pool.submit(list_eo.get(i));
+			}
+
+			// wait for each method
+			for (int i = 0; i < number_workes_by_mh; i += 1) {
+				list_mtls.get(i).join();
+				list_rots.get(i).join();
+				list_eo.get(i).join();
+			}
+
+			result_population = new ArrayList<>();
+
+			for (int i = 0; i < number_workes_by_mh; i += 1) {
+				result_population.add(new Solution(list_mtls.get(i).getSolution(), params_MTLS, mh_text[MTLS]));
+				result_population.add(new Solution(list_rots.get(i).getSolution(), params_ROTS, mh_text[ROTS]));
+				result_population.add(new Solution(list_eo.get(i).getSolution(), params_EO, mh_text[EO]));
+			}
+
+			System.out.println("\n*****************    Results                ********************************");
+			// System.out.println("Result Population");
+			// printSolutionPopulation(result_population);
+
+			list_mtls.clear();
+			list_rots.clear();
+			list_eo.clear();
+
+			// get results
+			int[] best_solution = result_population.get(0).getArray();
+			int best_cost = Integer.MAX_VALUE;
+			int[] best_params = { -1, -1, -1 };
+			String method = "";
+			for (int i = 0; i < result_population.size(); i++) {
+				int[] temp_s = result_population.get(i).getArray();
+				int temp_cost = qap.evalSolution(result_population.get(i).getArray());
+				if (temp_cost < best_cost) {
+					best_solution = temp_s;
+					best_cost = temp_cost;
+					best_params = result_population.get(i).getParams();
+					method = result_population.get(i).getMethod();
+				}
+			}
+
+			// qap.printSolution(best_solution, best_cost);
+			final double std = best_cost * 100.0 / qap.getBKS() - 100;
+			System.out.println("Best cost achieved: " + best_cost + " " + Tools.DECIMAL_FORMAT_2D.format(std) + "%");
+			System.out.println("Method: " + method);
+			System.out.println("Parameters:");
+			Tools.printArray(best_params);
+
+			double total_time = (System.currentTimeMillis() - start);
+			total_time /= 1000.0;
+			System.out.println("Total time: " + total_time + " sec");// including initiate time
+
+			// final String dir_file = "Results/";
+			final String dir_file = "../Result-test-63mh-101/";
+
+			final String file_name = problem.replace(".qap", "");
+			File idea = new File(dir_file, file_name + ".csv");
+			FileWriter fileWriter;
+			if (!idea.exists()) {
+				// if file does not exist, so create and write header
+
+				try {
+					fileWriter = new FileWriter(dir_file + file_name + ".csv");
+					fileWriter.append("solution");
+					fileWriter.append(";");
+					fileWriter.append("cost");
+					fileWriter.append(";");
+					fileWriter.append("deviation ");
+					fileWriter.append(";");
+					fileWriter.append("time");
+					fileWriter.append(";");
+					fileWriter.append("init_time");
+					fileWriter.append(";");
+					fileWriter.append("params");
+					fileWriter.append(";");
+					fileWriter.append("method");
+					fileWriter.append("\n");
+
+					fileWriter.flush();
+					fileWriter.close();
+
+				} catch (IOException e) {
+					System.out.println("Error writing headers");
+					e.printStackTrace();
+				}
+			}
+
+			try {
+				fileWriter = new FileWriter(dir_file + file_name + ".csv", true);
+				// solution - cost- deviation - time - generations
+				fileWriter.append(Arrays.toString(best_solution));
+				fileWriter.append(";");
+				fileWriter.append(Integer.toString(best_cost));
+				fileWriter.append(";");
+				fileWriter.append(Tools.DECIMAL_FORMAT_2D.format(std));
+				fileWriter.append(";");
+				fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(total_time));
+				fileWriter.append(";");
+				fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(init_time));
+				fileWriter.append(";");
+				fileWriter.append(Arrays.toString(best_params));
+				fileWriter.append(";");
+				fileWriter.append(method);
+				fileWriter.append("\n");
+
+				fileWriter.flush();
+				fileWriter.close();
+			} catch (IOException e) {
+				System.out.println("Error writing data");
+
+				e.printStackTrace();
+			}
+
+			init_solutions_population.clear();
+			result_population.clear();
+			no_find_BKS.set(true);
+
 		}
-
-		// qap.printSolution(best_solution, best_cost);
-		final double std = best_cost * 100.0 / qap.getBKS() - 100;
-		System.out.println("Best cost achieved: " + best_cost + " " + Tools.DECIMAL_FORMAT_2D.format(std) + "%");
-		System.out.println("Method: " + method);
-		System.out.println("Parameters:");
-		Tools.printArray(best_params);
-
-		double total_time = (System.currentTimeMillis() - start);
-		total_time /= 1000.0;
-		System.out.println("Total time: " + total_time + " sec");// including initiate time
 
 		/*
 		 * for (int i = 0; i < params_population.size(); i++) { List<Params> listParams
@@ -203,67 +272,6 @@ public class MainActivity {
 		 * printMetaheuristic(i, best, listParams.get(c).getParams(),
 		 * Tools.DECIMAL_FORMAT); }
 		 */
-		
-		//final String dir_file = "Results/";
-		final String dir_file = "../Result-test-63mh/";
-
-		final String file_name = problem.replace(".qap", "");
-		File idea = new File(dir_file, file_name + ".csv");
-		FileWriter fileWriter;
-		if (!idea.exists()) {
-			// if file does not exist, so create and write header
-
-			try {
-				fileWriter = new FileWriter(dir_file + file_name + ".csv");
-				fileWriter.append("solution");
-				fileWriter.append(";");
-				fileWriter.append("cost");
-				fileWriter.append(";");
-				fileWriter.append("deviation ");
-				fileWriter.append(";");
-				fileWriter.append("time");
-				fileWriter.append(";");
-				fileWriter.append("init_time");
-				fileWriter.append(";");
-				fileWriter.append("params");
-				fileWriter.append(";");
-				fileWriter.append("method");
-				fileWriter.append("\n");
-
-				fileWriter.flush();
-				fileWriter.close();
-
-			} catch (IOException e) {
-				System.out.println("Error writing headers");
-				e.printStackTrace();
-			}
-		}
-
-		try {
-			fileWriter = new FileWriter(dir_file + file_name + ".csv", true);
-			// solution - cost- deviation - time - generations
-			fileWriter.append(Arrays.toString(best_solution));
-			fileWriter.append(";");
-			fileWriter.append(Integer.toString(best_cost));
-			fileWriter.append(";");
-			fileWriter.append(Tools.DECIMAL_FORMAT_2D.format(std));
-			fileWriter.append(";");
-			fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(total_time));
-			fileWriter.append(";");
-			fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(init_time));
-			fileWriter.append(";");
-			fileWriter.append(Arrays.toString(best_params));
-			fileWriter.append(";");
-			fileWriter.append(method);
-			fileWriter.append("\n");
-
-			fileWriter.flush();
-			fileWriter.close();
-		} catch (IOException e) {
-			System.out.println("Error writing data");
-
-			e.printStackTrace();
-		}
 
 	}
 
