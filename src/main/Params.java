@@ -5,6 +5,7 @@ public class Params {
 	private int score;
 	private double gain = -1;
 	private double distance = -1;
+	private String setup = "";
 
 	public Params(final int[] params, int score) {
 		p = params.clone();
@@ -18,6 +19,21 @@ public class Params {
 		gain = behavior_mh[0];
 		distance = behavior_mh[1];
 	}
+	
+	public Params(final int[] params, int score, double[] behavior_mh, String setup) {
+		p = params.clone();
+		this.score = score;
+		gain = behavior_mh[0];
+		distance = behavior_mh[1];
+		this.setup= setup;
+	}
+	
+	public Params(final int[] params, int score, String setup) {
+		p = params.clone();
+		this.score = score;
+		this.setup= setup;
+	}
+
 
 	public double getDistance() {
 		return distance;
@@ -46,6 +62,10 @@ public class Params {
 	public double[] getBehavior() {
 		double[] behavior = { gain, distance };
 		return behavior;
+	}
+	
+	public String getSetup() {
+		return setup;
 	}
 
 }

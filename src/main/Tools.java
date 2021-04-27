@@ -61,7 +61,7 @@ public class Tools {
 				for (int j : list_params.get(l).getParams()) {
 					params_details = params_details + " " + j;
 				}
-				System.out.print(params_details + " Gain: " + Tools.DECIMAL_FORMAT_3D.format(list_params.get(l).getGain()) + " D: " + list_params.get(l).getDistance() + "\n");// +1 because the
+				System.out.print(params_details + " Gain: " + Tools.DECIMAL_FORMAT_3D.format(list_params.get(l).getGain()) + " D: " + list_params.get(l).getDistance() + " Setup: "+ list_params.get(l).getSetup() + "\n");// +1 because the
 																									// index in java
 																									// start with 0
 				// Tools.printArray(list_params.get(l).getParams());

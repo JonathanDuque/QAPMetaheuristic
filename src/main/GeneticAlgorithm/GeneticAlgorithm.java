@@ -388,7 +388,7 @@ public class GeneticAlgorithm extends RecursiveAction {
 		List<Solution> final_population = new ArrayList<>(pop_size);
 		
 		for (Individual i: population) {
-			final_population.add(new Solution(i.getGenes().clone(), empty_params, "N/A"));
+			final_population.add(new Solution(i.getGenes().clone(), empty_params, "N/A", ""));
 		}
 		
 		return final_population;	

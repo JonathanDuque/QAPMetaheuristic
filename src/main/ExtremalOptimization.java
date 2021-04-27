@@ -28,6 +28,7 @@ public class ExtremalOptimization extends RecursiveAction {
 	QAPData qap;
 	private int[] solution, init_solution;
 	private int[] params;
+	private String params_setup;
 	private int best_cost, init_cost;
 	private int execution_time;
 
@@ -40,10 +41,11 @@ public class ExtremalOptimization extends RecursiveAction {
 	}
 
 	// always before compute function, is necessary set the environment
-	public void setEnvironment(int[] initSolution, int[] params, final int execution_time) {
+	public void setEnvironment(int[] initSolution, int[] params,  String params_setup, final int execution_time) {
 		this.params = params.clone();
 		this.init_solution = initSolution.clone();
 		this.execution_time = execution_time;
+		this.params_setup = params_setup;
 	}
 
 	public int[] getInitSolution() {
@@ -56,6 +58,10 @@ public class ExtremalOptimization extends RecursiveAction {
 
 	public int[] getParams() {
 		return params;
+	}
+	
+	public String getParamSetup() {
+		return params_setup;
 	}
 
 	public int getBestCost() {

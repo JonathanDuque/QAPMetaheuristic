@@ -26,7 +26,7 @@ public class WorkerTeam extends RecursiveAction {
 	private int execution_time;// by iteration
 	private final boolean dynamic_time;
 	private final int team_id;
-	private Params best_global_params;
+	// private Params best_global_params;
 	int[] not_improve = { 0, 0, 0 };
 
 	private Solution team_best_solution;
@@ -102,6 +102,7 @@ public class WorkerTeam extends RecursiveAction {
 		int current_iteration = 0;
 
 		while (current_iteration < total_iterations && MainActivity.is_BKS_was_not_found()) {
+			// Tools.printParamsPopulation(params_population, 0);
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap);
@@ -128,12 +129,16 @@ public class WorkerTeam extends RecursiveAction {
 				int[] params_ROTS = selectParam(list_params_ROST, i).getParams();
 				int[] params_EO = selectParam(list_params_EO, i).getParams();
 
+				String params_setup_MTLS = selectParam(list_params_MTLS, i).getSetup();
+				String params_setup_ROTS = selectParam(list_params_ROST, i).getSetup();
+				String params_setup_EO = selectParam(list_params_EO, i).getSetup();
+
 				list_mtls.get(i).setEnvironment(getSolutionFromList(solution_population, i * DIFFERENT_MH), params_MTLS,
-						execution_time);
+						params_setup_MTLS, execution_time);
 				list_rots.get(i).setEnvironment(getSolutionFromList(solution_population, i * DIFFERENT_MH + 1),
-						params_ROTS, execution_time);
+						params_ROTS, params_setup_ROTS, execution_time);
 				list_eo.get(i).setEnvironment(getSolutionFromList(solution_population, i * DIFFERENT_MH + 2), params_EO,
-						execution_time);
+						params_setup_EO, execution_time);
 			}
 
 			// launch execution in parallel for all workers
@@ -158,6 +163,10 @@ public class WorkerTeam extends RecursiveAction {
 				int[] params_ROTS = list_rots.get(i).getParams();
 				int[] params_EO = list_eo.get(i).getParams();
 
+				String params_setup_MTLS = list_mtls.get(i).getParamSetup();
+				String params_setup_ROTS = list_rots.get(i).getParamSetup();
+				String params_setup_EO = list_eo.get(i).getParamSetup();
+
 				// init_cost, final cost order matter
 				double[] behavior_mtls = compareSolution(list_mtls.get(i).getInitCost(), list_mtls.get(i).getBestCost(),
 						list_mtls.get(i).getInitSolution(), list_mtls.get(i).getSolution());
@@ -179,32 +188,48 @@ public class WorkerTeam extends RecursiveAction {
 				// position
 				// here is just for update the behavior and cost
 				insertParameter(params_population.get(MTLS),
-						new Params(params_MTLS, list_mtls.get(i).getBestCost(), behavior_mtls), MTLS, i);
+						new Params(params_MTLS, list_mtls.get(i).getBestCost(), behavior_mtls, params_setup_MTLS), MTLS,
+						i);
 				insertParameter(params_population.get(ROTS),
-						new Params(params_ROTS, list_rots.get(i).getBestCost(), behavior_rots), ROTS, i);
+						new Params(params_ROTS, list_rots.get(i).getBestCost(), behavior_rots, params_setup_ROTS), ROTS,
+						i);
 				insertParameter(params_population.get(EO),
-						new Params(params_EO, list_eo.get(i).getBestCost(), behavior_eo), EO, i);
+						new Params(params_EO, list_eo.get(i).getBestCost(), behavior_eo, params_setup_EO), EO, i);
 
 				// inserts solution into solution population
-				updateSolutionPopulation(list_mtls.get(i).getSolution(), params_MTLS, mh_text[MTLS], i * DIFFERENT_MH,
-						list_mtls.get(i).getBestCost());
-				updateSolutionPopulation(list_rots.get(i).getSolution(), params_ROTS, mh_text[ROTS],
+				updateSolutionPopulation(list_mtls.get(i).getSolution(), params_MTLS, params_setup_MTLS, mh_text[MTLS],
+						i * DIFFERENT_MH, list_mtls.get(i).getBestCost());
+				updateSolutionPopulation(list_rots.get(i).getSolution(), params_ROTS, params_setup_ROTS, mh_text[ROTS],
 						i * DIFFERENT_MH + 1, list_rots.get(i).getBestCost());
-				updateSolutionPopulation(list_eo.get(i).getSolution(), params_EO, mh_text[EO], i * DIFFERENT_MH + 2,
-						list_eo.get(i).getBestCost());
+				updateSolutionPopulation(list_eo.get(i).getSolution(), params_EO, params_setup_EO, mh_text[EO],
+						i * DIFFERENT_MH + 2, list_eo.get(i).getBestCost());
 			}
+
+			// Tools.printParamsPopulation(params_population, 1);
+			// System.out.println();
+
+			int index_for_adapt = number_workes_by_mh / 3;
+			int index_for_discard = 2 * index_for_adapt;
 
 			// the first iteration sort the params populations
 			if (current_iteration == 0) {
 				Collections.sort(params_population.get(MTLS), compareByGain);
 				Collections.sort(params_population.get(ROTS), compareByGain);
 				Collections.sort(params_population.get(EO), compareByGain);
+
+				for (int i = 0; i < index_for_adapt; i += 1) {
+					Params p_MTLS = params_population.get(MTLS).get(i);
+					Params p_ROTS = params_population.get(ROTS).get(i);
+					Params p_EO = params_population.get(EO).get(i);
+
+					insertParameter(params_population.get(MTLS),
+							new Params(p_MTLS.getParams(), p_MTLS.getFitness(), p_MTLS.getBehavior(), "Best"), MTLS, i);
+					insertParameter(params_population.get(ROTS),
+							new Params(p_ROTS.getParams(), p_ROTS.getFitness(), p_ROTS.getBehavior(), "Best"), ROTS, i);
+					insertParameter(params_population.get(EO),
+							new Params(p_EO.getParams(), p_EO.getFitness(), p_EO.getBehavior(), "Best"), EO, i);
+				}
 			}
-
-			// Tools.printParamsPopulation(params_population, 0);
-
-			int index_for_adapt = number_workes_by_mh / 3;
-			int index_for_discard = 2 * index_for_adapt;
 
 			for (int i = index_for_adapt; i < index_for_discard; i += 1) {
 				Params p_MTLS = params_population.get(MTLS).get(i);
@@ -218,9 +243,11 @@ public class WorkerTeam extends RecursiveAction {
 				int[] params_EO = improveParameter(p_EO.getParams(), p_EO.getBehavior(), EO, current_iteration,
 						total_iterations, diversify_percentage_limit);
 
-				insertParameter(params_population.get(MTLS), new Params(params_MTLS, Integer.MAX_VALUE), MTLS, i);
-				insertParameter(params_population.get(ROTS), new Params(params_ROTS, Integer.MAX_VALUE), ROTS, i);
-				insertParameter(params_population.get(EO), new Params(params_EO, Integer.MAX_VALUE), EO, i);
+				insertParameter(params_population.get(MTLS), new Params(params_MTLS, Integer.MAX_VALUE, "Adapted"),
+						MTLS, i);
+				insertParameter(params_population.get(ROTS), new Params(params_ROTS, Integer.MAX_VALUE, "Adapted"),
+						ROTS, i);
+				insertParameter(params_population.get(EO), new Params(params_EO, Integer.MAX_VALUE, "Adapted"), EO, i);
 			}
 
 			// replace params for a new one
@@ -229,9 +256,11 @@ public class WorkerTeam extends RecursiveAction {
 				int[] params_ROTS = createParam(ROTS);
 				int[] params_EO = createParam(EO);
 
-				insertParameter(params_population.get(MTLS), new Params(params_MTLS, Integer.MAX_VALUE), MTLS, i);
-				insertParameter(params_population.get(ROTS), new Params(params_ROTS, Integer.MAX_VALUE), ROTS, i);
-				insertParameter(params_population.get(EO), new Params(params_EO, Integer.MAX_VALUE), EO, i);
+				insertParameter(params_population.get(MTLS), new Params(params_MTLS, Integer.MAX_VALUE, "Random"), MTLS,
+						i);
+				insertParameter(params_population.get(ROTS), new Params(params_ROTS, Integer.MAX_VALUE, "Random"), ROTS,
+						i);
+				insertParameter(params_population.get(EO), new Params(params_EO, Integer.MAX_VALUE, "Random"), EO, i);
 
 				// Tools.printParam(params_population.get(MTLS).get(i), mh_text[MTLS], 1);
 			}
@@ -256,14 +285,14 @@ public class WorkerTeam extends RecursiveAction {
 
 		}
 
-		// Tools.printParamsPopulation(best_mh_params_population, team_id);
+		// Tools.printParamsPopulation(params_population, team_id);
 		// Tools.printSolutionPopulation(solution_population, qap, team_id);
 
 		// create and initiate variables for team results
 		int[] best_solution = constructive.createRandomSolution(qap_size, current_iteration);
 		int best_cost = qap.evalSolution(best_solution);
 		final int[] empty_params = { -1, -1, -1 };
-		team_best_solution = new Solution(best_solution, empty_params, "N/A");
+		team_best_solution = new Solution(best_solution, empty_params, "N/A", "");
 
 		// update final results variables
 		for (int i = 0; i < solution_population.size(); i++) {
@@ -343,7 +372,7 @@ public class WorkerTeam extends RecursiveAction {
 					p[1] = thread_local_random.nextInt(3); // pdf function type
 					break;
 				}
-				temp_list_params.add(new Params(p, Integer.MAX_VALUE));
+				temp_list_params.add(new Params(p, Integer.MAX_VALUE, "Init"));
 			}
 
 			params_population.add(temp_list_params);
@@ -359,7 +388,7 @@ public class WorkerTeam extends RecursiveAction {
 
 		for (int i = 0; i < total; i++) {
 			int[] s = constructive.createRandomSolution(qap_size, i);// i stands for the seed
-			init_solution_population.add(new Solution(s, empty_params, "N/A"));
+			init_solution_population.add(new Solution(s, empty_params, "N/A", "Init"));
 		}
 
 		return init_solution_population;
@@ -588,16 +617,17 @@ public class WorkerTeam extends RecursiveAction {
 
 		} while (exist);
 
-		solution_population.add(new Solution(s, params, method));
+		solution_population.add(new Solution(s, params, method, ""));
 
 	}
 
-	public void updateSolutionPopulation(int[] new_solution, int[] params, String method, final int index,
-			final int new_cost) {
+	public void updateSolutionPopulation(int[] new_solution, int[] params, String params_setup, String method,
+			final int index, final int new_cost) {
 		Solution last_solution = solution_population.get(index);
 
 		if (qap.evalSolution(last_solution.getArray()) >= new_cost) {
-			solution_population.set(index, new Solution(new_solution, params, method));// replace by the better
+			solution_population.set(index, new Solution(new_solution, params, method, params_setup));// replace by the
+																										// better
 		}
 	}
 
