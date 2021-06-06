@@ -203,7 +203,7 @@ public class MainActivity {
 					fileWriter.append(";");
 					fileWriter.append("team");
 					fileWriter.append(";");
-					fileWriter.append("params setup");
+					fileWriter.append("params_setup");
 					fileWriter.append("\n");
 
 					fileWriter.flush();
