@@ -61,9 +61,9 @@ public class WorkerTeam extends RecursiveAction {
 		// List<List<Params>> params_population_one =
 		// generateInitialParamsPopulation(params_of_each_mh);
 		List<List<Params>> params_population = generateInitialParamsPopulation(number_workes_by_mh);
-		//Tools.printParamsPopulation(params_population, team_id);
+		// Tools.printParamsPopulation(params_population, team_id);
 		solution_population = generateInitialSolutionPopulation(workers, constructive);
-		//Tools.printSolutionPopulation(solution_population, qap, team_id);
+		// Tools.printSolutionPopulation(solution_population, qap, team_id);
 
 		// create array parameters for each metaheuristic
 		int[] params_MTLS = new int[3];
@@ -94,9 +94,9 @@ public class WorkerTeam extends RecursiveAction {
 			// setting environment variables for each method
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 
-				params_MTLS = selectParam(list_params_MTLS).getParams();
-				params_ROTS = selectParam(list_params_ROST).getParams();
-				params_EO = selectParam(list_params_EO).getParams();
+				params_MTLS = selectParam(list_params_MTLS, i).getParams();
+				params_ROTS = selectParam(list_params_ROST, i).getParams();
+				params_EO = selectParam(list_params_EO, i).getParams();
 
 				list_mtls.get(i).setEnvironment(getSolution(solution_population_copy), params_MTLS, execution_time);
 				list_rots.get(i).setEnvironment(getSolution(solution_population_copy), params_ROTS, execution_time);
@@ -141,12 +141,12 @@ public class WorkerTeam extends RecursiveAction {
 
 			current_iteration++;
 		}
-		//System.out.println("\nDespues" );
-		//Tools.printParamsPopulation(params_population);
-		//Tools.printSolutionPopulation(solution_population, qap, team_id);
+		// System.out.println("\nDespues" );
+		// Tools.printParamsPopulation(params_population);
+		// Tools.printSolutionPopulation(solution_population, qap, team_id);
 
 		// create and initiate variables for results
-		int[] best_solution = constructive.createRandomSolution(qap_size );
+		int[] best_solution = constructive.createRandomSolution(qap_size);
 		int best_cost = qap.evalSolution(best_solution);
 		int[] empty_params = { -1, -1, -1 };
 		team_best_solution = new Solution(best_solution, empty_params, "N/A");
@@ -221,6 +221,7 @@ public class WorkerTeam extends RecursiveAction {
 		return init_solution_population;
 	}
 
+	// select random parameter
 	public Params selectParam(List<Params> p) {
 		Params selected;
 		// obtain a number between 0 - size population
@@ -228,6 +229,13 @@ public class WorkerTeam extends RecursiveAction {
 		selected = p.get(index);
 		p.remove(index);// delete for no selecting later
 		// System.out.println("selected : " + index);
+
+		return selected;
+	}
+
+	// select always the same parameter
+	public Params selectParam(List<Params> p, final int index) {
+		Params selected = p.get(index);
 
 		return selected;
 	}

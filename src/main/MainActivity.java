@@ -19,8 +19,8 @@ public class MainActivity {
 	public static void main(String[] args) {
 		QAPData qap;
 		int total_iterations;
-		final long start = System.currentTimeMillis();
-		final String problem;
+
+		String problem;
 		int total_workers;
 		int execution_time;// by iteration
 
@@ -69,7 +69,8 @@ public class MainActivity {
 			break;
 		}
 
-		final int teams = 3;
+		final int teams = 1;
+		problem = args[0];
 		total_workers = 63;
 		execution_time = 20000;
 		total_iterations = 15;
@@ -93,137 +94,147 @@ public class MainActivity {
 			return;
 		}
 
-		System.out.println("\n*****************    Problem: " + problem + "    ********************************");
-		System.out.println("Total Teams: " + teams);
+		for (int k = 0; k < 30; k += 1) {
+			final long start = System.currentTimeMillis();
 
-		//final ReadFile readFile = new ReadFile("Data/" + problem);
-		final ReadFile readFile = new ReadFile("../../Data/" + problem);
+			System.out.println("\n*****************    Problem: " + problem + "    ********************************");
+			System.out.println("Total Teams: " + teams);
+			System.out.println("execution: " + k);
 
-		// initialize qap data, flow and distance matrix, format [row][col]
-		final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
-		qap = new QAPData(distance, flow, readFile.getTarget());
+			// final ReadFile readFile = new ReadFile("Data/" + problem);
+			final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
-		ForkJoinPool pool = new ForkJoinPool(teams);
-		List<WorkerTeam> list_teams = new ArrayList<>(teams);// these lists are necessary for the executing in parallel
-																// of each team
+			// initialize qap data, flow and distance matrix, format [row][col]
+			final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
+			qap = new QAPData(distance, flow, readFile.getTarget());
 
-		double init_time = (System.currentTimeMillis() - start);
-		init_time /= 1000.0;
+			ForkJoinPool pool = new ForkJoinPool(teams);
+			List<WorkerTeam> list_teams = new ArrayList<>(teams);// these lists are necessary for the executing in
+																	// parallel
+																	// of each team
 
-		for (int i = 0; i < teams; i += 1) {
-			WorkerTeam team = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, i);
-			list_teams.add(team);
-		}
+			double init_time = (System.currentTimeMillis() - start);
+			init_time /= 1000.0;
 
-		// launch execution in parallel for all teams
-		for (int i = 0; i < teams; i += 1) {
-			pool.submit(list_teams.get(i));
-		}
-
-		// wait for each team
-		for (int i = 0; i < teams; i += 1) {
-			list_teams.get(i).join();
-		}
-
-		// get the results for each team
-		List<Solution> list_teams_solutions = new ArrayList<>();
-		for (int i = 0; i < teams; i += 1) {
-			Solution solution = list_teams.get(i).getBestTeamSolution();
-			list_teams_solutions.add(solution);
-		}
-
-		Solution best_team_solution = list_teams_solutions.get(0);
-		int best_cost = qap.evalSolution(best_team_solution.getArray());
-		int team = 0;
-
-		// get the best result
-		for (int i = 0; i < list_teams_solutions.size(); i++) {
-			int temp_cost = qap.evalSolution(list_teams_solutions.get(i).getArray());
-
-			if (temp_cost < best_cost) {
-				best_cost = temp_cost;
-				best_team_solution = list_teams_solutions.get(i);
-				team = i;
+			for (int i = 0; i < teams; i += 1) {
+				WorkerTeam team = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, i);
+				list_teams.add(team);
 			}
-		}
 
-		int[] best_solution = best_team_solution.getArray();
-		int[] best_params = best_team_solution.getParams();
-		String best_method = best_team_solution.getMethod();
-		best_cost = qap.evalSolution(best_solution);
+			// launch execution in parallel for all teams
+			for (int i = 0; i < teams; i += 1) {
+				pool.submit(list_teams.get(i));
+			}
 
-		double total_time = (System.currentTimeMillis() - start);
-		total_time /= 1000.0;
+			// wait for each team
+			for (int i = 0; i < teams; i += 1) {
+				list_teams.get(i).join();
+			}
 
-		final double std = best_cost * 100.0 / qap.getBKS() - 100;
-		System.out.println("\n*****************      Results     ********************************");
-		System.out.println("Best cost achieved: " + best_cost + " " + Tools.DECIMAL_FORMAT_2D.format(std) + "%");
-		System.out.println("Method: " + best_method);
-		System.out.println("Parameters:");
-		Tools.printArray(best_params);
-		System.out.println("Total time: " + total_time + " sec");
+			// get the results for each team
+			List<Solution> list_teams_solutions = new ArrayList<>();
+			for (int i = 0; i < teams; i += 1) {
+				Solution solution = list_teams.get(i).getBestTeamSolution();
+				list_teams_solutions.add(solution);
+			}
 
-		// final String dir_file = "Results/";
-		final String dir_file = "../Result-test-3teams-21mh-15adaptations/";
+			Solution best_team_solution = list_teams_solutions.get(0);
+			int best_cost = qap.evalSolution(best_team_solution.getArray());
+			int team = 0;
 
-		final String file_name = problem.replace(".qap", "");
-		File idea = new File(dir_file + file_name + ".csv");
-		FileWriter fileWriter;
-		if (!idea.exists()) {
-			// if file does not exist, so create and write header
+			// get the best result
+			for (int i = 0; i < list_teams_solutions.size(); i++) {
+				int temp_cost = qap.evalSolution(list_teams_solutions.get(i).getArray());
+
+				if (temp_cost < best_cost) {
+					best_cost = temp_cost;
+					best_team_solution = list_teams_solutions.get(i);
+					team = i;
+				}
+			}
+
+			int[] best_solution = best_team_solution.getArray();
+			int[] best_params = best_team_solution.getParams();
+			String best_method = best_team_solution.getMethod();
+			best_cost = qap.evalSolution(best_solution);
+
+			double total_time = (System.currentTimeMillis() - start);
+			total_time /= 1000.0;
+
+			final double std = best_cost * 100.0 / qap.getBKS() - 100;
+			System.out.println("\n*****************      Results     ********************************");
+			System.out.println("Best cost achieved: " + best_cost + " " + Tools.DECIMAL_FORMAT_2D.format(std) + "%");
+			System.out.println("Method: " + best_method);
+			System.out.println("Parameters:");
+			Tools.printArray(best_params);
+			System.out.println("Total time: " + total_time + " sec");
+
+			// final String dir_file = "Results/";
+			final String dir_file = "../Result-26/";
+
+			final String file_name = problem.replace(".qap", "");
+			File idea = new File(dir_file + file_name + ".csv");
+			FileWriter fileWriter;
+			if (!idea.exists()) {
+				// if file does not exist, so create and write header
+
+				try {
+					fileWriter = new FileWriter(dir_file + file_name + ".csv");
+					fileWriter.append("solution");
+					fileWriter.append(";");
+					fileWriter.append("cost");
+					fileWriter.append(";");
+					fileWriter.append("deviation");
+					fileWriter.append(";");
+					fileWriter.append("time");
+					fileWriter.append(";");
+					fileWriter.append("init_time");
+					fileWriter.append(";");
+					fileWriter.append("params");
+					fileWriter.append(";");
+					fileWriter.append("method");
+					fileWriter.append(";");
+					fileWriter.append("team");
+					fileWriter.append("\n");
+
+					fileWriter.flush();
+					fileWriter.close();
+
+				} catch (IOException e) {
+					System.out.println("Error writing headers");
+					e.printStackTrace();
+				}
+			}
 
 			try {
-				fileWriter = new FileWriter(dir_file + file_name + ".csv");
-				fileWriter.append("solution");
+				fileWriter = new FileWriter(dir_file + file_name + ".csv", true);
+				fileWriter.append(Arrays.toString(best_solution));
 				fileWriter.append(";");
-				fileWriter.append("cost");
+				fileWriter.append(Integer.toString(best_cost));
 				fileWriter.append(";");
-				fileWriter.append("deviation");
+				fileWriter.append(Tools.DECIMAL_FORMAT_2D.format(std));
 				fileWriter.append(";");
-				fileWriter.append("time");
+				fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(total_time));
 				fileWriter.append(";");
-				fileWriter.append("init_time");
+				fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(init_time));
 				fileWriter.append(";");
-				fileWriter.append("params");
+				fileWriter.append(Arrays.toString(best_params));
 				fileWriter.append(";");
-				fileWriter.append("method");
+				fileWriter.append(best_method);
 				fileWriter.append(";");
-				fileWriter.append("team");
+				fileWriter.append(Integer.toString(team));
 				fileWriter.append("\n");
 
 				fileWriter.flush();
 				fileWriter.close();
-
 			} catch (IOException e) {
-				System.out.println("Error writing headers");
+				System.out.println("Error writing data");
 				e.printStackTrace();
 			}
-		}
 
-		try {
-			fileWriter = new FileWriter(dir_file + file_name + ".csv", true);
-			fileWriter.append(Arrays.toString(best_solution));
-			fileWriter.append(";");
-			fileWriter.append(Integer.toString(best_cost));
-			fileWriter.append(";");
-			fileWriter.append(Tools.DECIMAL_FORMAT_2D.format(std));
-			fileWriter.append(";");
-			fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(total_time));
-			fileWriter.append(";");
-			fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(init_time));
-			fileWriter.append(";");
-			fileWriter.append(Arrays.toString(best_params));
-			fileWriter.append(";");
-			fileWriter.append(best_method);
-			fileWriter.append(";");
-			fileWriter.append(Integer.toString(team));
-			fileWriter.append("\n");
-
-			fileWriter.flush();
-			fileWriter.close();
-		} catch (IOException e) {
-			System.out.println("Error writing data");
-			e.printStackTrace();
+			list_teams.clear();
+			list_teams_solutions.clear();
+			no_find_BKS.set(true);
 		}
 
 	}
@@ -236,5 +247,5 @@ public class MainActivity {
 
 	public static boolean is_BKS_was_not_found() {
 		return no_find_BKS.get();
-	}	
+	}
 }
