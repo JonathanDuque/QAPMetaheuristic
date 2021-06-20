@@ -118,9 +118,8 @@ public class WorkerTeam extends RecursiveAction {
 			List<Params> list_params_ROST = new ArrayList<>(params_population.get(ROTS));
 			List<Params> list_params_EO = new ArrayList<>(params_population.get(EO));
 
-			// is necessary a copy because after solution population will be update
-			// List<Solution> solution_population_copy = new
-			// ArrayList<>(solution_population);
+			// is necessary a copy because after solution population will be update, used for cooperative version
+			List<Solution> solution_population_copy = new ArrayList<>(solution_population);
 
 			// setting environment variables for each method
 			// select same solution and same parameter for each mh
@@ -129,11 +128,11 @@ public class WorkerTeam extends RecursiveAction {
 				params_ROTS = selectParam(list_params_ROST, i).getParams();
 				params_EO = selectParam(list_params_EO, i).getParams();
 
-				list_mtls.get(i).setEnvironment(getSolutionFromList(solution_population, i * DIFFERENT_MH), params_MTLS,
+				list_mtls.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_MTLS,
 						execution_time);
-				list_rots.get(i).setEnvironment(getSolutionFromList(solution_population, i * DIFFERENT_MH + 1),
+				list_rots.get(i).setEnvironment(getSolutionFromList(solution_population_copy),
 						params_ROTS, execution_time);
-				list_eo.get(i).setEnvironment(getSolutionFromList(solution_population, i * DIFFERENT_MH + 2), params_EO,
+				list_eo.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_EO,
 						execution_time);
 			}
 
@@ -151,17 +150,23 @@ public class WorkerTeam extends RecursiveAction {
 				list_eo.get(i).join();
 			}
 
-			// solution_population.clear();
+			// for cooperative version
+			solution_population.clear();
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				// init_cost, final cost order matter
 				
-				double[] behavior_mtls = compareSolution(list_mtls.get(i).getInitCost(), list_mtls.get(i).getBestCost(),
-						list_mtls.get(i).getInitSolution(), list_mtls.get(i).getSolution());
-				double[] behavior_rots = compareSolution(list_rots.get(i).getInitCost(), list_rots.get(i).getBestCost(),
-						list_rots.get(i).getInitSolution(), list_rots.get(i).getSolution());
-				double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
-						list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
+				//with adaptations is necessary the behavior
+				/*
+				 * double[] behavior_mtls = compareSolution(list_mtls.get(i).getInitCost(),
+				 * list_mtls.get(i).getBestCost(), list_mtls.get(i).getInitSolution(),
+				 * list_mtls.get(i).getSolution()); double[] behavior_rots =
+				 * compareSolution(list_rots.get(i).getInitCost(),
+				 * list_rots.get(i).getBestCost(), list_rots.get(i).getInitSolution(),
+				 * list_rots.get(i).getSolution()); double[] behavior_eo =
+				 * compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
+				 * list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
+				 */
 
 				// best_global_params = updateBestGlobalParams(behavior_mtls,
 				// list_mtls.get(i).getParams(), behavior_rots,
@@ -172,16 +177,20 @@ public class WorkerTeam extends RecursiveAction {
 				// list_eo.get(i).getParams());
 				// System.out.println("Gain: " + best_global_params.getGain() + "\n");
 
-				//params_MTLS = createParam(MTLS);
-				//params_ROTS = createParam(ROTS);
-				//params_EO = createParam(EO);
+				//random parameters
+				params_MTLS = createParam(MTLS);
+				params_ROTS = createParam(ROTS);
+				params_EO = createParam(EO);
 
-				params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration,
-						total_iterations, diversify_percentage_limit);
-				params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration,
-						total_iterations, diversify_percentage_limit);
-				params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration,
-						total_iterations, diversify_percentage_limit);
+				//with adaptations
+				/*
+				 * params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls,
+				 * MTLS, current_iteration, total_iterations, diversify_percentage_limit);
+				 * params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots,
+				 * ROTS, current_iteration, total_iterations, diversify_percentage_limit);
+				 * params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO,
+				 * current_iteration, total_iterations, diversify_percentage_limit);
+				 */
 
 				// insert the new parameters into parameters population, each one in the same
 				// position
@@ -192,12 +201,9 @@ public class WorkerTeam extends RecursiveAction {
 				insertParameter(params_population.get(EO), new Params(params_EO, list_eo.get(i).getBestCost()), EO, i);
 
 				// inserts solution into solution population
-				updateSolutionPopulation(list_mtls.get(i).getSolution(), params_MTLS, mh_text[MTLS], i * DIFFERENT_MH,
-						list_mtls.get(i).getBestCost());
-				updateSolutionPopulation(list_rots.get(i).getSolution(), params_ROTS, mh_text[ROTS],
-						i * DIFFERENT_MH + 1, list_rots.get(i).getBestCost());
-				updateSolutionPopulation(list_eo.get(i).getSolution(), params_EO, mh_text[EO], i * DIFFERENT_MH + 2,
-						list_eo.get(i).getBestCost());
+				updateSolutionPopulation(list_mtls.get(i).getSolution(), params_MTLS, mh_text[MTLS]);
+				updateSolutionPopulation(list_rots.get(i).getSolution(), params_ROTS, mh_text[ROTS]);
+				updateSolutionPopulation(list_eo.get(i).getSolution(), params_EO, mh_text[EO]);
 			}
 
 			list_mtls.clear();
