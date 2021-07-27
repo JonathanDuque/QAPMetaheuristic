@@ -175,7 +175,7 @@ public class MainActivity {
 			System.out.println("Total time: " + total_time + " sec");
 
 			//final String dir_file = "Results/";
-			final String dir_file = "../Result-16-problem-15a/";
+			final String dir_file = "../Result-26/";
 
 			final String file_name = problem.replace(".qap", "");
 			File idea = new File(dir_file + file_name + ".csv");

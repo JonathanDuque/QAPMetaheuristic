@@ -91,7 +91,7 @@ public class WorkerTeam extends RecursiveAction {
 		// best_mh_params_population.add(new ArrayList<>(params_population.get(k)));
 		// }
 
-		//Tools.printParamsPopulation(params_population, team_id);
+		// Tools.printParamsPopulation(params_population, team_id);
 		solution_population = generateInitialSolutionPopulation(workers, constructive);
 		// Tools.printSolutionPopulation(solution_population, qap, team_id);
 
@@ -118,7 +118,8 @@ public class WorkerTeam extends RecursiveAction {
 			List<Params> list_params_ROST = new ArrayList<>(params_population.get(ROTS));
 			List<Params> list_params_EO = new ArrayList<>(params_population.get(EO));
 
-			// is necessary a copy because after solution population will be update, used for cooperative version
+			// is necessary a copy because after solution population will be update, used
+			// for cooperative version
 			List<Solution> solution_population_copy = new ArrayList<>(solution_population);
 
 			// setting environment variables for each method
@@ -130,10 +131,9 @@ public class WorkerTeam extends RecursiveAction {
 
 				list_mtls.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_MTLS,
 						execution_time);
-				list_rots.get(i).setEnvironment(getSolutionFromList(solution_population_copy),
-						params_ROTS, execution_time);
-				list_eo.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_EO,
+				list_rots.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_ROTS,
 						execution_time);
+				list_eo.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_EO, execution_time);
 			}
 
 			// launch execution in parallel for all workers
@@ -155,18 +155,14 @@ public class WorkerTeam extends RecursiveAction {
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				// init_cost, final cost order matter
-				
-				//with adaptations is necessary the behavior
-				/*
-				 * double[] behavior_mtls = compareSolution(list_mtls.get(i).getInitCost(),
-				 * list_mtls.get(i).getBestCost(), list_mtls.get(i).getInitSolution(),
-				 * list_mtls.get(i).getSolution()); double[] behavior_rots =
-				 * compareSolution(list_rots.get(i).getInitCost(),
-				 * list_rots.get(i).getBestCost(), list_rots.get(i).getInitSolution(),
-				 * list_rots.get(i).getSolution()); double[] behavior_eo =
-				 * compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
-				 * list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
-				 */
+
+				// with adaptations is necessary the behavior
+				double[] behavior_mtls = compareSolution(list_mtls.get(i).getInitCost(), list_mtls.get(i).getBestCost(),
+						list_mtls.get(i).getInitSolution(), list_mtls.get(i).getSolution());
+				double[] behavior_rots = compareSolution(list_rots.get(i).getInitCost(), list_rots.get(i).getBestCost(),
+						list_rots.get(i).getInitSolution(), list_rots.get(i).getSolution());
+				double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
+						list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
 
 				// best_global_params = updateBestGlobalParams(behavior_mtls,
 				// list_mtls.get(i).getParams(), behavior_rots,
@@ -177,20 +173,18 @@ public class WorkerTeam extends RecursiveAction {
 				// list_eo.get(i).getParams());
 				// System.out.println("Gain: " + best_global_params.getGain() + "\n");
 
-				//random parameters
-				params_MTLS = createParam(MTLS);
-				params_ROTS = createParam(ROTS);
-				params_EO = createParam(EO);
+				// random parameters
+				// params_MTLS = createParam(MTLS);
+				// params_ROTS = createParam(ROTS);
+				// params_EO = createParam(EO);
 
-				//with adaptations
-				/*
-				 * params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls,
-				 * MTLS, current_iteration, total_iterations, diversify_percentage_limit);
-				 * params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots,
-				 * ROTS, current_iteration, total_iterations, diversify_percentage_limit);
-				 * params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO,
-				 * current_iteration, total_iterations, diversify_percentage_limit);
-				 */
+				// with adaptations
+				params_MTLS = improveParameterOLAPaper(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration,
+						total_iterations, diversify_percentage_limit);
+				params_ROTS = improveParameterOLAPaper(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration,
+						total_iterations, diversify_percentage_limit);
+				params_EO = improveParameterOLAPaper(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration,
+						total_iterations, diversify_percentage_limit);
 
 				// insert the new parameters into parameters population, each one in the same
 				// position
@@ -255,13 +249,13 @@ public class WorkerTeam extends RecursiveAction {
 		int total_values = 20;
 		final double[] limits = new double[total_values];
 
-		// double a = 94.67597;
-		// double b = 0.31811;
-		// double c = 0.15699;
+		double a = 94.67597;
+		double b = 0.31811;
+		double c = 0.15699;
 
-		double a = 8.46744;
-		double b = 0.55246;
-		double c = 0.122;
+		// double a = 8.46744;
+		// double b = 0.55246;
+		// double c = 0.122;
 
 		double y = 0;
 
@@ -516,6 +510,105 @@ public class WorkerTeam extends RecursiveAction {
 
 		return new_params;
 	}
+	
+	public int[] improveParameterOLAPaper(final int[] parameter, final double[] behavior_mh, final int type,
+			final int current_iteration, final int total_iterations, final double[] diversify_percentage_limit) {
+		final double[] change_pdf_percentage_limit = { 10, 5, 1, 0.5, 0.3 };
+
+		// behavior_mh[0] = percentage difference
+		// behavior_mh[1] = distance
+
+		int[] new_params = { 0, 0, 0 };
+
+		if (behavior_mh[0] > 0) {
+			switch (type) {
+			// case MTLS keep equal
+			case ROTS:
+				if (behavior_mh[0] <= diversify_percentage_limit[current_iteration] && behavior_mh[1] <= qap_size / 3) {
+					// is necessary diversify
+					new_params[0] = parameter[0] + Math.floorDiv(qap_size, 2);
+					new_params[1] = parameter[1] + Math.floorDiv(qap_size * qap_size, 2);
+				} else {
+					// is necessary intensify
+					new_params[0] = parameter[0] - Math.floorDiv(qap_size, 3);
+					new_params[1] = parameter[1] - Math.floorDiv(qap_size, 2);
+				}
+
+				if (new_params[0] > 20 * qap_size) {
+					new_params[0] = thread_local_random.nextInt(16 * qap_size) + 4 * qap_size; // 4n to 20n
+				}
+
+				if (new_params[1] > 10 * qap_size * qap_size) {
+					new_params[1] = thread_local_random.nextInt(9 * qap_size * qap_size) + qap_size * qap_size; // n*n to 10*n*n
+				}
+				
+				if (new_params[0] < 4 * qap_size) {
+					new_params[0] = 4 * qap_size + thread_local_random.nextInt(16 * qap_size); // 4n to 20n
+				}
+
+				if (new_params[1] < qap_size * qap_size) {
+					new_params[1] = qap_size * qap_size + thread_local_random.nextInt(9 * qap_size * qap_size); // n*n to 10*n*n
+																												
+				}
+
+				break;
+
+			case EO:
+				// parameter[0] : tau
+				// parameter[1] : probability function
+
+				if (behavior_mh[0] <= diversify_percentage_limit[current_iteration] && behavior_mh[1] <= qap_size / 3) {
+					// is necessary diversify
+					switch (parameter[1]) {
+					case 2:// gamma tau: 0 to 1 means intensify to diversify
+						new_params[0] = parameter[0] + 6;
+						break;
+					default:
+						// Exponential tau: 0 to 1 means diversify to intensify
+						// Power tau: 0 to 1 means diversify to intensify
+						new_params[0] = parameter[0] - 6;
+						break;
+					}
+				} else {
+					// is necessary intensify
+					switch (parameter[1]) {
+					case 2:// gamma tau: 0 to 1 means intensify to diversify
+						new_params[0] = parameter[0] - 6;
+						break;
+					default:
+						// Exponential tau: 0 to 1 means diversify to intensify
+						// Power tau: 0 to 1 means diversify to intensify
+						new_params[0] = parameter[0] + 6;
+						break;
+					}
+				}
+
+				if (new_params[0] > 100) {
+					new_params[0] = thread_local_random.nextInt(100); // tau*100
+				}
+				
+				if (new_params[0] <= 0) {
+					new_params[0] = thread_local_random.nextInt(100); // tau*100
+				}
+
+				if (behavior_mh[0] < change_pdf_percentage_limit[current_iteration / 3]) {
+					int new_pdf_function;
+					do {
+						new_pdf_function = thread_local_random.nextInt(3);
+						new_params[1] = new_pdf_function;
+					} while (parameter[1] == new_pdf_function);
+
+				}
+				break;
+			}
+		} else {
+			// if the solution did not improve, so will be assign a new parameter
+			new_params = createParam(type);
+		}
+
+		return new_params;
+	}
+	
 
 	// insert new parameter and remove the worst
 	public void insertParameter(List<Params> listParams, Params new_params, final int type) {
