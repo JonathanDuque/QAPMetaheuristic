@@ -118,12 +118,12 @@ public class WorkerTeam extends RecursiveAction {
 			List<Params> list_params_ROST = new ArrayList<>(params_population.get(ROTS));
 			List<Params> list_params_EO = new ArrayList<>(params_population.get(EO));
 
-			// is necessary a copy because after solution population will be update
-			// List<Solution> solution_population_copy = new
-			// ArrayList<>(solution_population);
+			// is necessary a copy because after solution population will be update, used
+			// for cooperative version
+			List<Solution> solution_population_copy = new ArrayList<>(solution_population);
 
 			// setting environment variables for each method
-			// select same solution and same parameter for each mh
+			// select same solution and same parameter for each mh, this is for the no cooperative version
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 				int[] params_MTLS = selectParam(list_params_MTLS, i).getParams();
 				int[] params_ROTS = selectParam(list_params_ROST, i).getParams();
@@ -133,11 +133,11 @@ public class WorkerTeam extends RecursiveAction {
 				String params_setup_ROTS = selectParam(list_params_ROST, i).getSetup();
 				String params_setup_EO = selectParam(list_params_EO, i).getSetup();
 
-				list_mtls.get(i).setEnvironment(getSolutionFromList(solution_population, i * DIFFERENT_MH), params_MTLS,
+				list_mtls.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_MTLS,
 						params_setup_MTLS, execution_time);
-				list_rots.get(i).setEnvironment(getSolutionFromList(solution_population, i * DIFFERENT_MH + 1),
+				list_rots.get(i).setEnvironment(getSolutionFromList(solution_population_copy),
 						params_ROTS, params_setup_ROTS, execution_time);
-				list_eo.get(i).setEnvironment(getSolutionFromList(solution_population, i * DIFFERENT_MH + 2), params_EO,
+				list_eo.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_EO,
 						params_setup_EO, execution_time);
 			}
 
@@ -155,7 +155,8 @@ public class WorkerTeam extends RecursiveAction {
 				list_eo.get(i).join();
 			}
 
-			// solution_population.clear();
+			// for cooperative version
+			solution_population.clear();
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
 
@@ -168,6 +169,7 @@ public class WorkerTeam extends RecursiveAction {
 				String params_setup_EO = list_eo.get(i).getParamSetup();
 
 				// init_cost, final cost order matter
+				// with adaptations is necessary the behavior
 				double[] behavior_mtls = compareSolution(list_mtls.get(i).getInitCost(), list_mtls.get(i).getBestCost(),
 						list_mtls.get(i).getInitSolution(), list_mtls.get(i).getSolution());
 				double[] behavior_rots = compareSolution(list_rots.get(i).getInitCost(), list_rots.get(i).getBestCost(),
@@ -197,12 +199,9 @@ public class WorkerTeam extends RecursiveAction {
 						new Params(params_EO, list_eo.get(i).getBestCost(), behavior_eo, params_setup_EO), EO, i);
 
 				// inserts solution into solution population
-				updateSolutionPopulation(list_mtls.get(i).getSolution(), params_MTLS, params_setup_MTLS, mh_text[MTLS],
-						i * DIFFERENT_MH, list_mtls.get(i).getBestCost());
-				updateSolutionPopulation(list_rots.get(i).getSolution(), params_ROTS, params_setup_ROTS, mh_text[ROTS],
-						i * DIFFERENT_MH + 1, list_rots.get(i).getBestCost());
-				updateSolutionPopulation(list_eo.get(i).getSolution(), params_EO, params_setup_EO, mh_text[EO],
-						i * DIFFERENT_MH + 2, list_eo.get(i).getBestCost());
+				updateSolutionPopulation(list_mtls.get(i).getSolution(), params_MTLS, params_setup_MTLS, mh_text[MTLS]);
+				updateSolutionPopulation(list_rots.get(i).getSolution(), params_ROTS, params_setup_ROTS, mh_text[ROTS]);
+				updateSolutionPopulation(list_eo.get(i).getSolution(), params_EO, params_setup_EO, mh_text[EO]);
 			}
 
 			// Tools.printParamsPopulation(params_population, 1);
@@ -600,7 +599,7 @@ public class WorkerTeam extends RecursiveAction {
 		listParams.set(index, new_params);
 	}
 
-	public void updateSolutionPopulation(int[] s, int[] params, String method) {
+	public void updateSolutionPopulation(int[] s, int[] params, String params_setup, String method) {
 
 		boolean exist; // this cycle finish until the new solution will be different
 		do {
@@ -617,7 +616,7 @@ public class WorkerTeam extends RecursiveAction {
 
 		} while (exist);
 
-		solution_population.add(new Solution(s, params, method, ""));
+		solution_population.add(new Solution(s, params, method, params_setup));
 
 	}
 
