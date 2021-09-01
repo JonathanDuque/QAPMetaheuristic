@@ -25,13 +25,14 @@ public class WorkerTeam extends RecursiveAction {
 	private final boolean dynamic_time;
 	private final int team_id;
 	final private boolean cooperative;
+	final private boolean random_parameters;
 	private Params best_global_params;
 	int[] not_improve = { 0, 0, 0 };
 
 	private Solution team_best_solution;
 
 	public WorkerTeam(int workers, int execution_time, int total_iterations, QAPData qap, boolean dynamic_time,
-			int team_id, boolean cooperative) {
+			int team_id, boolean cooperative, boolean random_parameters) {
 		super();
 
 		this.qap = qap;
@@ -40,6 +41,7 @@ public class WorkerTeam extends RecursiveAction {
 		this.dynamic_time = dynamic_time;
 		this.team_id = team_id;
 		this.cooperative = cooperative;
+		this.random_parameters = random_parameters;
 
 		System.out.println("\nTeam: " + team_id);
 		System.out.println("Threads: " + workers);
@@ -174,16 +176,6 @@ public class WorkerTeam extends RecursiveAction {
 			}
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
-				// init_cost, final cost order matter
-
-				// with adaptations is necessary the behavior
-				double[] behavior_mtls = compareSolution(list_mtls.get(i).getInitCost(), list_mtls.get(i).getBestCost(),
-						list_mtls.get(i).getInitSolution(), list_mtls.get(i).getSolution());
-				double[] behavior_rots = compareSolution(list_rots.get(i).getInitCost(), list_rots.get(i).getBestCost(),
-						list_rots.get(i).getInitSolution(), list_rots.get(i).getSolution());
-				double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
-						list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
-
 				// best_global_params = updateBestGlobalParams(behavior_mtls,
 				// list_mtls.get(i).getParams(), behavior_rots,
 				// list_rots.get(i).getParams(), behavior_eo, list_eo.get(i).getParams());
@@ -193,18 +185,37 @@ public class WorkerTeam extends RecursiveAction {
 				// list_eo.get(i).getParams());
 				// System.out.println("Gain: " + best_global_params.getGain() + "\n");
 
-				// random parameters
-				// params_MTLS = createParam(MTLS);
-				// params_ROTS = createParam(ROTS);
-				// params_EO = createParam(EO);
+				// System.out.println("\nAdaptation: "+ current_iteration);
+				// Tools.printArray(params_ROTS);
 
-				// with adaptations
-				params_MTLS = improveParameterOLAPaper(list_mtls.get(i).getParams(), behavior_mtls, MTLS,
-						current_iteration, total_iterations, diversify_percentage_limit);
-				params_ROTS = improveParameterOLAPaper(list_rots.get(i).getParams(), behavior_rots, ROTS,
-						current_iteration, total_iterations, diversify_percentage_limit);
-				params_EO = improveParameterOLAPaper(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration,
-						total_iterations, diversify_percentage_limit);
+				// random parameters
+				if (random_parameters) {
+					params_MTLS = createParam(MTLS);
+					params_ROTS = createParam(ROTS);
+					params_EO = createParam(EO);
+				} else {
+					// init_cost, final cost order matter
+
+					// with adaptations is necessary the behavior
+					double[] behavior_mtls = compareSolution(list_mtls.get(i).getInitCost(),
+							list_mtls.get(i).getBestCost(), list_mtls.get(i).getInitSolution(),
+							list_mtls.get(i).getSolution());
+					double[] behavior_rots = compareSolution(list_rots.get(i).getInitCost(),
+							list_rots.get(i).getBestCost(), list_rots.get(i).getInitSolution(),
+							list_rots.get(i).getSolution());
+					double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
+							list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
+
+					// with adaptations
+					params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration,
+							total_iterations, diversify_percentage_limit);
+					params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration,
+							total_iterations, diversify_percentage_limit);
+					params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration,
+							total_iterations, diversify_percentage_limit);
+				}
+
+				// Tools.printArray(params_ROTS);
 
 				// insert the new parameters into parameters population, each one in the same
 				// position
@@ -529,7 +540,7 @@ public class WorkerTeam extends RecursiveAction {
 		}
 
 		if (not_improve[type] == 3) {
-			// System.out.print(" New parameter for " + mh_text[type] );
+			// System.out.print("New parameter for " + mh_text[type] + "\n");
 			new_params = createParam(type);
 			not_improve[type] = 0;
 		}
