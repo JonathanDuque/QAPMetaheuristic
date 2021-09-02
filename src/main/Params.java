@@ -11,11 +11,10 @@ public class Params {
 		// Tools.printArray(genes);
 	}
 
-	public Params(final int[] params, int score, double gain) {
-		p = params.clone();
-		this.score = score;
-		this.gain = gain;
-	}
+	/*
+	 * public Params(final int[] params, int score, double gain) { p =
+	 * params.clone(); this.score = score; this.gain = gain; }
+	 */
 
 	public int[] getParams() {
 		return p.clone();

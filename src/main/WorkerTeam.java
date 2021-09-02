@@ -25,14 +25,14 @@ public class WorkerTeam extends RecursiveAction {
 	private final boolean dynamic_time;
 	private final int team_id;
 	final private boolean cooperative;
-	final private boolean random_parameters;
-	private Params best_global_params;
+	final private String parameter_setup;
+	// private Params best_global_params;
 	int[] not_improve = { 0, 0, 0 };
 
 	private Solution team_best_solution;
 
 	public WorkerTeam(int workers, int execution_time, int total_iterations, QAPData qap, boolean dynamic_time,
-			int team_id, boolean cooperative, boolean random_parameters) {
+			int team_id, boolean cooperative, String parameter_setup) {
 		super();
 
 		this.qap = qap;
@@ -41,7 +41,7 @@ public class WorkerTeam extends RecursiveAction {
 		this.dynamic_time = dynamic_time;
 		this.team_id = team_id;
 		this.cooperative = cooperative;
-		this.random_parameters = random_parameters;
+		this.parameter_setup = parameter_setup;
 
 		System.out.println("\nTeam: " + team_id);
 		System.out.println("Threads: " + workers);
@@ -176,6 +176,7 @@ public class WorkerTeam extends RecursiveAction {
 			}
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
+
 				// best_global_params = updateBestGlobalParams(behavior_mtls,
 				// list_mtls.get(i).getParams(), behavior_rots,
 				// list_rots.get(i).getParams(), behavior_eo, list_eo.get(i).getParams());
@@ -185,15 +186,15 @@ public class WorkerTeam extends RecursiveAction {
 				// list_eo.get(i).getParams());
 				// System.out.println("Gain: " + best_global_params.getGain() + "\n");
 
-				// System.out.println("\nAdaptation: "+ current_iteration);
+				// System.out.println("\nIteration: " + current_iteration);
 				// Tools.printArray(params_ROTS);
 
 				// random parameters
-				if (random_parameters) {
+				if (parameter_setup == MainActivity.setup_text[MainActivity.RANDOM]) {
 					params_MTLS = createParam(MTLS);
 					params_ROTS = createParam(ROTS);
 					params_EO = createParam(EO);
-				} else {
+				} else if (parameter_setup == MainActivity.setup_text[MainActivity.ADAPTED]) {
 					// init_cost, final cost order matter
 
 					// with adaptations is necessary the behavior
@@ -213,6 +214,11 @@ public class WorkerTeam extends RecursiveAction {
 							total_iterations, diversify_percentage_limit);
 					params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration,
 							total_iterations, diversify_percentage_limit);
+				} else {
+					// fixed parameter, same parameter always
+					params_MTLS = list_mtls.get(i).getParams();
+					params_ROTS = list_rots.get(i).getParams();
+					params_EO = list_eo.get(i).getParams();
 				}
 
 				// Tools.printArray(params_ROTS);
@@ -802,43 +808,29 @@ public class WorkerTeam extends RecursiveAction {
 		return execution_time;
 	}
 
-	public Params updateBestGlobalParams(double[] mtls, int[] params_mtls, double[] rots, int[] params_rots,
-			double[] eo, int[] params_eo) {
-
-		// behavior_mh[0] = gain
-		// behavior_mh[1] = distance
-
-		int method = -1;
-		int[] best_params = { 0, 0, 0 };
-		double best_gain = best_global_params.getGain();
-		// System.out.println("Gain mtls: " + mtls[0]);
-		// System.out.println("Gain rots: " + rots[0]);
-		// System.out.println("Gain eo: " + eo[0]);
-
-		if (mtls[0] > best_gain) {
-			best_gain = mtls[0];
-			method = MTLS;
-			best_params = params_mtls.clone();
-		}
-
-		if (rots[0] > best_gain) {
-			best_gain = rots[0];
-			method = ROTS;
-			best_params = params_rots.clone();
-		}
-
-		if (eo[0] > best_gain) {
-			best_gain = eo[0];
-			method = EO;
-			best_params = params_eo.clone();
-		}
-
-		if (method == -1) {
-			return best_global_params;
-		} else {
-			return new Params(best_params, 0, best_gain);
-		}
-	}
+	/*
+	 * public Params updateBestGlobalParams(double[] mtls, int[] params_mtls,
+	 * double[] rots, int[] params_rots, double[] eo, int[] params_eo) {
+	 * 
+	 * // behavior_mh[0] = gain // behavior_mh[1] = distance
+	 * 
+	 * int method = -1; int[] best_params = { 0, 0, 0 }; double best_gain =
+	 * best_global_params.getGain(); // System.out.println("Gain mtls: " + mtls[0]);
+	 * // System.out.println("Gain rots: " + rots[0]); //
+	 * System.out.println("Gain eo: " + eo[0]);
+	 * 
+	 * if (mtls[0] > best_gain) { best_gain = mtls[0]; method = MTLS; best_params =
+	 * params_mtls.clone(); }
+	 * 
+	 * if (rots[0] > best_gain) { best_gain = rots[0]; method = ROTS; best_params =
+	 * params_rots.clone(); }
+	 * 
+	 * if (eo[0] > best_gain) { best_gain = eo[0]; method = EO; best_params =
+	 * params_eo.clone(); }
+	 * 
+	 * if (method == -1) { return best_global_params; } else { return new
+	 * Params(best_params, 0, best_gain); } }
+	 */
 
 	public void adaptParameterPSO() {
 		// function should be implemented

@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MainActivity {
 
 	static final String[] mh_text = { "MTLS", "ROTS", "EO" };
+	static final String[] setup_text = { "Fixed", "Random", "Adapted" };
+	static final int FIXED = 0, RANDOM = 1, ADAPTED = 2;
 
 	final static int DIFFERENT_MH = 3;
 	// atomic variable to avoid race condition reading and writing it throw threads
@@ -20,10 +22,12 @@ public class MainActivity {
 	public static void main(String[] args) {
 		QAPData qap;
 		int total_iterations;
-		
+
 		String problem;
 		int total_workers;
 		int execution_time;// by iteration
+		boolean cooperative = false;
+		String parameter_setup = setup_text[ADAPTED];
 
 		switch (args.length) {
 		case 5:
@@ -96,8 +100,8 @@ public class MainActivity {
 			System.out.println("Total Teams: " + teams);
 			System.out.println("execution: " + k);
 
-			//final ReadFile readFile = new ReadFile("Data/" + problem);
-			final ReadFile readFile = new ReadFile("../../Data/" + problem);
+			final ReadFile readFile = new ReadFile("Data/" + problem);
+			// final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
 			// initialize qap data, flow and distance matrix, format [row][col]
 			final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
@@ -113,7 +117,7 @@ public class MainActivity {
 
 			for (int i = 0; i < teams; i += 1) {
 				WorkerTeam team1 = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, false,
-						i);
+						i, cooperative, parameter_setup);
 				list_teams.add(team1);
 			}
 
@@ -236,7 +240,7 @@ public class MainActivity {
 				System.out.println("Error writing data");
 				e.printStackTrace();
 			}
-			
+
 			list_teams.clear();
 			list_teams_solutions.clear();
 			no_find_BKS.set(true);

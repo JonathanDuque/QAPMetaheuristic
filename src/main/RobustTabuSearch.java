@@ -107,6 +107,7 @@ public class RobustTabuSearch extends RecursiveAction {
 		//MainActivity.listCost.get(1).add(bestCost);
 
 		//System.out.println("Fin ROTS");
+		//Tools.printArray(solution);
 		//System.out.println("ROTS : " + bestCost);
 		//System.out.println("ROTS2 : " + qap.evalSolution(solution));
 	}
