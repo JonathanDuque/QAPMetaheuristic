@@ -26,7 +26,6 @@ public class WorkerTeam extends RecursiveAction {
 	private final int team_id;
 	final private boolean cooperative;
 	final private String parameter_setup;
-	// private Params best_global_params;
 	int[] not_improve = { 0, 0, 0 };
 
 	private Solution team_best_solution;
@@ -86,14 +85,6 @@ public class WorkerTeam extends RecursiveAction {
 		List<ExtremalOptimization> list_eo = new ArrayList<>(number_workes_by_mh);
 
 		List<List<Params>> params_population = generateInitialParamsPopulation(number_workes_by_mh);
-		// best_global_params = new
-		// Params(params_population.get(0).get(0).getParams(),params_population.get(0).get(0).getFitness(),
-		// 0);
-
-		// List<List<Params>> best_mh_params_population = new ArrayList<>(DIFFERENT_MH);
-		// for (int k = 0; k < DIFFERENT_MH; k++) {
-		// best_mh_params_population.add(new ArrayList<>(params_population.get(k)));
-		// }
 
 		// Tools.printParamsPopulation(params_population, team_id);
 		solution_population = generateInitialSolutionPopulation(workers, constructive);
@@ -176,16 +167,6 @@ public class WorkerTeam extends RecursiveAction {
 			}
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
-
-				// best_global_params = updateBestGlobalParams(behavior_mtls,
-				// list_mtls.get(i).getParams(), behavior_rots,
-				// list_rots.get(i).getParams(), behavior_eo, list_eo.get(i).getParams());
-				// updateBestParamsByMH(best_mh_params_population, i, behavior_mtls,
-				// list_mtls.get(i).getParams(),
-				// behavior_rots, list_rots.get(i).getParams(), behavior_eo,
-				// list_eo.get(i).getParams());
-				// System.out.println("Gain: " + best_global_params.getGain() + "\n");
-
 				// System.out.println("\nIteration: " + current_iteration);
 				// Tools.printArray(params_ROTS);
 
@@ -806,69 +787,5 @@ public class WorkerTeam extends RecursiveAction {
 		}
 
 		return execution_time;
-	}
-
-	/*
-	 * public Params updateBestGlobalParams(double[] mtls, int[] params_mtls,
-	 * double[] rots, int[] params_rots, double[] eo, int[] params_eo) {
-	 * 
-	 * // behavior_mh[0] = gain // behavior_mh[1] = distance
-	 * 
-	 * int method = -1; int[] best_params = { 0, 0, 0 }; double best_gain =
-	 * best_global_params.getGain(); // System.out.println("Gain mtls: " + mtls[0]);
-	 * // System.out.println("Gain rots: " + rots[0]); //
-	 * System.out.println("Gain eo: " + eo[0]);
-	 * 
-	 * if (mtls[0] > best_gain) { best_gain = mtls[0]; method = MTLS; best_params =
-	 * params_mtls.clone(); }
-	 * 
-	 * if (rots[0] > best_gain) { best_gain = rots[0]; method = ROTS; best_params =
-	 * params_rots.clone(); }
-	 * 
-	 * if (eo[0] > best_gain) { best_gain = eo[0]; method = EO; best_params =
-	 * params_eo.clone(); }
-	 * 
-	 * if (method == -1) { return best_global_params; } else { return new
-	 * Params(best_params, 0, best_gain); } }
-	 */
-
-	public void adaptParameterPSO() {
-		// function should be implemented
-	}
-
-	public void updateBestParamsByMH(List<List<Params>> best_mh_params_population, int mh_index, double[] mtls,
-			int[] params_mtls, double[] rots, int[] params_rots, double[] eo, int[] params_eo) {
-
-		// behavior_mh[0] = gain
-		List<Params> best_list_params_MTLS = best_mh_params_population.get(MTLS);
-		List<Params> best_list_params_ROTS = best_mh_params_population.get(ROTS);
-		List<Params> best_list_params_EO = best_mh_params_population.get(EO);
-
-		Params best_params_MTLS = best_list_params_MTLS.get(mh_index); // for this index
-		Params best_params_ROTS = best_list_params_ROTS.get(mh_index); // for this index
-		Params best_params_EO = best_list_params_EO.get(mh_index); // for this index
-
-		if (best_params_MTLS.getGain() < mtls[0]) {
-			best_params_MTLS.setParams(params_mtls);
-			best_params_MTLS.setGain(mtls[0]);
-			Tools.printArray(params_mtls);
-			System.out.println("gain " + mtls[0]);
-		}
-
-		if (best_params_ROTS.getGain() < rots[0]) {
-			best_params_ROTS.setParams(params_rots);
-			best_params_ROTS.setGain(rots[0]);
-			Tools.printArray(params_rots);
-			System.out.println("gain " + rots[0]);
-		}
-
-		if (best_params_EO.getGain() < eo[0]) {
-			best_params_EO.setParams(params_eo);
-			best_params_EO.setGain(eo[0]);
-			Tools.printArray(params_eo);
-			System.out.println("gain " + eo[0]);
-		}
-
-		return;
 	}
 }
