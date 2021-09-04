@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class ExtremalOptimization extends RecursiveAction {
+public class ExtremalOptimization extends MetaheuristicSearch {
 	private static final long serialVersionUID = 3L;
 
 	public class Delta {
@@ -18,100 +18,58 @@ public class ExtremalOptimization extends RecursiveAction {
 			this.index = index;
 			this.bestMove = bestMove;
 		}
-
 		int cost, index, bestMove;
 	}
 
 	double[] pdf;
-	private ThreadLocalRandom thread_local_random;
-	private final int n;
-	QAPData qap;
-	private int[] solution, init_solution;
-	private int[] params;
-	private int best_cost, init_cost;
-	private int execution_time;
 
 	public ExtremalOptimization(QAPData qapData) {
-		super();
-		thread_local_random = ThreadLocalRandom.current();
-
-		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getBKS());
-		n = qap.getSize();
-	}
-
-	// always before compute function, is necessary set the environment
-	public void setEnvironment(int[] initSolution, int[] params, final int execution_time) {
-		this.params = params.clone();
-		this.init_solution = initSolution.clone();
-		this.execution_time = execution_time;
-	}
-
-	public int[] getInitSolution() {
-		return init_solution;
-	}
-
-	public int[] getSolution() {
-		return solution;
-	}
-
-	public int[] getParams() {
-		return params;
-	}
-
-	public int getBestCost() {
-		return best_cost;
-	}
-
-	public int getInitCost() {
-		return init_cost;
+		super(qapData);
 	}
 
 	@Override
 	protected void compute() {
-		int currentCost;
-		pdf = new double[n];
-		// int currentIteration = 1;
-		// int totalIterations = 1000;
-		int[] currentSolution = Arrays.copyOf(init_solution, n);
-		int tempDelta, bestDelta;
-		List<Delta> deltaList = new ArrayList<>();
+		final int qap_size = getQapSize();
+		
 		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
+		int tempDelta, bestDelta, currentCost;
+		List<Delta> deltaList = new ArrayList<>();
 
 		// receive tau parameter
-		final double tau = params[0] / 100.0; // necessary due to is important that division get a decimal number
-
-		final int pdf_function_type = params[1];
-		// System.out.println("\ntau: " + tau + " pfd type: "+ pdf_function_type);
-
+		final double tau = getParams()[0] / 100.0; // necessary due to is important that division get a decimal number
+		final int pdf_function_type = getParams()[1];
+		pdf = new double[qap_size];
+		
 		switch (pdf_function_type) {
 		case 0:
-			initPdfExp(n, tau);
+			initPdfExp(qap_size, tau);
 			break;
 		case 1:
-			initPdfPow(n, tau);
+			initPdfPow(qap_size, tau);
 			break;
 		case 2:
-			initPdfGamma(n, tau);
+			initPdfGamma(qap_size, tau);
 			break;
 		}
 
-		init_cost = qap.evalSolution(init_solution);
-		currentCost = init_cost;
-		best_cost = init_cost;
-		solution = Arrays.copyOf(init_solution, n);
-		qap.initDeltas(init_solution);
+		int[] currentSolution = Arrays.copyOf(getInitSolution(), qap_size);
+		setInitCost(qap.evalSolution(getInitSolution()));
+		currentCost = getInitCost();
+		setBestCost(getInitCost());
+		setBestSolution(Arrays.copyOf(getInitSolution(), qap_size));
+		qap.initDeltas(getInitSolution());
 
 		int counterBest = 0;
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
-		while (time - start < execution_time && MainActivity.is_BKS_was_not_found()) {
+		while (time - start < getExecutionTime() && MainActivity.is_BKS_was_not_found()) {
 
-			for (int i = 0; i < n; i++) {
+			for (int i = 0; i < qap_size; i++) {
 				int bestMove = -1;
 				bestDelta = negative_infinity;
 
-				for (int j = 0; j < n; j++) {
+				for (int j = 0; j < qap_size; j++) {
 					if (i == j) {
 						continue;
 					}
@@ -126,7 +84,7 @@ public class ExtremalOptimization extends RecursiveAction {
 						bestMove = j;
 						bestDelta = tempDelta;
 						counterBest = 1;
-					} else if (tempDelta == bestDelta && thread_local_random.nextInt(++counterBest) == 0) {
+					} else if (tempDelta == bestDelta && getThreadLocalRandom().nextInt(++counterBest) == 0) {
 						bestMove = j;
 						bestDelta = tempDelta;
 					}
@@ -146,16 +104,12 @@ public class ExtremalOptimization extends RecursiveAction {
 
 			// update the best solution found if is the best of the moment at the end this
 			// block help to save the best of the best
-			// System.out.println("best: " + bestCost);
-			// System.out.println("curr: " + currentCost );
-			// System.out.println("delta: " + delta.cost + "\n");
-
-			if (currentCost < best_cost) {
-				solution = Arrays.copyOf(currentSolution, n);
-				best_cost = currentCost;
+			if (currentCost < getBestCost()) {
+				setBestCost(currentCost);
+				setBestSolution(Arrays.copyOf(currentSolution, qap_size));
 
 				// if the new solution is the bks the MainActivity should be know
-				if (best_cost == qap.getBKS()) {
+				if (getBestCost() == qap.getBKS()) {
 					MainActivity.findBKS();
 				}
 
@@ -165,101 +119,72 @@ public class ExtremalOptimization extends RecursiveAction {
 			time = System.currentTimeMillis();
 
 		}
-
-		// MainActivity.listCost.get(2).add(bestCost);
-		// System.out.println("bestCost: " + bestCost);
-		// System.out.println("solution: " + qap.evalSolution(solution) + "\n");
-		// System.out.println("Fin EO");
-
 	}
 
-	public void initPdfExp(int n, double tau) {
+	public void initPdfExp(int qap_size, double tau) {
 
 		double sum = 0;
 		double y = 0;
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < qap_size; i++) {
 			y = Math.exp(-tau * (i + 1));
-			// System.out.println("f(" + i + ") = " + (float) y);
 
 			pdf[i] = y;
 			sum += y;
 		}
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < qap_size; i++) {
 			pdf[i] /= sum;
 		}
-		// System.out.println("total " + sum + "\n");
-
-		// for (int i = 0; i < n; i++) {
-		// System.out.println("f(" + i + ") = " + pdf[i]);
-		// }
 
 	}
 
-	public void initPdfPow(int n, double tau) {
+	public void initPdfPow(int qap_size, double tau) {
 		double sum = 0;
 		double y = 0;
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < qap_size; i++) {
 			y = Math.pow((i + 1), -tau);
-			// System.out.println("f(" + i + ") = " + (float) y);
 			pdf[i] = y;
 			sum += y;
 		}
 
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < qap_size; i++) {
 			pdf[i] /= sum;
 		}
-
-		// System.out.println("total " + sum + "\n");
-
-		// for (int i = 0; i < n; i++) {
-		// System.out.println("f(" + i + ") = " + pdf[i]);
-		// }
 	}
 
-	public void initPdfGamma(int n, double tau) {
+	public void initPdfGamma(int qap_size, double tau) {
 		double sum = 0;
 		double y = 0;
 		// double k = tau;
 		double theta = Math.exp(tau);
 		double constk = Math.pow(theta, tau) * gamma(tau);
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < qap_size; i++) {
 			y = Math.pow(i + 1, tau - 1) * Math.exp(-(i + 1) / theta) / constk;
-			// System.out.println("f(" + i + ") = " + (float) y);
 			pdf[i] = y;
 			sum += y;
 		}
 
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < qap_size; i++) {
 			pdf[i] /= sum;
 		}
 
-		// System.out.println("total " + sum + "\n");
-
-		// for (int i = 0; i < n; i++) {
-		// System.out.println("f(" + i + ") = " + pdf[i]);
-		// }
 	}
 
-	public double gamma(double n) {
-		double invn = 1.0 / n;
+	public double gamma(double qap_size) {
+		double invn = 1.0 / qap_size;
 		double g = (2.506628274631 * Math.sqrt(invn) + 0.208885689552583 * Math.pow(invn, 1.5)
 				+ 0.00870357039802431 * Math.pow(invn, 2.5) - (174.210665086855 * Math.pow(invn, 3.5)) / 25920.0
-				- (715.642372407151 * Math.pow(invn, 4.5)) / 1244160.0) * Math.exp((-Math.log(invn) - 1) * n);
+				- (715.642372407151 * Math.pow(invn, 4.5)) / 1244160.0) * Math.exp((-Math.log(invn) - 1) * qap_size);
 		return g;
 	}
 
 	public int pdfPick() {
-		double p = thread_local_random.nextDouble(), fx;
-		
-		// System.out.println("p " + p);
+		double p = getThreadLocalRandom().nextDouble(), fx;
 
 		int index = 0;
 
 		while ((fx = pdf[index++]) < p) {
 			p -= fx;
 		}
-
-		// System.out.println("index " + index);
 
 		return index - 1;
 	}

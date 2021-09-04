@@ -1,87 +1,44 @@
 package main;
 
 import java.util.Arrays;
-import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.ThreadLocalRandom;
 
-public class MultiStartLocalSearch extends RecursiveAction {
+public class MultiStartLocalSearch extends MetaheuristicSearch {
 
 	private static final long serialVersionUID = 1L;
-	private ThreadLocalRandom thread_local_random;
-	private final int n;
-	
-	QAPData qap;
-	private int[] solution, init_solution;
-	private int[] params;
-	private int best_cost, init_cost;
-	int execution_time ;
-	
+
 	public MultiStartLocalSearch(QAPData qapData) {
-		super();
-		thread_local_random = ThreadLocalRandom.current();
-
-		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(),qapData.getBKS());
-		n = qap.getSize();
-	}
-
-	// always before compute function, is necessary set the environment
-	public void setEnvironment(int[] initSolution, int[] params, final int execution_time) {
-		this.params = params.clone();
-		this.init_solution = initSolution.clone();
-		this.execution_time = execution_time;
-	}
-
-	public int[] getInitSolution() {
-		return init_solution;
-	}
-
-	public int[] getSolution() {
-		return solution;
-	}
-
-	public int[] getParams() {
-		return params;
-	}
-
-	public int getBestCost() {
-		return best_cost;
-	}
-
-	public int getInitCost() {
-		return init_cost;
+		super(qapData);
 	}
 
 	@Override
 	protected void compute() {
 		// this initial block define the variable needed
-		solution = Arrays.copyOf(init_solution, n);
-		int[] currentSolution = Arrays.copyOf(init_solution, n);
-		boolean improve = false; // this flag control when the solution no improve and we are in an optimal local
-		//int currentIteration = 0;
-		int temporalDelta, bestDelta, cost = qap.evalSolution(init_solution);
-		init_cost = cost;
-		best_cost = cost;
-		final boolean random_restart = params[0] == 0 ? true : false; // restart type 0: random restart, 1: swaps
-		// System.out.println(params[0] + " " +random_restart);
-		qap.initDeltas(init_solution);
-		
-		//System.out.println("\nMTLS init");
-		//Tools.printArray(currentSolution);
-		//Tools.printArray(params);
+		final int qap_size = getQapSize();
+		setBestSolution(Arrays.copyOf(getInitSolution(), qap_size));
+		int[] currentSolution = Arrays.copyOf(getInitSolution(), qap_size);
+		int temporalDelta, bestDelta, cost = qap.evalSolution(getInitSolution());
+		setInitCost(cost);
+		setBestCost(cost);
+
+		final boolean random_restart = getParams()[0] == 0 ? true : false; // restart type 0: random restart, 1: swaps
+		qap.initDeltas(getInitSolution());
 
 		final Constructive constructive = new Constructive();
+		boolean improve = false; // this flag control when the solution no improve and we are in an optimal local
 		final long start = System.currentTimeMillis();
 		long time = 0;
 
 		// here find the best solution from the initSolution
-		while (time - start < execution_time && MainActivity.is_BKS_was_not_found()) { // execution during execution_time or until find bks
+		while (time - start < getExecutionTime() && MainActivity.is_BKS_was_not_found()) { // execution during
+																							// execution_time or until
+																							// find bks
 			improve = false;
 			bestDelta = 0;
-
 			int i_selected = -1, j_selected = -1;
+
 			// here evaluate all the neighborhood
-			for (int i = 0; i < (n - 1); i++) {
-				for (int j = i + 1; j < n; j++) {
+			for (int i = 0; i < (qap_size - 1); i++) {
+				for (int j = i + 1; j < qap_size; j++) {
 					temporalDelta = qap.evalMovement(currentSolution, i, j);
 
 					// if improve
@@ -97,55 +54,49 @@ public class MultiStartLocalSearch extends RecursiveAction {
 			if (improve) {
 				cost -= bestDelta;
 				currentSolution = qap.makeSwap(currentSolution, i_selected, j_selected);
-				if (cost < best_cost) {
-					best_cost = cost;
-					solution = Arrays.copyOf(currentSolution, n);
-					//if the new solution is the bks the MainActivity should be know
-					if (best_cost == qap.getBKS()) {
+				if (cost < getBestCost()) {
+					setBestCost(cost);
+					setBestSolution(Arrays.copyOf(currentSolution, qap_size));
+
+					// if the new solution is the bks the MainActivity should be know
+					if (getBestCost() == qap.getBKS()) {
 						MainActivity.findBKS();
 					}
 				}
 
-				// qap.printSolution(bestSolution);
 				qap.updateDeltas(currentSolution, i_selected, j_selected);
-
 			} else {
 				improve = false;
 				if (random_restart) {
 					// start in a new point
-					currentSolution = constructive.createRandomSolution(n, thread_local_random.nextInt());
+					currentSolution = constructive.createRandomSolution(qap_size, getThreadLocalRandom().nextInt());
 				} else {
-					// System.out.println("many swaps");
 					currentSolution = makeManySwaps(currentSolution, qap);
 				}
 
 				qap.initDeltas(currentSolution);
 				cost = qap.evalSolution(currentSolution);
 			}
-			//currentIteration++;
-			time = System.currentTimeMillis();
 
+			time = System.currentTimeMillis();
 		}
-		
-		//System.out.println(name + " " + currentIteration );
-		//System.out.println("MTLS final");
-		//Tools.printArray(solution);
+
 	}
 
 	public int[] makeManySwaps(int[] currentSolution, QAPData qap) {
-		int max_swaps = Math.floorDiv(n, 2); // maybe n is not pair
-	
-		int num_swaps = 2 * (thread_local_random.nextInt(max_swaps - 1) + 1);
+		int max_swaps = Math.floorDiv(getQapSize(), 2); // maybe n is not pair
+
+		int num_swaps = 2 * (getThreadLocalRandom().nextInt(max_swaps - 1) + 1);
 		int[] order_swaps = new int[num_swaps];
 
-		order_swaps[0] = thread_local_random.nextInt(n);
+		order_swaps[0] = getThreadLocalRandom().nextInt(getQapSize());
 
 		for (int i = 1; i < num_swaps; i++) {
 			boolean isEqual = true;
 			while (isEqual) {
 				isEqual = false;
 
-				int x = thread_local_random.nextInt(n);
+				int x = getThreadLocalRandom().nextInt(getQapSize());
 				for (int j = 0; j < i; j++) {
 					if (x == order_swaps[j]) {
 						isEqual = true;
@@ -157,18 +108,12 @@ public class MultiStartLocalSearch extends RecursiveAction {
 				}
 			}
 		}
-		// Tools.printArray(currentSolution);
-		// Tools.printArray(order_swaps);
 
 		for (int i = 0; i < num_swaps; i += 2) {
 			currentSolution = qap.makeSwap(currentSolution, order_swaps[i], order_swaps[i + 1]);
 		}
 
-		// Tools.printArray(currentSolution);
-
 		return currentSolution;
 	}
-	
-	
 
 }

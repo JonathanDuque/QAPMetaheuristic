@@ -181,12 +181,12 @@ public class WorkerTeam extends RecursiveAction {
 					// with adaptations is necessary the behavior
 					double[] behavior_mtls = compareSolution(list_mtls.get(i).getInitCost(),
 							list_mtls.get(i).getBestCost(), list_mtls.get(i).getInitSolution(),
-							list_mtls.get(i).getSolution());
+							list_mtls.get(i).getBestSolution());
 					double[] behavior_rots = compareSolution(list_rots.get(i).getInitCost(),
 							list_rots.get(i).getBestCost(), list_rots.get(i).getInitSolution(),
-							list_rots.get(i).getSolution());
+							list_rots.get(i).getBestSolution());
 					double[] behavior_eo = compareSolution(list_eo.get(i).getInitCost(), list_eo.get(i).getBestCost(),
-							list_eo.get(i).getInitSolution(), list_eo.get(i).getSolution());
+							list_eo.get(i).getInitSolution(), list_eo.get(i).getBestSolution());
 
 					// with adaptations
 					params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration,
@@ -214,15 +214,15 @@ public class WorkerTeam extends RecursiveAction {
 
 				// inserts solution into solution population
 				if (cooperative) {
-					updateSolutionPopulation(list_mtls.get(i).getSolution(), params_MTLS, mh_text[MTLS]);
-					updateSolutionPopulation(list_rots.get(i).getSolution(), params_ROTS, mh_text[ROTS]);
-					updateSolutionPopulation(list_eo.get(i).getSolution(), params_EO, mh_text[EO]);
+					updateSolutionPopulation(list_mtls.get(i).getBestSolution(), params_MTLS, mh_text[MTLS]);
+					updateSolutionPopulation(list_rots.get(i).getBestSolution(), params_ROTS, mh_text[ROTS]);
+					updateSolutionPopulation(list_eo.get(i).getBestSolution(), params_EO, mh_text[EO]);
 				} else {
-					updateSolutionPopulation(list_mtls.get(i).getSolution(), params_MTLS, mh_text[MTLS],
+					updateSolutionPopulation(list_mtls.get(i).getBestSolution(), params_MTLS, mh_text[MTLS],
 							i * DIFFERENT_MH, list_mtls.get(i).getBestCost());
-					updateSolutionPopulation(list_rots.get(i).getSolution(), params_ROTS, mh_text[ROTS],
+					updateSolutionPopulation(list_rots.get(i).getBestSolution(), params_ROTS, mh_text[ROTS],
 							i * DIFFERENT_MH + 1, list_rots.get(i).getBestCost());
-					updateSolutionPopulation(list_eo.get(i).getSolution(), params_EO, mh_text[EO], i * DIFFERENT_MH + 2,
+					updateSolutionPopulation(list_eo.get(i).getBestSolution(), params_EO, mh_text[EO], i * DIFFERENT_MH + 2,
 							list_eo.get(i).getBestCost());
 				}
 
