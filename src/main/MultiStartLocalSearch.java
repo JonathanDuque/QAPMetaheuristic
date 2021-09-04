@@ -16,9 +16,9 @@ public class MultiStartLocalSearch extends MetaheuristicSearch {
 		final int qap_size = getQapSize();
 		setBestSolution(Arrays.copyOf(getInitSolution(), qap_size));
 		int[] currentSolution = Arrays.copyOf(getInitSolution(), qap_size);
-		int temporalDelta, bestDelta, cost = qap.evalSolution(getInitSolution());
-		setInitCost(cost);
-		setBestCost(cost);
+		int temporalDelta, bestDelta, currentCost = qap.evalSolution(getInitSolution());
+		setInitCost(currentCost);
+		setBestCost(currentCost);
 
 		final boolean random_restart = getParams()[0] == 0 ? true : false; // restart type 0: random restart, 1: swaps
 		qap.initDeltas(getInitSolution());
@@ -52,10 +52,10 @@ public class MultiStartLocalSearch extends MetaheuristicSearch {
 			}
 
 			if (improve) {
-				cost -= bestDelta;
+				currentCost -= bestDelta;
 				currentSolution = qap.makeSwap(currentSolution, i_selected, j_selected);
-				if (cost < getBestCost()) {
-					setBestCost(cost);
+				if (currentCost < getBestCost()) {
+					setBestCost(currentCost);
 					setBestSolution(Arrays.copyOf(currentSolution, qap_size));
 
 					// if the new solution is the bks the MainActivity should be know
@@ -75,7 +75,7 @@ public class MultiStartLocalSearch extends MetaheuristicSearch {
 				}
 
 				qap.initDeltas(currentSolution);
-				cost = qap.evalSolution(currentSolution);
+				currentCost = qap.evalSolution(currentSolution);
 			}
 
 			time = System.currentTimeMillis();
