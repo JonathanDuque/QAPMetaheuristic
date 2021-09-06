@@ -8,21 +8,19 @@ import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class WorkerTeam extends RecursiveAction {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+	
 	private QAPData qap;
 	private int qap_size;
 	private int total_iterations;
-	private final int workers;
+	private final int searchers;
 	private List<Solution> solution_population;
 	private final int MTLS = 0, ROTS = 1, EO = 2;
 	final String[] mh_text = { "MTLS", "ROTS", "EO" };
 	final int DIFFERENT_MH = 3;
 	private ThreadLocalRandom thread_local_random;
 	private int execution_time;// by iteration
-	private final boolean dynamic_time;
+
 	private final int team_id;
 	final private boolean cooperative;
 	final private String parameter_setup;
@@ -30,36 +28,25 @@ public class WorkerTeam extends RecursiveAction {
 
 	private Solution team_best_solution;
 
-	public WorkerTeam(int workers, int execution_time, int total_iterations, QAPData qap, boolean dynamic_time,
-			int team_id, boolean cooperative, String parameter_setup) {
+	public WorkerTeam(int searchers, int execution_time, int total_iterations, QAPData qap, int team_id,
+			boolean cooperative, String parameter_setup) {
 		super();
 
 		this.qap = qap;
 		qap_size = qap.getSize();
-		this.workers = workers;
-		this.dynamic_time = dynamic_time;
+		this.searchers = searchers;
+
 		this.team_id = team_id;
 		this.cooperative = cooperative;
 		this.parameter_setup = parameter_setup;
-
+		this.execution_time = execution_time;
+		this.total_iterations = total_iterations;
+		
 		System.out.println("\nTeam: " + team_id);
-		System.out.println("Threads: " + workers);
-
-		if (dynamic_time) {
-			/**** setting data for execution with dynamic times *******/
-			int time_out = 300000; // 5 minutes, this data is necessary for some calculus
-			this.execution_time = 1000; // this is the first value, after it changes through each iterations
-			this.total_iterations = calculateTotalIterations2(time_out);
-			System.out.println("Metaheuristic time grow through each iterations");
-			System.out.println("Iterations: " + this.total_iterations);
-			System.out.println("Time out: " + time_out / 1000.0 + " seconds");
-		} else {
-			this.execution_time = execution_time;
-			this.total_iterations = total_iterations;
-			System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
-			System.out.println("Iterations: " + total_iterations);
-			System.out.println("Time out: " + execution_time * total_iterations / 1000.0 + " seconds");
-		}
+		System.out.println("Threads: " + searchers);
+		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
+		System.out.println("Iterations: " + total_iterations);
+		System.out.println("Time out: " + execution_time * total_iterations / 1000.0 + " seconds");
 
 	}
 
@@ -69,15 +56,12 @@ public class WorkerTeam extends RecursiveAction {
 		// values for the params
 		thread_local_random = ThreadLocalRandom.current();
 
-		// int step_time = 1000;
-		int current_time = 0, time_out = 300000; // 5 minutes
-
 		// the limits depends to the total iterations
 		final double[] diversify_percentage_limit = getDiversifyPercentageLimit(total_iterations);
 
-		ForkJoinPool pool = new ForkJoinPool(workers);
+		ForkJoinPool pool = new ForkJoinPool(searchers);
 		final Constructive constructive = new Constructive();
-		final int number_workes_by_mh = workers / DIFFERENT_MH;
+		final int number_workes_by_mh = searchers / DIFFERENT_MH;
 
 		// these lists are necessary for the executing in parallel
 		List<MultiStartLocalSearch> list_mtls = new ArrayList<>(number_workes_by_mh);
@@ -86,9 +70,7 @@ public class WorkerTeam extends RecursiveAction {
 
 		List<List<Params>> params_population = generateInitialParamsPopulation(number_workes_by_mh);
 
-		// Tools.printParamsPopulation(params_population, team_id);
-		solution_population = generateInitialSolutionPopulation(workers, constructive);
-		// Tools.printSolutionPopulation(solution_population, qap, team_id);
+		solution_population = generateInitialSolutionPopulation(searchers, constructive);
 
 		// create array parameters for each metaheuristic
 		int[] params_MTLS = new int[3];
@@ -167,8 +149,6 @@ public class WorkerTeam extends RecursiveAction {
 			}
 
 			for (int i = 0; i < number_workes_by_mh; i += 1) {
-				// System.out.println("\nIteration: " + current_iteration);
-				// Tools.printArray(params_ROTS);
 
 				// random parameters
 				if (parameter_setup == MainActivity.setup_text[MainActivity.RANDOM]) {
@@ -202,8 +182,6 @@ public class WorkerTeam extends RecursiveAction {
 					params_EO = list_eo.get(i).getParams();
 				}
 
-				// Tools.printArray(params_ROTS);
-
 				// insert the new parameters into parameters population, each one in the same
 				// position
 				insertParameter(params_population.get(MTLS), new Params(params_MTLS, list_mtls.get(i).getBestCost()),
@@ -222,8 +200,8 @@ public class WorkerTeam extends RecursiveAction {
 							i * DIFFERENT_MH, list_mtls.get(i).getBestCost());
 					updateSolutionPopulation(list_rots.get(i).getBestSolution(), params_ROTS, mh_text[ROTS],
 							i * DIFFERENT_MH + 1, list_rots.get(i).getBestCost());
-					updateSolutionPopulation(list_eo.get(i).getBestSolution(), params_EO, mh_text[EO], i * DIFFERENT_MH + 2,
-							list_eo.get(i).getBestCost());
+					updateSolutionPopulation(list_eo.get(i).getBestSolution(), params_EO, mh_text[EO],
+							i * DIFFERENT_MH + 2, list_eo.get(i).getBestCost());
 				}
 
 			}
@@ -233,23 +211,7 @@ public class WorkerTeam extends RecursiveAction {
 			list_eo.clear();
 
 			current_iteration++;
-
-			/* updating times when is dynamic time */
-			if (dynamic_time) {
-				current_time += execution_time;
-				execution_time = updateExecutionTime2(execution_time, current_time, time_out);
-				/*
-				 * execution_time += step_time; step_time += 1000;
-				 *
-				 * if (current_time + execution_time + step_time > time_out) { execution_time =
-				 * time_out - current_time; }
-				 */
-			}
-
 		}
-
-		// Tools.printParamsPopulation(best_mh_params_population, team_id);
-		// Tools.printSolutionPopulation(solution_population, qap, team_id);
 
 		// create and initiate variables for team results
 		int[] best_solution = constructive.createRandomSolution(qap_size, current_iteration);
@@ -269,7 +231,7 @@ public class WorkerTeam extends RecursiveAction {
 
 	}
 
-	public Solution getbestTeamSolution() {
+	public Solution getBestTeamSolution() {
 		return team_best_solution;
 	}
 
@@ -678,7 +640,7 @@ public class WorkerTeam extends RecursiveAction {
 				}
 			} // if exist is necessary mutate
 			if (exist) {
-				s = mutate(s);
+				s = mutateSolution(s);
 			}
 
 		} while (exist);
@@ -716,8 +678,8 @@ public class WorkerTeam extends RecursiveAction {
 		}
 		return p;
 	}
-
-	private int[] mutate(int[] s) {
+	
+	public int[] mutateSolution(int[] solution) {
 		int posX, posY, temp;
 
 		// first decide what value change randomly
@@ -727,65 +689,11 @@ public class WorkerTeam extends RecursiveAction {
 		} while (posX == posY);
 
 		// swapping - making the mutation
-		temp = s[posX];
-		s[posX] = s[posY];
-		s[posY] = temp;
-		return s;
+		temp = solution[posX];
+		solution[posX] = solution[posY];
+		solution[posY] = temp;
+		return solution;
 	}
 
-	public int calculateTotalIterations(int time_out) {
-		int total_iterations = 0;
-		int step_time = 1000, current_time = 0, execution_time = 1000;
 
-		while (current_time < time_out) {
-			current_time += execution_time;
-			execution_time += step_time;
-			step_time += 1000;
-
-			if (current_time + execution_time + step_time > time_out) {
-				execution_time = time_out - current_time;
-			}
-
-			total_iterations++;
-
-		}
-
-		return total_iterations;
-	}
-
-	public int calculateTotalIterations2(int time_out) {
-		int total_iterations = 0;
-		int current_time = 0, execution_time = 1000;
-
-		while (current_time < time_out) {
-			// System.out.println("\nexecution_time: " + execution_time);
-
-			current_time += execution_time;
-
-			if (execution_time < 30000) {
-				execution_time *= 2;
-			}
-
-			if (current_time + 2 * execution_time > time_out) {
-				execution_time = time_out - current_time;
-			}
-
-			total_iterations++;
-
-		}
-
-		return total_iterations;
-	}
-
-	public int updateExecutionTime2(int execution_time, final int current_time, final int time_out) {
-		if (execution_time < 30000) {
-			execution_time *= 2;
-		}
-
-		if (current_time + 2 * execution_time > time_out) {
-			execution_time = time_out - current_time;
-		}
-
-		return execution_time;
-	}
 }

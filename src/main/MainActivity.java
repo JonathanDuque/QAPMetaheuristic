@@ -116,8 +116,8 @@ public class MainActivity {
 			init_time /= 1000.0;
 
 			for (int i = 0; i < teams; i += 1) {
-				WorkerTeam team1 = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, false,
-						i, cooperative, parameter_setup);
+				WorkerTeam team1 = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, i,
+						cooperative, parameter_setup);
 				list_teams.add(team1);
 			}
 
@@ -143,7 +143,7 @@ public class MainActivity {
 			// get the results for each team
 			List<Solution> list_teams_solutions = new ArrayList<>();
 			for (int i = 0; i < teams; i += 1) {
-				Solution solution = list_teams.get(i).getbestTeamSolution();
+				Solution solution = list_teams.get(i).getBestTeamSolution();
 				list_teams_solutions.add(solution);
 			}
 
@@ -178,7 +178,7 @@ public class MainActivity {
 			Tools.printArray(best_params);
 			System.out.println("Total time: " + total_time + " sec");
 
-			//final String dir_file = "Results/";
+			// final String dir_file = "Results/";
 			final String dir_file = "../Result-26/";
 
 			final String file_name = problem.replace(".qap", "");
