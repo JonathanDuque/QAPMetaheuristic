@@ -61,7 +61,7 @@ public class ExtremalOptimization extends MetaheuristicSearch {
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
-		while (time - start < getExecutionTime() && MainActivity.is_BKS_was_not_found()) {
+		while (time - start < getIterationTime() && MainActivity.is_BKS_was_not_found()) {
 
 			for (int i = 0; i < qap_size; i++) {
 				int bestMove = -1;

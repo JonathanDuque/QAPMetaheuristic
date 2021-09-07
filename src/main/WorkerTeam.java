@@ -7,70 +7,32 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class WorkerTeam extends RecursiveAction {
+public class WorkerTeam extends GenericTeam {
 	private static final long serialVersionUID = 1L;
-	
-	private QAPData qap;
-	private int qap_size;
-	private int total_iterations;
-	private final int searchers;
-	private List<Solution> solution_population;
-	private final int MTLS = 0, ROTS = 1, EO = 2;
-	final String[] mh_text = { "MTLS", "ROTS", "EO" };
-	final int DIFFERENT_MH = 3;
-	private ThreadLocalRandom thread_local_random;
-	private int execution_time;// by iteration
 
-	private final int team_id;
-	final private boolean cooperative;
-	final private String parameter_setup;
-	int[] not_improve = { 0, 0, 0 };
-
-	private Solution team_best_solution;
-
-	public WorkerTeam(int searchers, int execution_time, int total_iterations, QAPData qap, int team_id,
+	public WorkerTeam(int searchers, int iterationTime, int totalAdaptations, QAPData qap, int team_id,
 			boolean cooperative, String parameter_setup) {
-		super();
-
-		this.qap = qap;
-		qap_size = qap.getSize();
-		this.searchers = searchers;
-
-		this.team_id = team_id;
-		this.cooperative = cooperative;
-		this.parameter_setup = parameter_setup;
-		this.execution_time = execution_time;
-		this.total_iterations = total_iterations;
-		
-		System.out.println("\nTeam: " + team_id);
-		System.out.println("Threads: " + searchers);
-		System.out.println("Metaheuristic time: " + execution_time / 1000.0 + " seconds");
-		System.out.println("Iterations: " + total_iterations);
-		System.out.println("Time out: " + execution_time * total_iterations / 1000.0 + " seconds");
-
+		super(searchers, iterationTime, totalAdaptations, qap, team_id, cooperative, parameter_setup);
 	}
 
 	@Override
 	protected void compute() {
-		// is necessary init here because in the constructor generate the same random
-		// values for the params
-		thread_local_random = ThreadLocalRandom.current();
+		initializeGlobalVariables();
 
 		// the limits depends to the total iterations
-		final double[] diversify_percentage_limit = getDiversifyPercentageLimit(total_iterations);
+		final double[] diversify_percentage_limit = getDiversifyPercentageLimit(getTotalAdaptations());
 
-		ForkJoinPool pool = new ForkJoinPool(searchers);
+		ForkJoinPool pool = new ForkJoinPool(getSearchers());
 		final Constructive constructive = new Constructive();
-		final int number_workes_by_mh = searchers / DIFFERENT_MH;
+		final int number_searchers_by_mh = getSearchers() / DIFFERENT_MH;
 
 		// these lists are necessary for the executing in parallel
-		List<MultiStartLocalSearch> list_mtls = new ArrayList<>(number_workes_by_mh);
-		List<RobustTabuSearch> list_rots = new ArrayList<>(number_workes_by_mh);
-		List<ExtremalOptimization> list_eo = new ArrayList<>(number_workes_by_mh);
+		List<MultiStartLocalSearch> list_mtls = new ArrayList<>(number_searchers_by_mh);
+		List<RobustTabuSearch> list_rots = new ArrayList<>(number_searchers_by_mh);
+		List<ExtremalOptimization> list_eo = new ArrayList<>(number_searchers_by_mh);
 
-		List<List<Params>> params_population = generateInitialParamsPopulation(number_workes_by_mh);
-
-		solution_population = generateInitialSolutionPopulation(searchers, constructive);
+		List<List<Params>> params_population = generateInitialParamsPopulation(number_searchers_by_mh);
+		solutionPopulation = generateInitialSolutionPopulation(getSearchers(), constructive);
 
 		// create array parameters for each metaheuristic
 		int[] params_MTLS = new int[3];
@@ -79,10 +41,10 @@ public class WorkerTeam extends RecursiveAction {
 
 		int current_iteration = 0;
 
-		while (current_iteration < total_iterations && MainActivity.is_BKS_was_not_found()) {
+		while (current_iteration < getTotalAdaptations() && MainActivity.is_BKS_was_not_found()) {
 			List<Solution> solution_population_copy = null;
 
-			for (int i = 0; i < number_workes_by_mh; i += 1) {
+			for (int i = 0; i < number_searchers_by_mh; i += 1) {
 				MultiStartLocalSearch mtls = new MultiStartLocalSearch(qap);
 				RobustTabuSearch rots = new RobustTabuSearch(qap);
 				ExtremalOptimization eo = new ExtremalOptimization(qap);
@@ -98,64 +60,64 @@ public class WorkerTeam extends RecursiveAction {
 
 			// is necessary a copy because after solution population will be update, used
 			// for cooperative version
-			if (cooperative) {
-				solution_population_copy = new ArrayList<>(solution_population);
+			if (isCooperative()) {
+				solution_population_copy = new ArrayList<>(solutionPopulation);
 			}
 
 			// setting environment variables for each method
 
 			// non-cooperative select same solution and same parameter for each mh
 			// cooperative select random solution, but same parameter for each mh
-			for (int i = 0; i < number_workes_by_mh; i += 1) {
-				params_MTLS = selectParam(list_params_MTLS, i).getParams();
-				params_ROTS = selectParam(list_params_ROST, i).getParams();
-				params_EO = selectParam(list_params_EO, i).getParams();
+			for (int i = 0; i < number_searchers_by_mh; i += 1) {
+				params_MTLS = selectParameter(list_params_MTLS, i).getParams();
+				params_ROTS = selectParameter(list_params_ROST, i).getParams();
+				params_EO = selectParameter(list_params_EO, i).getParams();
 
-				if (cooperative) {
+				if (isCooperative()) {
 					list_mtls.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_MTLS,
-							execution_time);
+							getIterationTime());
 					list_rots.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_ROTS,
-							execution_time);
+							getIterationTime());
 					list_eo.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_EO,
-							execution_time);
+							getIterationTime());
 				} else {
-					list_mtls.get(i).setEnvironment(getSolutionFromList(solution_population, i * DIFFERENT_MH),
-							params_MTLS, execution_time);
-					list_rots.get(i).setEnvironment(getSolutionFromList(solution_population, i * DIFFERENT_MH + 1),
-							params_ROTS, execution_time);
-					list_eo.get(i).setEnvironment(getSolutionFromList(solution_population, i * DIFFERENT_MH + 2),
-							params_EO, execution_time);
+					list_mtls.get(i).setEnvironment(getSolutionFromList(solutionPopulation, i * DIFFERENT_MH),
+							params_MTLS, getIterationTime());
+					list_rots.get(i).setEnvironment(getSolutionFromList(solutionPopulation, i * DIFFERENT_MH + 1),
+							params_ROTS, getIterationTime());
+					list_eo.get(i).setEnvironment(getSolutionFromList(solutionPopulation, i * DIFFERENT_MH + 2),
+							params_EO, getIterationTime());
 
 				}
 			}
 
 			// launch execution in parallel for all workers
-			for (int i = 0; i < number_workes_by_mh; i += 1) {
+			for (int i = 0; i < number_searchers_by_mh; i += 1) {
 				pool.submit(list_mtls.get(i));
 				pool.submit(list_rots.get(i));
 				pool.submit(list_eo.get(i));
 			}
 
 			// wait for each method
-			for (int i = 0; i < number_workes_by_mh; i += 1) {
+			for (int i = 0; i < number_searchers_by_mh; i += 1) {
 				list_mtls.get(i).join();
 				list_rots.get(i).join();
 				list_eo.get(i).join();
 			}
 
 			// for cooperative version
-			if (cooperative) {
-				solution_population.clear();
+			if (isCooperative()) {
+				solutionPopulation.clear();
 			}
 
-			for (int i = 0; i < number_workes_by_mh; i += 1) {
+			for (int i = 0; i < number_searchers_by_mh; i += 1) {
 
 				// random parameters
-				if (parameter_setup == MainActivity.setup_text[MainActivity.RANDOM]) {
-					params_MTLS = createParam(MTLS);
-					params_ROTS = createParam(ROTS);
-					params_EO = createParam(EO);
-				} else if (parameter_setup == MainActivity.setup_text[MainActivity.ADAPTED]) {
+				if (getParameterSetup() == MainActivity.setup_text[MainActivity.RANDOM]) {
+					params_MTLS = createParameter(MTLS);
+					params_ROTS = createParameter(ROTS);
+					params_EO = createParameter(EO);
+				} else if (getParameterSetup() == MainActivity.setup_text[MainActivity.ADAPTED]) {
 					// init_cost, final cost order matter
 
 					// with adaptations is necessary the behavior
@@ -170,11 +132,11 @@ public class WorkerTeam extends RecursiveAction {
 
 					// with adaptations
 					params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration,
-							total_iterations, diversify_percentage_limit);
+							getTotalAdaptations(), diversify_percentage_limit);
 					params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration,
-							total_iterations, diversify_percentage_limit);
+							getTotalAdaptations(), diversify_percentage_limit);
 					params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration,
-							total_iterations, diversify_percentage_limit);
+							getTotalAdaptations(), diversify_percentage_limit);
 				} else {
 					// fixed parameter, same parameter always
 					params_MTLS = list_mtls.get(i).getParams();
@@ -191,7 +153,7 @@ public class WorkerTeam extends RecursiveAction {
 				insertParameter(params_population.get(EO), new Params(params_EO, list_eo.get(i).getBestCost()), EO, i);
 
 				// inserts solution into solution population
-				if (cooperative) {
+				if (isCooperative()) {
 					updateSolutionPopulation(list_mtls.get(i).getBestSolution(), params_MTLS, mh_text[MTLS]);
 					updateSolutionPopulation(list_rots.get(i).getBestSolution(), params_ROTS, mh_text[ROTS]);
 					updateSolutionPopulation(list_eo.get(i).getBestSolution(), params_EO, mh_text[EO]);
@@ -217,483 +179,18 @@ public class WorkerTeam extends RecursiveAction {
 		int[] best_solution = constructive.createRandomSolution(qap_size, current_iteration);
 		int best_cost = qap.evalSolution(best_solution);
 		final int[] empty_params = { -1, -1, -1 };
-		team_best_solution = new Solution(best_solution, empty_params, "N/A");
+		setBestTeamSolution(new Solution(best_solution, empty_params, "N/A"));
 
 		// update final results variables
-		for (int i = 0; i < solution_population.size(); i++) {
-			int temp_cost = qap.evalSolution(solution_population.get(i).getArray());
+		for (int i = 0; i < solutionPopulation.size(); i++) {
+			int temp_cost = qap.evalSolution(solutionPopulation.get(i).getArray());
 
 			if (temp_cost < best_cost) {
 				best_cost = temp_cost;
-				team_best_solution = solution_population.get(i);
+				setBestTeamSolution(solutionPopulation.get(i));
 			}
 		}
 
 	}
-
-	public Solution getBestTeamSolution() {
-		return team_best_solution;
-	}
-
-	public double[] getDiversifyPercentageLimit(int total_iterations) {
-		int total_values = 20;
-		final double[] limits = new double[total_values];
-
-		double a = 94.67597;
-		double b = 0.31811;
-		double c = 0.15699;
-
-		// double a = 8.46744;
-		// double b = 0.55246;
-		// double c = 0.122;
-
-		double y = 0;
-
-		for (int x = 0; x < total_values; x++) {
-			y = a * Math.exp(-b * (x + 1)) + c;
-			// System.out.println("f(" + x + ") = " + (float) y);
-
-			limits[x] = y;
-		}
-
-		double m = (double) total_values / total_iterations;
-
-		// System.out.println("f(" + m + ") = " + (float) m);
-
-		final double[] definitive_limits = new double[total_iterations];
-
-		int index;
-
-		for (int x = 0; x < total_iterations; x++) {
-			index = (int) Math.round(m * x);
-			definitive_limits[x] = limits[index];
-			// System.out.println("f(" + x + ") = " + definitive_limits[x]);
-		}
-
-		return definitive_limits;
-	}
-
-	public List<List<Params>> generateInitialParamsPopulation(int params_of_each_mh) {
-		List<List<Params>> params_population = new ArrayList<>(DIFFERENT_MH); // because there are # DIFFERENT_MH
-
-		for (int k = 0; k < DIFFERENT_MH; k++) {
-			List<Params> temp_list_params = new ArrayList<>(params_of_each_mh);
-			for (int i = 0; i < params_of_each_mh; i++) {
-				int[] p = { 0, 0, 0 }; // parameters array empty
-
-				switch (k) {
-				case MTLS:
-					p[0] = thread_local_random.nextInt(2); // restart type 0: random restart, 1: swaps
-					break;
-				case ROTS:
-					p[0] = (thread_local_random.nextInt(16) + 4) * qap_size;// 4 * (i + 1) * qap_size;// tabu duration
-																			// factor
-					p[1] = (thread_local_random.nextInt(10) + 1) * qap_size * qap_size;// 2 * (i + 1) * qap_size *
-																						// qap_size; //
-					// aspiration factor
-					break;
-				case EO:
-					p[0] = thread_local_random.nextInt(100); // tau*100
-					p[1] = thread_local_random.nextInt(3); // pdf function type
-					break;
-				}
-				temp_list_params.add(new Params(p, Integer.MAX_VALUE));
-			}
-
-			params_population.add(temp_list_params);
-		}
-
-		// Tools.printParamsPopulation(params_population, 2);
-		return params_population;
-	}
-
-	public List<Solution> generateInitialSolutionPopulation(final int total, Constructive constructive) {
-		List<Solution> init_solution_population = new ArrayList<>();
-		final int[] empty_params = { -1, -1, -1 };
-
-		for (int i = 0; i < total; i++) {
-			int[] s = constructive.createRandomSolution(qap_size, i);// i stands for the seed
-			init_solution_population.add(new Solution(s, empty_params, "N/A"));
-		}
-
-		return init_solution_population;
-	}
-
-	public Params selectParam(List<Params> p) {
-		Params selected;
-		// obtain a number between 0 - size population
-		int index = thread_local_random.nextInt(p.size());
-		selected = p.get(index);
-		p.remove(index);// delete for no selecting later
-		// System.out.println("selected : " + index);
-
-		return selected;
-	}
-
-	public Params selectParam(List<Params> p, final int index) {
-		Params selected = p.get(index);
-
-		return selected;
-	}
-
-	public int[] getSolutionFromList(List<Solution> population) {
-		Solution selected_solution;
-		final int index = thread_local_random.nextInt(population.size());
-
-		selected_solution = population.get(index);
-		population.remove(index);// delete for no selecting later
-
-		return selected_solution.getArray();
-	}
-
-	public int[] getSolutionFromList(List<Solution> population, final int index) {
-		Solution selected_solution;
-		// System.out.println("selected : " + index);
-		selected_solution = population.get(index);
-
-		return selected_solution.getArray();
-	}
-
-	public double[] compareSolution(int init_cost, int final_cost, int[] init_solution, int[] final_solution) {
-		// init_cost - 100%
-		// init_cost-final_cost - x
-		double difference_percentage = (init_cost - final_cost) * 100.0 / init_cost; // or gain
-
-		int distance = 0;
-		for (int i = 0; i < init_solution.length; i++) {
-			if (init_solution[i] != final_solution[i]) {
-				distance++;
-			}
-		}
-		double[] comparison = { difference_percentage, distance };
-
-		return comparison;
-	}
-
-	public int[] improveParameter(final int[] parameter, final double[] behavior_mh, final int type,
-			final int current_iteration, final int total_iterations, final double[] diversify_percentage_limit) {
-
-		final double[] change_pdf_percentage_limit = { 10, 5, 1, 0.5, 0.3 };
-		final double divisor = (float) total_iterations / change_pdf_percentage_limit.length;
-		int[] new_params = { 0, 0, 0 };
-
-		// behavior_mh[0] = percentage difference or gain
-		// behavior_mh[1] = distance
-
-		// if (behavior_mh[0] > 0) {
-		switch (type) {
-		case MTLS:
-			if (behavior_mh[0] > 0) {
-				// case MTLS keep equal
-				new_params[0] = parameter[0];
-			} else {
-				new_params = createParam(MTLS);
-			}
-			break;
-
-		case ROTS:
-			if (behavior_mh[0] > 0 && behavior_mh[0] <= diversify_percentage_limit[current_iteration]
-					&& behavior_mh[1] <= qap_size / 3) {
-				// is necessary diversify
-				new_params[0] = parameter[0] + Math.floorDiv(qap_size, 2);
-				new_params[1] = parameter[1] + Math.floorDiv(qap_size * qap_size, 2);
-			} else {
-				// is necessary intensify
-				new_params[0] = parameter[0] - Math.floorDiv(qap_size, 3);
-				new_params[1] = parameter[1] - Math.floorDiv(qap_size, 2);
-			}
-
-			if (new_params[0] > 20 * qap_size) {
-				new_params[0] = 4 * qap_size + thread_local_random.nextInt(16 * qap_size); // 4n to 20n
-			}
-
-			if (new_params[0] < 4 * qap_size) {
-				new_params[0] = 4 * qap_size + thread_local_random.nextInt(16 * qap_size); // 4n to 20n
-			}
-
-			if (new_params[1] > 10 * qap_size * qap_size) {
-				new_params[1] = qap_size * qap_size + thread_local_random.nextInt(9 * qap_size * qap_size); // n*n
-																											// to
-																											// 10*n*n
-			}
-
-			if (new_params[1] < qap_size * qap_size) {
-				new_params[1] = qap_size * qap_size + thread_local_random.nextInt(9 * qap_size * qap_size); // n*n
-																											// to
-																											// 10*n*n
-			}
-
-			break;
-
-		case EO:
-			// parameter[0] : tau
-			// parameter[1] : probability function
-
-			if (behavior_mh[0] > 0 && behavior_mh[0] <= diversify_percentage_limit[current_iteration]
-					&& behavior_mh[1] <= qap_size / 3) {
-				// is necessary diversify
-				switch (parameter[1]) {
-				case 2:// gamma tau: 0 to 1 means intensify to diversify
-					new_params[0] = parameter[0] + 6;
-					break;
-				default:
-					// Exponential tau: 0 to 1 means diversify to intensify
-					// Power tau: 0 to 1 means diversify to intensify
-					new_params[0] = parameter[0] - 6;
-					break;
-				}
-			} else {
-				// is necessary intensify
-				switch (parameter[1]) {
-				case 2:// gamma tau: 0 to 1 means intensify to diversify
-					new_params[0] = parameter[0] - 6;
-					break;
-				default:
-					// Exponential tau: 0 to 1 means diversify to intensify
-					// Power tau: 0 to 1 means diversify to intensify
-					new_params[0] = parameter[0] + 6;
-					break;
-				}
-			}
-
-			if (new_params[0] > 100) {
-				new_params[0] = thread_local_random.nextInt(100); // tau*100
-			}
-
-			if (new_params[0] <= 0) {
-				new_params[0] = thread_local_random.nextInt(100); // tau*100
-			}
-
-			if (behavior_mh[0] < change_pdf_percentage_limit[(int) Math.floor(current_iteration / divisor)]) {
-				int new_pdf_function;
-				do {
-					new_pdf_function = thread_local_random.nextInt(3);
-					new_params[1] = new_pdf_function;
-				} while (parameter[1] == new_pdf_function);
-
-			}
-			break;
-		}
-		// } else {
-		// if the solution did not improve, so will be assign a new parameter
-		// new_params = createParam(type);
-		// }
-		// System.out.println( mh_text[type] + " Gain: " + behavior_mh[0] + " Counter:"
-		// +not_improve[type]);
-
-		if (behavior_mh[0] == 0) {
-			not_improve[type]++;
-		} else {
-			// System.out.println("Gain " + behavior_mh[0] + " for " + mh_text[type]);
-			not_improve[type] = 0;
-		}
-
-		if (not_improve[type] == 3) {
-			// System.out.print("New parameter for " + mh_text[type] + "\n");
-			new_params = createParam(type);
-			not_improve[type] = 0;
-		}
-
-		// System.out.println( mh_text[type] + " Gain: " +
-		// Tools.DECIMAL_FORMAT_2D.format(behavior_mh[0] ) + " Counter:"
-		// +not_improve[type]);
-
-		return new_params;
-	}
-
-	public int[] improveParameterOLAPaper(final int[] parameter, final double[] behavior_mh, final int type,
-			final int current_iteration, final int total_iterations, final double[] diversify_percentage_limit) {
-		final double[] change_pdf_percentage_limit = { 10, 5, 1, 0.5, 0.3 };
-
-		// behavior_mh[0] = percentage difference
-		// behavior_mh[1] = distance
-
-		int[] new_params = { 0, 0, 0 };
-
-		if (behavior_mh[0] > 0) {
-			switch (type) {
-			// case MTLS keep equal
-			case ROTS:
-				if (behavior_mh[0] <= diversify_percentage_limit[current_iteration] && behavior_mh[1] <= qap_size / 3) {
-					// is necessary diversify
-					new_params[0] = parameter[0] + Math.floorDiv(qap_size, 2);
-					new_params[1] = parameter[1] + Math.floorDiv(qap_size * qap_size, 2);
-				} else {
-					// is necessary intensify
-					new_params[0] = parameter[0] - Math.floorDiv(qap_size, 3);
-					new_params[1] = parameter[1] - Math.floorDiv(qap_size, 2);
-				}
-
-				if (new_params[0] > 20 * qap_size) {
-					new_params[0] = thread_local_random.nextInt(16 * qap_size) + 4 * qap_size; // 4n to 20n
-				}
-
-				if (new_params[1] > 10 * qap_size * qap_size) {
-					new_params[1] = thread_local_random.nextInt(9 * qap_size * qap_size) + qap_size * qap_size; // n*n
-																												// to
-																												// 10*n*n
-				}
-
-				if (new_params[0] < 4 * qap_size) {
-					new_params[0] = 4 * qap_size + thread_local_random.nextInt(16 * qap_size); // 4n to 20n
-				}
-
-				if (new_params[1] < qap_size * qap_size) {
-					new_params[1] = qap_size * qap_size + thread_local_random.nextInt(9 * qap_size * qap_size); // n*n
-																												// to
-																												// 10*n*n
-
-				}
-
-				break;
-
-			case EO:
-				// parameter[0] : tau
-				// parameter[1] : probability function
-
-				if (behavior_mh[0] <= diversify_percentage_limit[current_iteration] && behavior_mh[1] <= qap_size / 3) {
-					// is necessary diversify
-					switch (parameter[1]) {
-					case 2:// gamma tau: 0 to 1 means intensify to diversify
-						new_params[0] = parameter[0] + 6;
-						break;
-					default:
-						// Exponential tau: 0 to 1 means diversify to intensify
-						// Power tau: 0 to 1 means diversify to intensify
-						new_params[0] = parameter[0] - 6;
-						break;
-					}
-				} else {
-					// is necessary intensify
-					switch (parameter[1]) {
-					case 2:// gamma tau: 0 to 1 means intensify to diversify
-						new_params[0] = parameter[0] - 6;
-						break;
-					default:
-						// Exponential tau: 0 to 1 means diversify to intensify
-						// Power tau: 0 to 1 means diversify to intensify
-						new_params[0] = parameter[0] + 6;
-						break;
-					}
-				}
-
-				if (new_params[0] > 100) {
-					new_params[0] = thread_local_random.nextInt(100); // tau*100
-				}
-
-				if (new_params[0] <= 0) {
-					new_params[0] = thread_local_random.nextInt(100); // tau*100
-				}
-
-				if (behavior_mh[0] < change_pdf_percentage_limit[current_iteration / 3]) {
-					int new_pdf_function;
-					do {
-						new_pdf_function = thread_local_random.nextInt(3);
-						new_params[1] = new_pdf_function;
-					} while (parameter[1] == new_pdf_function);
-
-				}
-				break;
-			}
-		} else {
-			// if the solution did not improve, so will be assign a new parameter
-			new_params = createParam(type);
-		}
-
-		return new_params;
-	}
-
-	// insert new parameter and remove the worst
-	public void insertParameter(List<Params> listParams, Params new_params, final int type) {
-
-		int worst = -1;
-		int cost = Integer.MIN_VALUE;
-		int temp_score = 0;
-
-		for (int i = 0; i < listParams.size(); i++) {
-			temp_score = listParams.get(i).getFitness();
-			if (temp_score > cost) {
-				cost = temp_score;
-				worst = i;
-			}
-		}
-
-		listParams.remove(worst);
-		listParams.add(new_params);
-	}
-
-	// insert adapted parameter at the same position
-	public void insertParameter(List<Params> listParams, Params new_params, final int type, final int index) {
-
-		listParams.set(index, new_params);
-	}
-
-	public void updateSolutionPopulation(int[] s, int[] params, String method) {
-
-		boolean exist; // this cycle finish until the new solution will be different
-		do {
-			exist = false; // identify if the new solution is already in the population
-			for (Solution temp : solution_population) {
-				if (Arrays.equals(temp.getArray(), s)) {
-					exist = true;
-					break;
-				}
-			} // if exist is necessary mutate
-			if (exist) {
-				s = mutateSolution(s);
-			}
-
-		} while (exist);
-
-		solution_population.add(new Solution(s, params, method));
-
-	}
-
-	public void updateSolutionPopulation(int[] new_solution, int[] params, String method, final int index,
-			final int new_cost) {
-		Solution last_solution = solution_population.get(index);
-
-		if (qap.evalSolution(last_solution.getArray()) >= new_cost) {
-			solution_population.set(index, new Solution(new_solution, params, method));// replace by the better
-		}
-	}
-
-	public int[] createParam(int type) {
-
-		int[] p = { 0, 0, 0 };
-
-		switch (type) {
-		case MTLS:
-			p[0] = thread_local_random.nextInt(2); // restart type 0: random restart, 1: swaps
-			break;
-		case ROTS:
-			p[0] = thread_local_random.nextInt(16 * qap_size) + 4 * qap_size; // 4n to 20n
-			p[1] = thread_local_random.nextInt(9 * qap_size * qap_size) + qap_size * qap_size; // n*n to 10*n*n
-			// same range dokeroglu article
-			break;
-		case EO:
-			p[0] = thread_local_random.nextInt(100); // tau*100
-			p[1] = thread_local_random.nextInt(3); // pdf function type
-			break;
-		}
-		return p;
-	}
-	
-	public int[] mutateSolution(int[] solution) {
-		int posX, posY, temp;
-
-		// first decide what value change randomly
-		posX = thread_local_random.nextInt(qap_size);// with this value we put the range of number
-		do {
-			posY = thread_local_random.nextInt(qap_size);// check that the position to change are different
-		} while (posX == posY);
-
-		// swapping - making the mutation
-		temp = solution[posX];
-		solution[posX] = solution[posY];
-		solution[posY] = temp;
-		return solution;
-	}
-
 
 }

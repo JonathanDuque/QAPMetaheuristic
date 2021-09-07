@@ -15,7 +15,7 @@ public class MetaheuristicSearch extends RecursiveAction {
 	private int bestCost, initCost;
 
 	private int[] params;
-	private int executionTime;
+	private int iterationTime;
 
 	public MetaheuristicSearch(QAPData qapData) {
 		threadLocalRandom = ThreadLocalRandom.current();
@@ -25,10 +25,10 @@ public class MetaheuristicSearch extends RecursiveAction {
 	}
 
 	// always before compute function, is necessary set the environment
-	public void setEnvironment(int[] initSolution, int[] params, final int executionTime) {
+	public void setEnvironment(int[] initSolution, int[] params, final int iterationTime) {
 		this.params = params.clone();
 		this.initSolution = initSolution.clone();
-		this.executionTime = executionTime;
+		this.iterationTime = iterationTime;
 	}
 
 	@Override
@@ -56,8 +56,8 @@ public class MetaheuristicSearch extends RecursiveAction {
 		return initCost;
 	}
 
-	public int getExecutionTime() {
-		return executionTime;
+	public int getIterationTime() {
+		return iterationTime;
 	}
 
 	public int getQapSize() {

@@ -29,7 +29,7 @@ public class MultiStartLocalSearch extends MetaheuristicSearch {
 		long time = 0;
 
 		// here find the best solution from the initSolution
-		while (time - start < getExecutionTime() && MainActivity.is_BKS_was_not_found()) { // execution during
+		while (time - start < getIterationTime() && MainActivity.is_BKS_was_not_found()) { // execution during
 																							// execution_time or until
 																							// find bks
 			improve = false;

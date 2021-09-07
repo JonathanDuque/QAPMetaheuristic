@@ -35,7 +35,7 @@ public class RobustTabuSearch extends MetaheuristicSearch {
 		long time = 0;
 		// this while find the best solution during totalIterations or until BKS will be
 		// found
-		while (time - start < getExecutionTime() && MainActivity.is_BKS_was_not_found()) {
+		while (time - start < getIterationTime() && MainActivity.is_BKS_was_not_found()) {
 
 			bestNeighbor = getBestNeighbor(currentSolution, currentIteration, getBestCost());
 			bestNeighborCost = qap.evalSolution(bestNeighbor);

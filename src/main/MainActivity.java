@@ -21,11 +21,11 @@ public class MainActivity {
 
 	public static void main(String[] args) {
 		QAPData qap;
-		int total_iterations;
+		int totalAdaptations;
 
 		String problem;
 		int total_workers;
-		int execution_time;// by iteration
+		int iterationTime;// by iteration
 		boolean cooperative = false;
 		String parameter_setup = setup_text[ADAPTED];
 
@@ -33,46 +33,46 @@ public class MainActivity {
 		case 5:
 			problem = args[0];
 			total_workers = Integer.parseInt(args[1]);
-			execution_time = Integer.parseInt(args[2]);
-			total_iterations = Integer.parseInt(args[3]);
+			iterationTime = Integer.parseInt(args[2]);
+			totalAdaptations = Integer.parseInt(args[3]);
 			break;
 		case 4:
 			problem = args[0];
 			total_workers = Integer.parseInt(args[1]);
-			execution_time = Integer.parseInt(args[2]);
-			total_iterations = Integer.parseInt(args[3]);
+			iterationTime = Integer.parseInt(args[2]);
+			totalAdaptations = Integer.parseInt(args[3]);
 			break;
 		case 3:
 			problem = args[0];
 			total_workers = Integer.parseInt(args[1]);
-			execution_time = Integer.parseInt(args[2]);
-			total_iterations = 15;
+			iterationTime = Integer.parseInt(args[2]);
+			totalAdaptations = 15;
 			break;
 		case 2:
 			problem = args[0];
 			total_workers = Integer.parseInt(args[1]);
-			execution_time = 20000;
-			total_iterations = 15;
+			iterationTime = 20000;
+			totalAdaptations = 15;
 			break;
 		case 1:
 			problem = args[0];
 			total_workers = 3;
-			execution_time = 20000;
-			total_iterations = 15;
+			iterationTime = 20000;
+			totalAdaptations = 15;
 			break;
 		default:
 			problem = "bur26a.qap";
 			total_workers = 63;
-			execution_time = 20000;
-			total_iterations = 15;
+			iterationTime = 20000;
+			totalAdaptations = 15;
 			break;
 		}
 
 		final int teams = 1;
 		problem = args[0];
 		total_workers = 63;
-		execution_time = 20000;
-		total_iterations = 15;
+		iterationTime = 20000;
+		totalAdaptations = 15;
 
 		// checking some conditions for execution
 		if ((total_workers % DIFFERENT_MH) != 0) {
@@ -116,7 +116,7 @@ public class MainActivity {
 			init_time /= 1000.0;
 
 			for (int i = 0; i < teams; i += 1) {
-				WorkerTeam team1 = new WorkerTeam(total_workers / teams, execution_time, total_iterations, qap, i,
+				WorkerTeam team1 = new WorkerTeam(total_workers / teams, iterationTime, totalAdaptations, qap, i,
 						cooperative, parameter_setup);
 				list_teams.add(team1);
 			}
