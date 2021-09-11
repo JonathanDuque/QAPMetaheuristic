@@ -16,7 +16,7 @@ public class MultiStartLocalSearch extends MetaheuristicSearch {
 		final int qap_size = getQapSize();
 		setBestSolution(Arrays.copyOf(getInitSolution(), qap_size));
 		int[] currentSolution = Arrays.copyOf(getInitSolution(), qap_size);
-		int temporalDelta, bestDelta, currentCost = qap.evalSolution(getInitSolution());
+		int temporalDelta, bestDelta, currentCost = qap.evaluateSolution(getInitSolution());
 		setInitCost(currentCost);
 		setBestCost(currentCost);
 
@@ -75,7 +75,7 @@ public class MultiStartLocalSearch extends MetaheuristicSearch {
 				}
 
 				qap.initDeltas(currentSolution);
-				currentCost = qap.evalSolution(currentSolution);
+				currentCost = qap.evaluateSolution(currentSolution);
 			}
 
 			time = System.currentTimeMillis();

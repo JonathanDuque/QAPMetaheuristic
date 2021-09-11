@@ -51,7 +51,7 @@ public class ExtremalOptimization extends MetaheuristicSearch {
 		}
 
 		int[] currentSolution = Arrays.copyOf(getInitSolution(), qap_size);
-		setInitCost(qap.evalSolution(getInitSolution()));
+		setInitCost(qap.evaluateSolution(getInitSolution()));
 		currentCost = getInitCost();
 		setBestCost(getInitCost());
 		setBestSolution(Arrays.copyOf(getInitSolution(), qap_size));

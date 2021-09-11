@@ -1,18 +1,16 @@
 package main;
 
-public class QAPData implements Cloneable {
+public class QAPData extends GenericProblem {
 
 	final private int[][] flow, distance, delta;
-	final private int size;
-	final private int bks;
 
 	// constructor for init data
 	public QAPData(int[][] distance, int[][] flow, int bks) {
+		super(distance.length, bks);
+
 		this.distance = distance;
 		this.flow = flow;
-		size = distance.length;
 		delta = new int[size][size];
-		this.bks = bks;
 	}
 
 	public int[][] getFlow() {
@@ -23,27 +21,12 @@ public class QAPData implements Cloneable {
 		return distance;
 	}
 
-	public int getBKS() {
-		return bks;
-	}
-
 	public int getDistanceBetween(int location1, int location2) {
 		return distance[location1][location2];
 	}
 
 	public int getFlowBetween(int facility1, int facility2) {
 		return flow[facility1][facility2];
-	}
-
-	public int[] makeSwap(int[] permutation, int i, int j) {
-		int temp;
-
-		// change the values
-		temp = permutation[i];
-		permutation[i] = permutation[j];
-		permutation[j] = temp;
-
-		return permutation;
 	}
 
 	/********** initialization of current solution value ***********/
@@ -85,7 +68,7 @@ public class QAPData implements Cloneable {
 	}
 
 	// cost function
-	public int evalSolution(int[] s) {
+	public int evaluateSolution(int[] s) {
 		int cost = 0;
 		// s[0] = location of facility 0
 
@@ -146,10 +129,6 @@ public class QAPData implements Cloneable {
 		return -1;
 	}
 
-	public int getSize() {
-		return size;
-	}
-
 	public void showData() {
 		// Tools.printMatrix(distance, "Matriz de Distancias");
 		// Tools.printMatrix(flow, "\nMatriz de Flujos");
@@ -164,7 +143,7 @@ public class QAPData implements Cloneable {
 		for (int i : array) {
 			locations = locations + ((i + 1) + " ");// +1 because the index in java start with 0
 		}
-		System.out.println(locations + " " + evalSolution(array));
+		System.out.println(locations + " " + evaluateSolution(array));
 
 	}
 

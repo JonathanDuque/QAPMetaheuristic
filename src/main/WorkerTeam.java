@@ -177,13 +177,13 @@ public class WorkerTeam extends GenericTeam {
 
 		// create and initiate variables for team results
 		int[] best_solution = constructive.createRandomSolution(qap_size, current_iteration);
-		int best_cost = qap.evalSolution(best_solution);
+		int best_cost = qap.evaluateSolution(best_solution);
 		final int[] empty_params = { -1, -1, -1 };
 		setBestTeamSolution(new Solution(best_solution, empty_params, "N/A"));
 
 		// update final results variables
 		for (int i = 0; i < solutionPopulation.size(); i++) {
-			int temp_cost = qap.evalSolution(solutionPopulation.get(i).getArray());
+			int temp_cost = qap.evaluateSolution(solutionPopulation.get(i).getArray());
 
 			if (temp_cost < best_cost) {
 				best_cost = temp_cost;

@@ -28,7 +28,7 @@ public class RobustTabuSearch extends MetaheuristicSearch {
 		qap.initDeltas(getInitSolution());
 		currentSolution = Arrays.copyOf(getInitSolution(), qap_size);
 		setBestSolution(Arrays.copyOf(getInitSolution(), qap_size));
-		setInitCost(qap.evalSolution(getInitSolution()));
+		setInitCost(qap.evaluateSolution(getInitSolution()));
 		setBestCost(getInitCost());
 
 		final long start = System.currentTimeMillis();
@@ -38,7 +38,7 @@ public class RobustTabuSearch extends MetaheuristicSearch {
 		while (time - start < getIterationTime() && MainActivity.is_BKS_was_not_found()) {
 
 			bestNeighbor = getBestNeighbor(currentSolution, currentIteration, getBestCost());
-			bestNeighborCost = qap.evalSolution(bestNeighbor);
+			bestNeighborCost = qap.evaluateSolution(bestNeighbor);
 
 			// update the best solution found if is the best of the moment
 			// at the end this block help to save the best of the best
@@ -65,7 +65,7 @@ public class RobustTabuSearch extends MetaheuristicSearch {
 		int n = qap.getSize();
 		// int[] selectedSolution;
 		int i_selected = Integer.MAX_VALUE, j_selected = Integer.MAX_VALUE, maxDelta = Integer.MIN_VALUE;
-		int currentCost = qap.evalSolution(currentSolution);
+		int currentCost = qap.evaluateSolution(currentSolution);
 
 		boolean aspired = false, alreadyAspired = false, autorized = false;
 
