@@ -210,7 +210,7 @@ public class GenericTeam extends RecursiveAction {
 			final int new_cost) {
 		Solution last_solution = solutionPopulation.get(index);
 
-		if (qap.evalSolution(last_solution.getArray()) >= new_cost) {
+		if (qap.evaluateSolution(last_solution.getArray()) >= new_cost) {
 			solutionPopulation.set(index, new Solution(new_solution, params, method));// replace by the better
 		}
 	}

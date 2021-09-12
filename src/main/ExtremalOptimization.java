@@ -16,6 +16,7 @@ public class ExtremalOptimization extends MetaheuristicSearch {
 			this.index = index;
 			this.bestMove = bestMove;
 		}
+
 		int cost, index, bestMove;
 	}
 
@@ -27,40 +28,32 @@ public class ExtremalOptimization extends MetaheuristicSearch {
 
 	@Override
 	protected void compute() {
+		// initSolution, initCost, qap, qapSize, threadLocalRandom, iterationTime,
+		// and params are already initialized
+		setBestCost(getInitCost());
+		setBestSolution(Arrays.copyOf(getInitSolution(), getQapSize()));
+
+		// this initial block define the local variable needed
 		final int qap_size = getQapSize();
-		
+
 		int negative_infinity = (int) Double.NEGATIVE_INFINITY;
-		int tempDelta, bestDelta, currentCost;
+		int[] currentSolution = Arrays.copyOf(getInitSolution(), qap_size);
+		int tempDelta, bestDelta, currentCost = getInitCost();
+		int counterBest = 0;
 		List<Delta> deltaList = new ArrayList<>();
 
-		// receive tau parameter
+		// receive tau parameter and init pdf function
 		final double tau = getParams()[0] / 100.0; // necessary due to is important that division get a decimal number
 		final int pdf_function_type = getParams()[1];
-		pdf = new double[qap_size];
-		
-		switch (pdf_function_type) {
-		case 0:
-			initPdfExp(qap_size, tau);
-			break;
-		case 1:
-			initPdfPow(qap_size, tau);
-			break;
-		case 2:
-			initPdfGamma(qap_size, tau);
-			break;
-		}
+		initPdf(pdf_function_type, tau, qap_size);
 
-		int[] currentSolution = Arrays.copyOf(getInitSolution(), qap_size);
-		setInitCost(qap.evaluateSolution(getInitSolution()));
-		currentCost = getInitCost();
-		setBestCost(getInitCost());
-		setBestSolution(Arrays.copyOf(getInitSolution(), qap_size));
 		qap.initDeltas(getInitSolution());
-
-		int counterBest = 0;
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
+
+		// execution this loop during iterationTime or until find bks
+		// here find the best solution from the initSolution
 		while (time - start < getIterationTime() && MainActivity.is_BKS_was_not_found()) {
 
 			for (int i = 0; i < qap_size; i++) {
@@ -110,12 +103,26 @@ public class ExtremalOptimization extends MetaheuristicSearch {
 				if (getBestCost() == qap.getBKS()) {
 					MainActivity.findBKS();
 				}
-
 			}
 
 			deltaList.clear();// delete delta moves
 			time = System.currentTimeMillis();
+		}
+	}
 
+	public void initPdf(int pdf_function_type, double tau, int qap_size) {
+		pdf = new double[qap_size];
+
+		switch (pdf_function_type) {
+		case 0:
+			initPdfExp(qap_size, tau);
+			break;
+		case 1:
+			initPdfPow(qap_size, tau);
+			break;
+		case 2:
+			initPdfGamma(qap_size, tau);
+			break;
 		}
 	}
 

@@ -77,7 +77,7 @@ public class Tools {
 
 		for (int i = 0; i < p.size(); i++) {
 			int[] temp_s = p.get(i).getArray();
-			int temp_cost = qap.evalSolution(p.get(i).getArray());
+			int temp_cost = qap.evaluateSolution(p.get(i).getArray());
 			// System.out.println(p.get(i).getMethod());
 			qap.printSolution(temp_s, temp_cost, team_id);
 			// Tools.printArray(p.get(i).getParams());
@@ -85,33 +85,5 @@ public class Tools {
 		}
 
 	}
-
-	/*
-	 * public static void printMetaheuristic(final int type_mh, final int cost,
-	 * final int[] p, DecimalFormat df2) {
-	 * 
-	 * String params_text = ""; switch (type_mh) { case MTLS:
-	 * System.out.println("\nMultiStart LocalSearch Results:"); params_text = (p[0]
-	 * == 0) ? "\nRandom Restart" : "\nRestart by swaps"; break; case ROTS:
-	 * System.out.println("\nRobust TabuSearch Results:"); params_text =
-	 * "\nTabu duration: " + p[0] + "\nAspiration factor: " + p[1]; break; case EO:
-	 * System.out.println("\nExtremal Optimization Results:"); params_text =
-	 * "\nTau: " + p[0] / 100.0 + "\nPdf function: "; switch (p[1]) { case 0:
-	 * params_text += "Exponential"; break; case 1: params_text += "Power"; break;
-	 * case 2: params_text += "Gamma"; break; }
-	 * 
-	 * break; case GA: System.out.println("\nGenetic Algorithm Results:");
-	 * params_text = "\nPopulation: " + p[0] + "\nMutation rate: " + p[1] / 1000.0;
-	 * params_text += (p[2] == 0) ? "\nCrossover UX" :
-	 * "\nCrossover in random point";
-	 * 
-	 * break; }
-	 * 
-	 * double std = cost * 100.0 / qap.getBKS() - 100; System.out.println("Cost: " +
-	 * cost + " " + df2.format(std) + "%"); System.out.println("Params " +
-	 * params_text);
-	 * 
-	 * }
-	 */
 
 }

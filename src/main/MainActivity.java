@@ -148,12 +148,12 @@ public class MainActivity {
 			}
 
 			Solution best_team_solution = list_teams_solutions.get(0);
-			int best_cost = qap.evalSolution(best_team_solution.getArray());
+			int best_cost = qap.evaluateSolution(best_team_solution.getArray());
 			int team = 0;
 
 			// get the best result
 			for (int i = 0; i < list_teams_solutions.size(); i++) {
-				int temp_cost = qap.evalSolution(list_teams_solutions.get(i).getArray());
+				int temp_cost = qap.evaluateSolution(list_teams_solutions.get(i).getArray());
 
 				if (temp_cost < best_cost) {
 					best_cost = temp_cost;
@@ -165,7 +165,7 @@ public class MainActivity {
 			int[] best_solution = best_team_solution.getArray();
 			int[] best_params = best_team_solution.getParams();
 			String best_method = best_team_solution.getMethod();
-			best_cost = qap.evalSolution(best_solution);
+			best_cost = qap.evaluateSolution(best_solution);
 
 			double total_time = (System.currentTimeMillis() - start);
 			total_time /= 1000.0;

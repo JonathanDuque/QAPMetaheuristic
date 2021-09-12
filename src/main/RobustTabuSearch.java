@@ -15,26 +15,29 @@ public class RobustTabuSearch extends MetaheuristicSearch {
 
 	@Override
 	protected void compute() {
-		// this initial block define the variable needed
+		// initSolution, initCost, qap, qapSize, threadLocalRandom, iterationTime,
+		// and params are already initialized
+		setBestCost(getInitCost());
+		setBestSolution(Arrays.copyOf(getInitSolution(), getQapSize()));
+
+		// this initial block define the local variable needed
 		final int qap_size = getQapSize();
-		tabuDuration = getParams()[0];// 8*n, this 8 is a factor, is possible to change
-		aspiration = getParams()[1]; // 5 * n * n
+		tabuDuration = getParams()[0];
+		aspiration = getParams()[1];
 		initTabuMatrix(qap_size);
 
 		int currentIteration = 1;
 		int[] bestNeighbor, currentSolution;
+		currentSolution = Arrays.copyOf(getInitSolution(), qap_size);
 		int bestNeighborCost;
 
 		qap.initDeltas(getInitSolution());
-		currentSolution = Arrays.copyOf(getInitSolution(), qap_size);
-		setBestSolution(Arrays.copyOf(getInitSolution(), qap_size));
-		setInitCost(qap.evaluateSolution(getInitSolution()));
-		setBestCost(getInitCost());
 
 		final long start = System.currentTimeMillis();
 		long time = 0;
-		// this while find the best solution during totalIterations or until BKS will be
-		// found
+
+		// execution this loop during iterationTime or until find bks
+		// here find the best solution from the initSolution
 		while (time - start < getIterationTime() && MainActivity.is_BKS_was_not_found()) {
 
 			bestNeighbor = getBestNeighbor(currentSolution, currentIteration, getBestCost());

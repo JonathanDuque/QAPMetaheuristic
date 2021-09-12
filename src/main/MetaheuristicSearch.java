@@ -28,6 +28,7 @@ public class MetaheuristicSearch extends RecursiveAction {
 	public void setEnvironment(int[] initSolution, int[] params, final int iterationTime) {
 		this.params = params.clone();
 		this.initSolution = initSolution.clone();
+		initCost = qap.evaluateSolution(this.initSolution);
 		this.iterationTime = iterationTime;
 	}
 
@@ -70,14 +71,6 @@ public class MetaheuristicSearch extends RecursiveAction {
 
 	public void setBestCost(int bestCost) {
 		this.bestCost = bestCost;
-	}
-
-	public void setInitCost(int initCost) {
-		this.initCost = initCost;
-	}
-
-	public void setParams(int[] params) {
-		this.params = params;
 	}
 
 	public void setBestSolution(int[] bestSolution) {

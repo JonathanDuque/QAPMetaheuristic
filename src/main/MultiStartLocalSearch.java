@@ -12,26 +12,27 @@ public class MultiStartLocalSearch extends MetaheuristicSearch {
 
 	@Override
 	protected void compute() {
-		// this initial block define the variable needed
-		final int qap_size = getQapSize();
-		setBestSolution(Arrays.copyOf(getInitSolution(), qap_size));
-		int[] currentSolution = Arrays.copyOf(getInitSolution(), qap_size);
-		int temporalDelta, bestDelta, currentCost = qap.evaluateSolution(getInitSolution());
-		setInitCost(currentCost);
-		setBestCost(currentCost);
+		// initSolution, initCost, qap, qapSize, threadLocalRandom, iterationTime, and
+		// params are already initialized.
+		setBestSolution(Arrays.copyOf(getInitSolution(), getQapSize()));
+		setBestCost(getInitCost());
 
+		// this initial block define the local variable needed
+		final int qap_size = getQapSize();
+		int[] currentSolution = Arrays.copyOf(getInitSolution(), qap_size);
+		int temporalDelta, bestDelta, currentCost = getInitCost();
 		final boolean random_restart = getParams()[0] == 0 ? true : false; // restart type 0: random restart, 1: swaps
 		qap.initDeltas(getInitSolution());
 
 		final Constructive constructive = new Constructive();
 		boolean improve = false; // this flag control when the solution no improve and we are in an optimal local
+
 		final long start = System.currentTimeMillis();
 		long time = 0;
 
+		// execution this loop during iterationTime or until find bks
 		// here find the best solution from the initSolution
-		while (time - start < getIterationTime() && MainActivity.is_BKS_was_not_found()) { // execution during
-																							// execution_time or until
-																							// find bks
+		while (time - start < getIterationTime() && MainActivity.is_BKS_was_not_found()) {
 			improve = false;
 			bestDelta = 0;
 			int i_selected = -1, j_selected = -1;
