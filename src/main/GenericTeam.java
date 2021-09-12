@@ -16,17 +16,14 @@ public class GenericTeam extends RecursiveAction {
 	private int[] not_improve = { 0, 0, 0 };
 	private ThreadLocalRandom threadLocalRandom;
 
+	final TeamConfiguration teamConfiguration;
 	QAPData qap;
 	final int qap_size;
-	private final int totalAdaptations;
-	private final int searchers;
-	private final int iterationTime;
-	private final int teamId;
+	private Solution bestTeamSolution;
+
 	private final boolean cooperative;
 	private final String parameterSetup;
-
 	List<Solution> solutionPopulation;
-	private Solution bestTeamSolution;
 
 	public GenericTeam(int searchers, int iterationTime, int totalAdaptations, QAPData qap, int teamId,
 			boolean cooperative, String parameterSetup) {
@@ -34,32 +31,12 @@ public class GenericTeam extends RecursiveAction {
 
 		this.qap = qap;
 		qap_size = qap.getSize();
-		this.searchers = searchers;
 
-		this.teamId = teamId;
 		this.cooperative = cooperative;
 		this.parameterSetup = parameterSetup;
-		this.totalAdaptations = totalAdaptations;
-		this.iterationTime = iterationTime;
 
-		System.out.println("\nTeam: " + teamId);
-		System.out.println("Threads: " + searchers);
-		System.out.println("Metaheuristic time: " + iterationTime / 1000.0 + " seconds");
-		System.out.println("Iterations: " + totalAdaptations);
-		System.out.println("Time out: " + iterationTime * totalAdaptations / 1000.0 + " seconds");
-
-	}
-
-	public int getIterationTime() {
-		return iterationTime;
-	}
-
-	public int getTotalAdaptations() {
-		return totalAdaptations;
-	}
-
-	public int getSearchers() {
-		return searchers;
+		teamConfiguration = new TeamConfiguration(totalAdaptations, searchers, teamId, iterationTime);
+		teamConfiguration.printTeamConfiguration();
 	}
 
 	public boolean isCooperative() {

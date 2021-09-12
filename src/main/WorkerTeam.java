@@ -20,11 +20,11 @@ public class WorkerTeam extends GenericTeam {
 		initializeGlobalVariables();
 
 		// the limits depends to the total iterations
-		final double[] diversify_percentage_limit = getDiversifyPercentageLimit(getTotalAdaptations());
+		final double[] diversify_percentage_limit = getDiversifyPercentageLimit(teamConfiguration.getTotalAdaptations());
 
-		ForkJoinPool pool = new ForkJoinPool(getSearchers());
+		ForkJoinPool pool = new ForkJoinPool(teamConfiguration.getSearchers());
 		final Constructive constructive = new Constructive();
-		final int number_searchers_by_mh = getSearchers() / DIFFERENT_MH;
+		final int number_searchers_by_mh = teamConfiguration.getSearchers() / DIFFERENT_MH;
 
 		// these lists are necessary for the executing in parallel
 		List<MultiStartLocalSearch> list_mtls = new ArrayList<>(number_searchers_by_mh);
@@ -32,7 +32,7 @@ public class WorkerTeam extends GenericTeam {
 		List<ExtremalOptimization> list_eo = new ArrayList<>(number_searchers_by_mh);
 
 		List<List<Params>> params_population = generateInitialParamsPopulation(number_searchers_by_mh);
-		solutionPopulation = generateInitialSolutionPopulation(getSearchers(), constructive);
+		solutionPopulation = generateInitialSolutionPopulation(teamConfiguration.getSearchers(), constructive);
 
 		// create array parameters for each metaheuristic
 		int[] params_MTLS = new int[3];
@@ -41,7 +41,7 @@ public class WorkerTeam extends GenericTeam {
 
 		int current_iteration = 0;
 
-		while (current_iteration < getTotalAdaptations() && MainActivity.is_BKS_was_not_found()) {
+		while (current_iteration < teamConfiguration.getTotalAdaptations() && MainActivity.is_BKS_was_not_found()) {
 			List<Solution> solution_population_copy = null;
 
 			for (int i = 0; i < number_searchers_by_mh; i += 1) {
@@ -75,18 +75,18 @@ public class WorkerTeam extends GenericTeam {
 
 				if (isCooperative()) {
 					list_mtls.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_MTLS,
-							getIterationTime());
+							teamConfiguration.getIterationTime());
 					list_rots.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_ROTS,
-							getIterationTime());
+							teamConfiguration.getIterationTime());
 					list_eo.get(i).setEnvironment(getSolutionFromList(solution_population_copy), params_EO,
-							getIterationTime());
+							teamConfiguration.getIterationTime());
 				} else {
 					list_mtls.get(i).setEnvironment(getSolutionFromList(solutionPopulation, i * DIFFERENT_MH),
-							params_MTLS, getIterationTime());
+							params_MTLS, teamConfiguration.getIterationTime());
 					list_rots.get(i).setEnvironment(getSolutionFromList(solutionPopulation, i * DIFFERENT_MH + 1),
-							params_ROTS, getIterationTime());
+							params_ROTS, teamConfiguration.getIterationTime());
 					list_eo.get(i).setEnvironment(getSolutionFromList(solutionPopulation, i * DIFFERENT_MH + 2),
-							params_EO, getIterationTime());
+							params_EO, teamConfiguration.getIterationTime());
 
 				}
 			}
@@ -132,11 +132,11 @@ public class WorkerTeam extends GenericTeam {
 
 					// with adaptations
 					params_MTLS = improveParameter(list_mtls.get(i).getParams(), behavior_mtls, MTLS, current_iteration,
-							getTotalAdaptations(), diversify_percentage_limit);
+							teamConfiguration.getTotalAdaptations(), diversify_percentage_limit);
 					params_ROTS = improveParameter(list_rots.get(i).getParams(), behavior_rots, ROTS, current_iteration,
-							getTotalAdaptations(), diversify_percentage_limit);
+							teamConfiguration.getTotalAdaptations(), diversify_percentage_limit);
 					params_EO = improveParameter(list_eo.get(i).getParams(), behavior_eo, EO, current_iteration,
-							getTotalAdaptations(), diversify_percentage_limit);
+							teamConfiguration.getTotalAdaptations(), diversify_percentage_limit);
 				} else {
 					// fixed parameter, same parameter always
 					params_MTLS = list_mtls.get(i).getParams();
