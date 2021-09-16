@@ -11,11 +11,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity {
 
-	static final String[] mh_text = { "MTLS", "ROTS", "EO" };
 	static final String[] setup_text = { "Fixed", "Random", "Adapted" };
 	static final int FIXED = 0, RANDOM = 1, ADAPTED = 2;
+	final static String[] mh_text = { "MTLS", "ROTS", "EO" };
 
-	final static int DIFFERENT_MH = 3;
 	// atomic variable to avoid race condition reading and writing it throw threads
 	private static AtomicBoolean no_find_BKS = new AtomicBoolean(true);
 
@@ -26,7 +25,6 @@ public class MainActivity {
 		String problem;
 		int total_workers;
 		int iterationTime;// by iteration
-		boolean cooperative = false;
 		String parameter_setup = setup_text[ADAPTED];
 
 		switch (args.length) {
@@ -75,7 +73,7 @@ public class MainActivity {
 		totalAdaptations = 15;
 
 		// checking some conditions for execution
-		if ((total_workers % DIFFERENT_MH) != 0) {
+		if ((total_workers % AlgorithmConfiguration.DIFFERENT_MH) != 0) {
 			System.out.println(
 					"\n***************** Please enter workers multiple of 3     ********************************");
 			return;
@@ -87,7 +85,7 @@ public class MainActivity {
 			return;
 		}
 
-		if (((total_workers / teams) % DIFFERENT_MH) != 0) {
+		if (((total_workers / teams) % AlgorithmConfiguration.DIFFERENT_MH) != 0) {
 			System.out.println(
 					"\n***************** Threads by team must be multiple of 3     ********************************");
 			return;
@@ -117,7 +115,7 @@ public class MainActivity {
 
 			for (int i = 0; i < teams; i += 1) {
 				WorkerTeam team1 = new WorkerTeam(total_workers / teams, iterationTime, totalAdaptations, qap, i,
-						cooperative, parameter_setup);
+						parameter_setup, SolutionPopulation.REQUEST_RANDOM, SolutionPopulation.ENTRY_IF_DIFERENT);
 				list_teams.add(team1);
 			}
 

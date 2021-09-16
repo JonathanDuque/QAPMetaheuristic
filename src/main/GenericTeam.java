@@ -13,34 +13,30 @@ public class GenericTeam extends RecursiveAction {
 	final int MTLS = 0, ROTS = 1, EO = 2;
 	final String[] mh_text = { "MTLS", "ROTS", "EO" };
 	final int DIFFERENT_MH = 3;
+
 	private int[] not_improve = { 0, 0, 0 };
 	private ThreadLocalRandom threadLocalRandom;
 
-	final TeamConfiguration teamConfiguration;
 	QAPData qap;
 	final int qap_size;
+	final TeamConfiguration teamConfiguration;
+	SolutionPopulation solutionPopulation;
 	private Solution bestTeamSolution;
 
-	private final boolean cooperative;
 	private final String parameterSetup;
-	List<Solution> solutionPopulation;
 
 	public GenericTeam(int searchers, int iterationTime, int totalAdaptations, QAPData qap, int teamId,
-			boolean cooperative, String parameterSetup) {
+			String parameterSetup, int requestPolicy, int entryPolicy) {
 		super();
 
 		this.qap = qap;
 		qap_size = qap.getSize();
 
-		this.cooperative = cooperative;
 		this.parameterSetup = parameterSetup;
 
 		teamConfiguration = new TeamConfiguration(totalAdaptations, searchers, teamId, iterationTime);
 		teamConfiguration.printTeamConfiguration();
-	}
-
-	public boolean isCooperative() {
-		return cooperative;
+		solutionPopulation = new SolutionPopulation(requestPolicy, entryPolicy);
 	}
 
 	public String getParameterSetup() {
@@ -59,6 +55,7 @@ public class GenericTeam extends RecursiveAction {
 		// is necessary init here because in the constructor generate the same random
 		// values for the params
 		threadLocalRandom = ThreadLocalRandom.current();
+		solutionPopulation.initSolutionPopulation(teamConfiguration.getSearchers(), qap);
 	}
 
 	@Override
@@ -80,22 +77,6 @@ public class GenericTeam extends RecursiveAction {
 		double[] comparison = { difference_percentage, distance };
 
 		return comparison;
-	}
-
-	public int[] mutateSolution(int[] solution) {
-		int posX, posY, temp;
-
-		// first decide what value change randomly
-		posX = threadLocalRandom.nextInt(qap_size);// with this value we put the range of number
-		do {
-			posY = threadLocalRandom.nextInt(qap_size);// check that the position to change are different
-		} while (posX == posY);
-
-		// swapping - making the mutation
-		temp = solution[posX];
-		solution[posX] = solution[posY];
-		solution[posY] = temp;
-		return solution;
 	}
 
 	public List<List<Params>> generateInitialParamsPopulation(int params_of_each_mh) {
@@ -130,66 +111,6 @@ public class GenericTeam extends RecursiveAction {
 
 		// Tools.printParamsPopulation(params_population, 2);
 		return params_population;
-	}
-
-	public List<Solution> generateInitialSolutionPopulation(final int total, Constructive constructive) {
-		List<Solution> init_solution_population = new ArrayList<>();
-		final int[] empty_params = { -1, -1, -1 };
-
-		for (int i = 0; i < total; i++) {
-			int[] s = constructive.createRandomSolution(qap_size, i);// i stands for the seed
-			init_solution_population.add(new Solution(s, empty_params, "N/A"));
-		}
-
-		return init_solution_population;
-	}
-
-	public int[] getSolutionFromList(List<Solution> population) {
-		Solution selected_solution;
-		final int index = threadLocalRandom.nextInt(population.size());
-
-		selected_solution = population.get(index);
-		population.remove(index);// delete for no selecting later
-
-		return selected_solution.getArray();
-	}
-
-	public int[] getSolutionFromList(List<Solution> population, final int index) {
-		Solution selected_solution;
-		// System.out.println("selected : " + index);
-		selected_solution = population.get(index);
-
-		return selected_solution.getArray();
-	}
-
-	public void updateSolutionPopulation(int[] s, int[] params, String method) {
-
-		boolean exist; // this cycle finish until the new solution will be different
-		do {
-			exist = false; // identify if the new solution is already in the population
-			for (Solution temp : solutionPopulation) {
-				if (Arrays.equals(temp.getArray(), s)) {
-					exist = true;
-					break;
-				}
-			} // if exist is necessary mutate
-			if (exist) {
-				s = mutateSolution(s);
-			}
-
-		} while (exist);
-
-		solutionPopulation.add(new Solution(s, params, method));
-
-	}
-
-	public void updateSolutionPopulation(int[] new_solution, int[] params, String method, final int index,
-			final int new_cost) {
-		Solution last_solution = solutionPopulation.get(index);
-
-		if (qap.evaluateSolution(last_solution.getArray()) >= new_cost) {
-			solutionPopulation.set(index, new Solution(new_solution, params, method));// replace by the better
-		}
 	}
 
 	public int[] createParameter(int type) {

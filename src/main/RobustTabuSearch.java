@@ -9,8 +9,8 @@ public class RobustTabuSearch extends MetaheuristicSearch {
 	private int tabuDuration;// iterations tabu for a move
 	private int aspiration;
 
-	public RobustTabuSearch(QAPData qapData) {
-		super(qapData);
+	public RobustTabuSearch(QAPData qapData, int metaheuristicId) {
+		super(qapData, metaheuristicId);
 	}
 
 	@Override

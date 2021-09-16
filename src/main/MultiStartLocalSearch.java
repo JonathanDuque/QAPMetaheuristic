@@ -6,8 +6,8 @@ public class MultiStartLocalSearch extends MetaheuristicSearch {
 
 	private static final long serialVersionUID = 1L;
 
-	public MultiStartLocalSearch(QAPData qapData) {
-		super(qapData);
+	public MultiStartLocalSearch(QAPData qapData, int metaheuristicId) {
+		super(qapData, metaheuristicId);
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public class MultiStartLocalSearch extends MetaheuristicSearch {
 				improve = false;
 				if (random_restart) {
 					// start in a new point
-					currentSolution = constructive.createRandomSolution(qap_size, getThreadLocalRandom().nextInt());
+					currentSolution = constructive.createRandomSolution(qap_size);
 				} else {
 					currentSolution = makeManySwaps(currentSolution, qap);
 				}

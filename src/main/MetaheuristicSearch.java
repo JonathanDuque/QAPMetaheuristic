@@ -15,12 +15,14 @@ public class MetaheuristicSearch extends RecursiveAction {
 	private int bestCost, initCost;
 
 	private int[] params;
+	private final int metaheuristicId;
 	private int iterationTime;
 
-	public MetaheuristicSearch(QAPData qapData) {
+	public MetaheuristicSearch(QAPData qapData, int metahueristicId) {
 		threadLocalRandom = ThreadLocalRandom.current();
 
 		this.qap = new QAPData(qapData.getDistance(), qapData.getFlow(), qapData.getBKS());
+		this.metaheuristicId = metahueristicId;
 		qapSize = qap.getSize();
 	}
 
@@ -37,6 +39,10 @@ public class MetaheuristicSearch extends RecursiveAction {
 		// TODO Auto-generated method stub
 	}
 
+	public int getMetaheuristicId() {
+		return metaheuristicId;
+	}
+
 	public int[] getInitSolution() {
 		return initSolution.clone();
 	}
@@ -44,6 +50,10 @@ public class MetaheuristicSearch extends RecursiveAction {
 	public int[] getBestSolution() {
 		return bestSolution.clone();
 	}
+
+	// public Solution getBestSolution() {
+	// return new Solution (bestSolution.clone(), params, "");
+	// }
 
 	public int[] getParams() {
 		return params;
@@ -64,7 +74,7 @@ public class MetaheuristicSearch extends RecursiveAction {
 	public int getQapSize() {
 		return qapSize;
 	}
-	
+
 	public ThreadLocalRandom getThreadLocalRandom() {
 		return threadLocalRandom;
 	}

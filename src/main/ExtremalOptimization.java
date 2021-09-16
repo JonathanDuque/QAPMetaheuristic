@@ -22,8 +22,8 @@ public class ExtremalOptimization extends MetaheuristicSearch {
 
 	double[] pdf;
 
-	public ExtremalOptimization(QAPData qapData) {
-		super(qapData);
+	public ExtremalOptimization(QAPData qapData, int metaheuristicId) {
+		super(qapData, metaheuristicId);
 	}
 
 	@Override
