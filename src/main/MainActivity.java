@@ -13,7 +13,6 @@ public class MainActivity {
 
 	static final String[] setup_text = { "Fixed", "Random", "Adapted" };
 	static final int FIXED = 0, RANDOM = 1, ADAPTED = 2;
-	final static String[] mh_text = { "MTLS", "ROTS", "EO" };
 
 	// atomic variable to avoid race condition reading and writing it throw threads
 	private static AtomicBoolean no_find_BKS = new AtomicBoolean(true);
@@ -115,7 +114,7 @@ public class MainActivity {
 
 			for (int i = 0; i < teams; i += 1) {
 				WorkerTeam team1 = new WorkerTeam(total_workers / teams, iterationTime, totalAdaptations, qap, i,
-						parameter_setup, SolutionPopulation.REQUEST_RANDOM, SolutionPopulation.ENTRY_IF_DIFERENT);
+						parameter_setup, SolutionPopulation.REQUEST_RANDOM, SolutionPopulation.ENTRY_IF_DIFERENT, qap.size/3.0);
 				list_teams.add(team1);
 			}
 

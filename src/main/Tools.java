@@ -46,7 +46,7 @@ public class Tools {
 			List<Params> list_params = params_population.get(i);
 
 			for (int l = 0; l < list_params.size(); l++) {
-				params_details = "Team: " + team_id + " " + MainActivity.mh_text[i];
+				params_details = "Team: " + team_id + " " + AlgorithmConfiguration.mh_text[i];
 				String array_s = "";
 				for (int j : list_params.get(l).getParams()) {
 					params_details = params_details + " " + j;
@@ -64,7 +64,7 @@ public class Tools {
 	public static void printParamsPopulationOld(List<List<Params>> params_population) {
 		for (int i = 0; i < params_population.size(); i++) {
 			List<Params> list_params = params_population.get(i);
-			System.out.println(MainActivity.mh_text[i]);
+			System.out.println(AlgorithmConfiguration.mh_text[i]);
 			for (int l = 0; l < list_params.size(); l++) {
 				Tools.printArray(list_params.get(l).getParams());
 				// System.out.println("fitnes " + list_params.get(l).getFitness());
