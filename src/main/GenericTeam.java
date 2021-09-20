@@ -9,30 +9,25 @@ public class GenericTeam extends RecursiveAction {
 	final TeamConfiguration teamConfiguration;
 	SolutionPopulation solutionPopulation;
 	ParameterControl parameterControls;
-
 	private Solution bestTeamSolution;
 
-	private final String parameterSetup;
-
 	public GenericTeam(int searchers, int iterationTime, int totalAdaptations, QAPData qap, int teamId,
-			String parameterSetup, int requestPolicy, int entryPolicy, double solutionSimilarityPercertage) {
+			int requestPolicy, int entryPolicy, double solutionSimilarityPercertage) {
 		super();
 
 		this.qap = qap;
-		this.parameterSetup = parameterSetup;
-
 		teamConfiguration = new TeamConfiguration(totalAdaptations, searchers, teamId, iterationTime);
 		teamConfiguration.printTeamConfiguration();
 		solutionPopulation = new SolutionPopulation(requestPolicy, entryPolicy);
 		parameterControls = new ParameterControl(qap.getSize(), solutionSimilarityPercertage);
 	}
 
-	public String getParameterSetup() {
-		return parameterSetup;
-	}
-
 	public Solution getBestTeamSolution() {
 		return bestTeamSolution;
+	}
+
+	public int getTeamId() {
+		return teamConfiguration.getTeamId();
 	}
 
 	public void setBestTeamSolution(Solution bestTeamSolution) {

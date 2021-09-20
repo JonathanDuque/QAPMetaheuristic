@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
-public class WorkerTeam extends GenericTeam {
+public class TeamParamsFixed extends GenericTeam {
 	private static final long serialVersionUID = 1L;
 
-	public WorkerTeam(int searchers, int iterationTime, int totalAdaptations, QAPData qap, int teamId,
-			String parameter_setup, int requestPolicy, int entryPolicy, double solutionSimilarityPercertage) {
-		super(searchers, iterationTime, totalAdaptations, qap, teamId, parameter_setup, requestPolicy, entryPolicy,
+	public TeamParamsFixed(int searchers, int iterationTime, int totalAdaptations, QAPData qap, int teamId,
+			int requestPolicy, int entryPolicy, double solutionSimilarityPercertage) {
+		super(searchers, iterationTime, totalAdaptations, qap, teamId, requestPolicy, entryPolicy,
 				solutionSimilarityPercertage);
 	}
 
@@ -90,38 +90,10 @@ public class WorkerTeam extends GenericTeam {
 				int[] params_ROTS = new int[3];
 				int[] params_EO = new int[3];
 
-				// random parameters
-				if (getParameterSetup() == MainActivity.setup_text[MainActivity.RANDOM]) {
-					params_MTLS = parameterControls.createParameter(AlgorithmConfiguration.MTLS);
-					params_ROTS = parameterControls.createParameter(AlgorithmConfiguration.ROTS);
-					params_EO = parameterControls.createParameter(AlgorithmConfiguration.EO);
-				} else if (getParameterSetup() == MainActivity.setup_text[MainActivity.ADAPTED]) {
-					// init_cost, final cost order matter
-
-					// with adaptations is necessary the behavior
-					double[] perfomance_mtls = parameterControls
-							.getPerfomanceEvaluation(list_mtls.get(i).getMetaheuricticReport());
-					double[] perfomance_rots = parameterControls
-							.getPerfomanceEvaluation(list_rots.get(i).getMetaheuricticReport());
-					double[] perfomance_eo = parameterControls
-							.getPerfomanceEvaluation(list_eo.get(i).getMetaheuricticReport());
-
-					// with adaptations
-					params_MTLS = parameterControls.adaptParameter(list_mtls.get(i).getParams(), perfomance_mtls,
-							AlgorithmConfiguration.MTLS, current_iteration, teamConfiguration.getTotalAdaptations(),
-							diversifyPercentageLimit);
-					params_ROTS = parameterControls.adaptParameter(list_rots.get(i).getParams(), perfomance_rots,
-							AlgorithmConfiguration.ROTS, current_iteration, teamConfiguration.getTotalAdaptations(),
-							diversifyPercentageLimit);
-					params_EO = parameterControls.adaptParameter(list_eo.get(i).getParams(), perfomance_eo,
-							AlgorithmConfiguration.EO, current_iteration, teamConfiguration.getTotalAdaptations(),
-							diversifyPercentageLimit);
-				} else {
-					// fixed parameter, same parameter always
-					params_MTLS = list_mtls.get(i).getParams();
-					params_ROTS = list_rots.get(i).getParams();
-					params_EO = list_eo.get(i).getParams();
-				}
+				// fixed parameter, same parameter always
+				params_MTLS = list_mtls.get(i).getParams();
+				params_ROTS = list_rots.get(i).getParams();
+				params_EO = list_eo.get(i).getParams();
 
 				// insert the new parameters into parameters population, each one in the same
 				// position

@@ -67,8 +67,8 @@ public class MetaheuristicSearch extends RecursiveAction {
 		return iterationTime;
 	}
 
-	public MetaheuricticReport getMetaheuricticReport() {
-		return new MetaheuricticReport(initCost, bestCost, initSolution.clone(), bestSolution.clone());
+	public MetaheuristicReport getMetaheuristicReport() {
+		return new MetaheuristicReport(initCost, bestCost, initSolution.clone(), bestSolution.clone());
 	}
 
 	public int getQapSize() {

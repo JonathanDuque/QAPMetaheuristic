@@ -11,9 +11,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity {
 
-	static final String[] setup_text = { "Fixed", "Random", "Adapted" };
-	static final int FIXED = 0, RANDOM = 1, ADAPTED = 2;
-
 	// atomic variable to avoid race condition reading and writing it throw threads
 	private static AtomicBoolean no_find_BKS = new AtomicBoolean(true);
 
@@ -22,75 +19,74 @@ public class MainActivity {
 		int totalAdaptations;
 
 		String problem;
-		int total_workers;
+		int totalSearchers;
 		int iterationTime;// by iteration
-		String parameter_setup = setup_text[ADAPTED];
 
 		switch (args.length) {
 		case 5:
 			problem = args[0];
-			total_workers = Integer.parseInt(args[1]);
+			totalSearchers = Integer.parseInt(args[1]);
 			iterationTime = Integer.parseInt(args[2]);
 			totalAdaptations = Integer.parseInt(args[3]);
 			break;
 		case 4:
 			problem = args[0];
-			total_workers = Integer.parseInt(args[1]);
+			totalSearchers = Integer.parseInt(args[1]);
 			iterationTime = Integer.parseInt(args[2]);
 			totalAdaptations = Integer.parseInt(args[3]);
 			break;
 		case 3:
 			problem = args[0];
-			total_workers = Integer.parseInt(args[1]);
+			totalSearchers = Integer.parseInt(args[1]);
 			iterationTime = Integer.parseInt(args[2]);
 			totalAdaptations = 15;
 			break;
 		case 2:
 			problem = args[0];
-			total_workers = Integer.parseInt(args[1]);
+			totalSearchers = Integer.parseInt(args[1]);
 			iterationTime = 20000;
 			totalAdaptations = 15;
 			break;
 		case 1:
 			problem = args[0];
-			total_workers = 3;
+			totalSearchers = 3;
 			iterationTime = 20000;
 			totalAdaptations = 15;
 			break;
 		default:
 			problem = "bur26a.qap";
-			total_workers = 63;
+			totalSearchers = 63;
 			iterationTime = 20000;
 			totalAdaptations = 15;
 			break;
 		}
 
 		final int teams = 1;
-		problem = args[0];
-		total_workers = 63;
-		iterationTime = 20000;
+		// problem = args[0];
+		totalSearchers = 3;
+		iterationTime = 2000;
 		totalAdaptations = 15;
 
 		// checking some conditions for execution
-		if ((total_workers % AlgorithmConfiguration.DIFFERENT_MH) != 0) {
+		if ((totalSearchers % AlgorithmConfiguration.DIFFERENT_MH) != 0) {
 			System.out.println(
 					"\n***************** Please enter workers multiple of 3     ********************************");
 			return;
 		}
 
-		if ((total_workers % teams) != 0) {
-			System.out.println("\n***************** Please enter teams multiple of " + total_workers
+		if ((totalSearchers % teams) != 0) {
+			System.out.println("\n***************** Please enter teams multiple of " + totalSearchers
 					+ "    ********************************");
 			return;
 		}
 
-		if (((total_workers / teams) % AlgorithmConfiguration.DIFFERENT_MH) != 0) {
+		if (((totalSearchers / teams) % AlgorithmConfiguration.DIFFERENT_MH) != 0) {
 			System.out.println(
 					"\n***************** Threads by team must be multiple of 3     ********************************");
 			return;
 		}
 
-		for (int k = 0; k < 30; k += 1) {
+		for (int k = 0; k < 1; k += 1) {
 			final long start = System.currentTimeMillis();
 
 			System.out.println("\n*****************    Problem: " + problem + "    ********************************");
@@ -105,27 +101,31 @@ public class MainActivity {
 			qap = new QAPData(distance, flow, readFile.getTarget());
 
 			ForkJoinPool pool = new ForkJoinPool(teams);
-			List<WorkerTeam> list_teams = new ArrayList<>(teams);// these lists are necessary for the executing in
+			List<GenericTeam> list_teams = new ArrayList<>(teams);// these lists are necessary for the executing in
 																	// parallel
 																	// of each team
 
-			double init_time = (System.currentTimeMillis() - start);
-			init_time /= 1000.0;
+			double initTime = (System.currentTimeMillis() - start);
+			initTime /= 1000.0;
 
 			for (int i = 0; i < teams; i += 1) {
-				WorkerTeam team1 = new WorkerTeam(total_workers / teams, iterationTime, totalAdaptations, qap, i,
-						parameter_setup, SolutionPopulation.REQUEST_RANDOM, SolutionPopulation.ENTRY_IF_DIFERENT, qap.size/3.0);
+				TeamParamsAdapted team1 = new TeamParamsAdapted(totalSearchers / teams, iterationTime, totalAdaptations,
+						qap, i, SolutionPopulation.REQUEST_RANDOM, SolutionPopulation.ENTRY_IF_DIFERENT,
+						qap.size / 3.0);
 				list_teams.add(team1);
 			}
 
-			// this line is important if we want to execute teams with other setup
-			// WorkerTeam team2 = new WorkerTeam(total_workers / teams, 15000, 20,
-			// qap,false, 1);
-			// list_teams.add(team2);
-
-			// WorkerTeam team3 = new WorkerTeam(total_workers / teams, 15000, 20, qap,
-			// true, 2);
-			// list_teams.add(team3);
+			// this line is important if we want to execute other type of team with other
+			// setup
+			/*
+			 * TeamParamsRandom team2 = new TeamParamsRandom(totalSearchers / teams,
+			 * iterationTime, totalAdaptations, qap, 1, SolutionPopulation.REQUEST_RANDOM,
+			 * SolutionPopulation.ENTRY_IF_DIFERENT, qap.size / 3.0); list_teams.add(team2);
+			 * 
+			 * TeamParamsFixed team3 = new TeamParamsFixed(totalSearchers / teams,
+			 * iterationTime, totalAdaptations, qap, 2, SolutionPopulation.REQUEST_SAME,
+			 * SolutionPopulation.ENTRY_SAME, qap.size / 3.0); list_teams.add(team3);
+			 */
 
 			// launch execution in parallel for all teams
 			for (int i = 0; i < teams; i += 1) {
@@ -144,99 +144,25 @@ public class MainActivity {
 				list_teams_solutions.add(solution);
 			}
 
-			Solution best_team_solution = list_teams_solutions.get(0);
-			int best_cost = qap.evaluateSolution(best_team_solution.getArray());
-			int team = 0;
-
+			Solution bestTeamSolution = list_teams_solutions.get(0);
+			int best_cost = qap.evaluateSolution(bestTeamSolution.getArray());
+			int team = list_teams.get(0).getTeamId();
 			// get the best result
 			for (int i = 0; i < list_teams_solutions.size(); i++) {
 				int temp_cost = qap.evaluateSolution(list_teams_solutions.get(i).getArray());
 
 				if (temp_cost < best_cost) {
 					best_cost = temp_cost;
-					best_team_solution = list_teams_solutions.get(i);
-					team = i;
+					bestTeamSolution = list_teams_solutions.get(i);
+					team = list_teams.get(i).getTeamId();
 				}
 			}
 
-			int[] best_solution = best_team_solution.getArray();
-			int[] best_params = best_team_solution.getParams();
-			String best_method = best_team_solution.getMetaheuristicName();
-			best_cost = qap.evaluateSolution(best_solution);
+			double totalTime = (System.currentTimeMillis() - start);
+			totalTime /= 1000.0;
 
-			double total_time = (System.currentTimeMillis() - start);
-			total_time /= 1000.0;
-
-			final double std = best_cost * 100.0 / qap.getBKS() - 100;
-			System.out.println("\n*****************      Results     ********************************");
-			System.out.println("Best cost achieved: " + best_cost + " " + Tools.DECIMAL_FORMAT_2D.format(std) + "%");
-			System.out.println("Method: " + best_method);
-			System.out.println("Parameters:");
-			Tools.printArray(best_params);
-			System.out.println("Total time: " + total_time + " sec");
-
-			// final String dir_file = "Results/";
-			final String dir_file = "../Result-26/";
-
-			final String file_name = problem.replace(".qap", "");
-			File idea = new File(dir_file + file_name + ".csv");
-			FileWriter fileWriter;
-			if (!idea.exists()) {
-				// if file does not exist, so create and write header
-
-				try {
-					fileWriter = new FileWriter(dir_file + file_name + ".csv");
-					fileWriter.append("solution");
-					fileWriter.append(";");
-					fileWriter.append("cost");
-					fileWriter.append(";");
-					fileWriter.append("deviation");
-					fileWriter.append(";");
-					fileWriter.append("time");
-					fileWriter.append(";");
-					fileWriter.append("init_time");
-					fileWriter.append(";");
-					fileWriter.append("params");
-					fileWriter.append(";");
-					fileWriter.append("method");
-					fileWriter.append(";");
-					fileWriter.append("team");
-					fileWriter.append("\n");
-
-					fileWriter.flush();
-					fileWriter.close();
-
-				} catch (IOException e) {
-					System.out.println("Error writing headers");
-					e.printStackTrace();
-				}
-			}
-
-			try {
-				fileWriter = new FileWriter(dir_file + file_name + ".csv", true);
-				fileWriter.append(Arrays.toString(best_solution));
-				fileWriter.append(";");
-				fileWriter.append(Integer.toString(best_cost));
-				fileWriter.append(";");
-				fileWriter.append(Tools.DECIMAL_FORMAT_2D.format(std));
-				fileWriter.append(";");
-				fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(total_time));
-				fileWriter.append(";");
-				fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(init_time));
-				fileWriter.append(";");
-				fileWriter.append(Arrays.toString(best_params));
-				fileWriter.append(";");
-				fileWriter.append(best_method);
-				fileWriter.append(";");
-				fileWriter.append(Integer.toString(team));
-				fileWriter.append("\n");
-
-				fileWriter.flush();
-				fileWriter.close();
-			} catch (IOException e) {
-				System.out.println("Error writing data");
-				e.printStackTrace();
-			}
+			printResultInConsole(bestTeamSolution, problem, totalTime, qap, team);
+			printResultInFile(bestTeamSolution, problem, totalTime, qap, team, initTime);
 
 			list_teams.clear();
 			list_teams_solutions.clear();
@@ -254,6 +180,98 @@ public class MainActivity {
 
 	public static boolean is_BKS_was_not_found() {
 		return no_find_BKS.get();
+	}
+
+	public static void printResultInConsole(Solution bestTeamSolution, String problem, double totalTime, QAPData qap,
+			int team) {
+		int[] best_solution = bestTeamSolution.getArray();
+		int[] best_params = bestTeamSolution.getParams();
+		String best_method = bestTeamSolution.getMetaheuristicName();
+		int best_cost = qap.evaluateSolution(best_solution);
+
+		final double std = best_cost * 100.0 / qap.getBKS() - 100;
+
+		System.out.println("\n*****************      Results     ********************************");
+		System.out.println("Best cost achieved: " + best_cost + " " + Tools.DECIMAL_FORMAT_2D.format(std) + "%");
+		System.out.println("Method: " + best_method);
+		System.out.println("Parameters:");
+		Tools.printArray(best_params);
+		System.out.println("team: " + team);
+		System.out.println("Total time: " + totalTime + " sec");
+	}
+
+	public static void printResultInFile(Solution bestTeamSolution, String problem, double totalTime, QAPData qap,
+			int team, double initTime) {
+		int[] best_solution = bestTeamSolution.getArray();
+		int[] best_params = bestTeamSolution.getParams();
+		String best_method = bestTeamSolution.getMetaheuristicName();
+		int best_cost = qap.evaluateSolution(best_solution);
+
+		final double std = best_cost * 100.0 / qap.getBKS() - 100;
+
+		// final String dir_file = "Results/";
+		final String dir_file = "../Result-26/";
+
+		final String file_name = problem.replace(".qap", "");
+		File idea = new File(dir_file + file_name + ".csv");
+		FileWriter fileWriter;
+		if (!idea.exists()) {
+			// if file does not exist, so create and write header
+
+			try {
+				fileWriter = new FileWriter(dir_file + file_name + ".csv");
+				fileWriter.append("solution");
+				fileWriter.append(";");
+				fileWriter.append("cost");
+				fileWriter.append(";");
+				fileWriter.append("deviation");
+				fileWriter.append(";");
+				fileWriter.append("time");
+				fileWriter.append(";");
+				fileWriter.append("init_time");
+				fileWriter.append(";");
+				fileWriter.append("params");
+				fileWriter.append(";");
+				fileWriter.append("method");
+				fileWriter.append(";");
+				fileWriter.append("team");
+				fileWriter.append("\n");
+
+				fileWriter.flush();
+				fileWriter.close();
+
+			} catch (IOException e) {
+				System.out.println("Error writing headers");
+				e.printStackTrace();
+			}
+		}
+
+		try {
+			fileWriter = new FileWriter(dir_file + file_name + ".csv", true);
+			fileWriter.append(Arrays.toString(best_solution));
+			fileWriter.append(";");
+			fileWriter.append(Integer.toString(best_cost));
+			fileWriter.append(";");
+			fileWriter.append(Tools.DECIMAL_FORMAT_2D.format(std));
+			fileWriter.append(";");
+			fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(totalTime));
+			fileWriter.append(";");
+			fileWriter.append(Tools.DECIMAL_FORMAT_3D.format(initTime));
+			fileWriter.append(";");
+			fileWriter.append(Arrays.toString(best_params));
+			fileWriter.append(";");
+			fileWriter.append(best_method);
+			fileWriter.append(";");
+			fileWriter.append(Integer.toString(team));
+			fileWriter.append("\n");
+
+			fileWriter.flush();
+			fileWriter.close();
+		} catch (IOException e) {
+			System.out.println("Error writing data");
+			e.printStackTrace();
+		}
+
 	}
 
 }

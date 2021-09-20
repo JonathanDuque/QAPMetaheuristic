@@ -216,7 +216,7 @@ public class ParameterControl {
 		return new_params;
 	}
 
-	public double[] getPerfomanceEvaluation(MetaheuricticReport report) {
+	public double[] getPerformanceEvaluation(MetaheuristicReport report) {
 		// init_cost - 100%
 		// (init_cost-best_cost) - x
 
