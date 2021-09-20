@@ -161,7 +161,7 @@ public class MainActivity {
 
 			int[] best_solution = best_team_solution.getArray();
 			int[] best_params = best_team_solution.getParams();
-			String best_method = best_team_solution.getMethod();
+			String best_method = best_team_solution.getMetaheuristicName();
 			best_cost = qap.evaluateSolution(best_solution);
 
 			double total_time = (System.currentTimeMillis() - start);

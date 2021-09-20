@@ -47,13 +47,9 @@ public class MetaheuristicSearch extends RecursiveAction {
 		return initSolution.clone();
 	}
 
-	public int[] getBestSolution() {
-		return bestSolution.clone();
+	public Solution getBestSolution(String metaheuristicName) {
+		return new Solution(bestSolution.clone(), bestCost, params, metaheuristicName);
 	}
-
-	// public Solution getBestSolution() {
-	// return new Solution (bestSolution.clone(), params, "");
-	// }
 
 	public int[] getParams() {
 		return params;
@@ -69,6 +65,10 @@ public class MetaheuristicSearch extends RecursiveAction {
 
 	public int getIterationTime() {
 		return iterationTime;
+	}
+
+	public MetaheuricticReport getMetaheuricticReport() {
+		return new MetaheuricticReport(initCost, bestCost, initSolution.clone(), bestSolution.clone());
 	}
 
 	public int getQapSize() {

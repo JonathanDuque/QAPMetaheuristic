@@ -6,13 +6,13 @@ public class Solution {
 	private int[] array;
 	private int cost;
 	private int[] params;
-	private String method;
+	private String metaheuristicName;
 	private int metaheuricticId;
 
 	public Solution(int[] s, int c, int[] p, String m) {
 		array = s.clone();
 		params = p.clone();
-		method = m;
+		metaheuristicName = m;
 		cost = c;
 		metaheuricticId = NO_ID_METAHEURISTIC;
 	}
@@ -25,8 +25,8 @@ public class Solution {
 		return params;
 	}
 
-	public String getMethod() {
-		return method;
+	public String getMetaheuristicName() {
+		return metaheuristicName;
 	}
 
 	public int getMetaheuricticId() {

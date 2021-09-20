@@ -1,11 +1,8 @@
 package main;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class WorkerTeam extends GenericTeam {
 	private static final long serialVersionUID = 1L;
@@ -76,20 +73,16 @@ public class WorkerTeam extends GenericTeam {
 			}
 
 			for (int i = 0; i < number_searchers_by_mh; i += 1) {
+
 				// entry solution into solution population depending the entry policy
 				solutionPopulation.entrySolution(
-						new Solution(list_mtls.get(i).getBestSolution(), list_mtls.get(i).getBestCost(),
-								list_mtls.get(i).getParams(),
-								AlgorithmConfiguration.mh_text[AlgorithmConfiguration.MTLS]),
+						list_mtls.get(i).getBestSolution(AlgorithmConfiguration.mh_text[AlgorithmConfiguration.MTLS]),
 						list_mtls.get(i).getMetaheuristicId(), qap);
 				solutionPopulation.entrySolution(
-						new Solution(list_rots.get(i).getBestSolution(), list_rots.get(i).getBestCost(),
-								list_rots.get(i).getParams(),
-								AlgorithmConfiguration.mh_text[AlgorithmConfiguration.ROTS]),
+						list_rots.get(i).getBestSolution(AlgorithmConfiguration.mh_text[AlgorithmConfiguration.ROTS]),
 						list_rots.get(i).getMetaheuristicId(), qap);
 				solutionPopulation.entrySolution(
-						new Solution(list_eo.get(i).getBestSolution(), list_eo.get(i).getBestCost(),
-								list_eo.get(i).getParams(), AlgorithmConfiguration.mh_text[AlgorithmConfiguration.EO]),
+						list_eo.get(i).getBestSolution(AlgorithmConfiguration.mh_text[AlgorithmConfiguration.EO]),
 						list_eo.get(i).getMetaheuristicId(), qap);
 
 				// create array parameters for each metaheuristic
@@ -106,24 +99,21 @@ public class WorkerTeam extends GenericTeam {
 					// init_cost, final cost order matter
 
 					// with adaptations is necessary the behavior
-					double[] behavior_mtls = parameterControls.getSolutionComparison(list_mtls.get(i).getInitCost(),
-							list_mtls.get(i).getBestCost(), list_mtls.get(i).getInitSolution(),
-							list_mtls.get(i).getBestSolution());
-					double[] behavior_rots = parameterControls.getSolutionComparison(list_rots.get(i).getInitCost(),
-							list_rots.get(i).getBestCost(), list_rots.get(i).getInitSolution(),
-							list_rots.get(i).getBestSolution());
-					double[] behavior_eo = parameterControls.getSolutionComparison(list_eo.get(i).getInitCost(),
-							list_eo.get(i).getBestCost(), list_eo.get(i).getInitSolution(),
-							list_eo.get(i).getBestSolution());
+					double[] perfomance_mtls = parameterControls
+							.getPerfomanceEvaluation(list_mtls.get(i).getMetaheuricticReport());
+					double[] perfomance_rots = parameterControls
+							.getPerfomanceEvaluation(list_rots.get(i).getMetaheuricticReport());
+					double[] perfomance_eo = parameterControls
+							.getPerfomanceEvaluation(list_eo.get(i).getMetaheuricticReport());
 
 					// with adaptations
-					params_MTLS = parameterControls.improveParameter(list_mtls.get(i).getParams(), behavior_mtls,
+					params_MTLS = parameterControls.adaptParameter(list_mtls.get(i).getParams(), perfomance_mtls,
 							AlgorithmConfiguration.MTLS, current_iteration, teamConfiguration.getTotalAdaptations(),
 							diversifyPercentageLimit);
-					params_ROTS = parameterControls.improveParameter(list_rots.get(i).getParams(), behavior_rots,
+					params_ROTS = parameterControls.adaptParameter(list_rots.get(i).getParams(), perfomance_rots,
 							AlgorithmConfiguration.ROTS, current_iteration, teamConfiguration.getTotalAdaptations(),
 							diversifyPercentageLimit);
-					params_EO = parameterControls.improveParameter(list_eo.get(i).getParams(), behavior_eo,
+					params_EO = parameterControls.adaptParameter(list_eo.get(i).getParams(), perfomance_eo,
 							AlgorithmConfiguration.EO, current_iteration, teamConfiguration.getTotalAdaptations(),
 							diversifyPercentageLimit);
 				} else {

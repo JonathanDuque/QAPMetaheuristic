@@ -6,11 +6,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class ParameterControl {
 	private ThreadLocalRandom threadLocalRandom;
-	
+
 	final int qap_size;
 	final private double solutionSimilarityPercertage;
 	List<List<Params>> listParameters;
-	
+
 	private int[] not_improve = { 0, 0, 0 }; // TODO redefine functionality, in that way is no working
 
 	public ParameterControl(int qap_size, double solutionSimilarityPercertage) {
@@ -25,8 +25,8 @@ public class ParameterControl {
 
 	public void generateInitialParamsPopulation(final int params_of_each_mh) {
 		listParameters = new ArrayList<>(AlgorithmConfiguration.DIFFERENT_MH); // because there
-																										// are #
-																										// DIFFERENT_MH
+																				// are #
+																				// DIFFERENT_MH
 
 		for (int k = 0; k < AlgorithmConfiguration.DIFFERENT_MH; k++) {
 			List<Params> temp_list_params = new ArrayList<>(params_of_each_mh);
@@ -85,7 +85,7 @@ public class ParameterControl {
 		return listParameters.get(indexMetaheuristicType).get(index);
 	}
 
-	public int[] improveParameter(final int[] parameter, final double[] behavior_mh, final int type,
+	public int[] adaptParameter(final int[] parameter, final double[] behavior_mh, final int type,
 			final int current_iteration, final int totalAdaptations, final double[] diversify_percentage_limit) {
 
 		final double[] change_pdf_percentage_limit = { 10, 5, 1, 0.5, 0.3 };
@@ -216,14 +216,18 @@ public class ParameterControl {
 		return new_params;
 	}
 
-	public double[] getSolutionComparison(int initCost, int finalCost, int[] initSolution, int[] finalSolution) {
+	public double[] getPerfomanceEvaluation(MetaheuricticReport report) {
 		// init_cost - 100%
-		// (init_cost-final_cost) - x
-		double difference_percentage = (initCost - finalCost) * 100.0 / initCost; // or gain
+		// (init_cost-best_cost) - x
 
+		double difference_percentage = (report.getInitCost() - report.getBestCost()) * 100.0 / report.getInitCost(); // or
+																														// gain
+
+		int initSolution[] = report.getInitSolution();
+		int bestSolution[] = report.getBestSolution();
 		int distance = 0;
 		for (int i = 0; i < initSolution.length; i++) {
-			if (initSolution[i] != finalSolution[i]) {
+			if (initSolution[i] != bestSolution[i]) {
 				distance++;
 			}
 		}
