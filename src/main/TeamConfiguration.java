@@ -11,7 +11,7 @@ public class TeamConfiguration {
 		this.searchers = searchers;
 		this.teamId = teamId;
 		this.iterationTime = iterationTime;
-		//TODO validate time out of 5 mins
+		//TODO implemented a better identifier, no just an id
 	}
 
 	public int getTotalAdaptations() {

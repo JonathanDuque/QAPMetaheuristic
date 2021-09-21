@@ -7,9 +7,9 @@ import java.util.concurrent.ForkJoinPool;
 public class TeamParamsRandom extends GenericTeam {
 	private static final long serialVersionUID = 1L;
 
-	public TeamParamsRandom(int searchers, int iterationTime, int totalAdaptations, QAPData qap, int teamId,
-			int requestPolicy, int entryPolicy, double solutionSimilarityPercertage) {
-		super(searchers, iterationTime, totalAdaptations, qap, teamId, requestPolicy, entryPolicy,
+	public TeamParamsRandom(QAPData qap, int teamId, int searchers, int iterationTime, int totalAdaptations,
+			int requestPolicy, int entryPolicy, int solutionSimilarityPercertage) {
+		super(qap, teamId, searchers, iterationTime, totalAdaptations, requestPolicy, entryPolicy,
 				solutionSimilarityPercertage);
 	}
 

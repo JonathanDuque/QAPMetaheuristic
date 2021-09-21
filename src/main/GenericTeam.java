@@ -11,11 +11,13 @@ public class GenericTeam extends RecursiveAction {
 	ParameterControl parameterControls;
 	private Solution bestTeamSolution;
 
-	public GenericTeam(int searchers, int iterationTime, int totalAdaptations, QAPData qap, int teamId,
-			int requestPolicy, int entryPolicy, double solutionSimilarityPercertage) {
+	public GenericTeam(QAPData qap, int teamId, int searchers, int iterationTime, int totalAdaptations,
+			int requestPolicy, int entryPolicy, int solutionSimilarityPercertage) {
 		super();
 
-		this.qap = qap;
+		// is no possible to use this.qap = qap because is like assign the pointer to
+		// qap for each team
+		this.qap = new QAPData(qap.getDistance(), qap.getFlow(), qap.getBKS());
 		teamConfiguration = new TeamConfiguration(totalAdaptations, searchers, teamId, iterationTime);
 		teamConfiguration.printTeamConfiguration();
 		solutionPopulation = new SolutionPopulation(requestPolicy, entryPolicy);

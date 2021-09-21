@@ -43,7 +43,7 @@ public class QAPData extends GenericProblem {
 			}
 		}
 
-		//Tools.printMatrix(delta, "Init Deltas");
+		// Tools.printMatrix(delta, "Init Deltas");
 
 	}
 
@@ -85,18 +85,20 @@ public class QAPData extends GenericProblem {
 	// quadratic assignment problem
 	public int evalMovement(int[] solution, int i, int j) {
 
-		//int delta2 = 0;
-				/*(flow[j][j] - flow[i][i]) * (distance[solution[j]][solution[j]] - distance[solution[i]][solution[i]])
-		+ (flow[j][i] - flow[i][j]) * (distance[solution[j]][solution[i]] - distance[solution[i]][solution[j]]);*/
-		
-		/*for (int k = 0; k < size; k++) {
-			if (k != i && k != j) {
-				delta2 = delta2 + (flow[j][k] - flow[i][k])
-						* (distance[solution[j]][solution[k]] - distance[solution[i]][solution[k]]);
-			}
-		}*/
+		// int delta2 = 0;
+		/*
+		 * (flow[j][j] - flow[i][i]) * (distance[solution[j]][solution[j]] -
+		 * distance[solution[i]][solution[i]]) + (flow[j][i] - flow[i][j]) *
+		 * (distance[solution[j]][solution[i]] - distance[solution[i]][solution[j]]);
+		 */
 
-		//System.out.println(mh + " real  : " + delta2*2  + " matriz  " + delta[i][j]);
+		/*
+		 * for (int k = 0; k < size; k++) { if (k != i && k != j) { delta2 = delta2 +
+		 * (flow[j][k] - flow[i][k]) (distance[solution[j]][solution[k]] -
+		 * distance[solution[i]][solution[k]]); } }
+		 */
+
+		// System.out.println(mh + " real : " + delta2*2 + " matriz " + delta[i][j]);
 
 		return delta[i][j];
 	}
@@ -137,8 +139,8 @@ public class QAPData extends GenericProblem {
 
 	public void printSolution(int[] array) {
 
-		//System.out.println(label);
-		//System.out.println("Costo: " + evalSolution(array));
+		// System.out.println(label);
+		// System.out.println("Costo: " + evalSolution(array));
 		String locations = "";
 		for (int i : array) {
 			locations = locations + ((i + 1) + " ");// +1 because the index in java start with 0

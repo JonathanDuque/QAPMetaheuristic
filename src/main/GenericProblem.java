@@ -1,6 +1,6 @@
 package main;
 
-public class GenericProblem implements Cloneable {
+public class GenericProblem{
 
 	final int size;
 	final int bks;

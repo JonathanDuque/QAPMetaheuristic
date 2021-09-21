@@ -8,12 +8,12 @@ public class ParameterControl {
 	private ThreadLocalRandom threadLocalRandom;
 
 	final int qap_size;
-	final private double solutionSimilarityPercertage;
+	final private int solutionSimilarityPercertage;
 	List<List<Params>> listParameters;
 
 	private int[] not_improve = { 0, 0, 0 }; // TODO redefine functionality, in that way is no working
 
-	public ParameterControl(int qap_size, double solutionSimilarityPercertage) {
+	public ParameterControl(int qap_size, int solutionSimilarityPercertage) {
 		super();
 		this.solutionSimilarityPercertage = solutionSimilarityPercertage;
 		this.qap_size = qap_size;
@@ -87,7 +87,9 @@ public class ParameterControl {
 
 	public int[] adaptParameter(final int[] parameter, final double[] behavior_mh, final int type,
 			final int current_iteration, final int totalAdaptations, final double[] diversify_percentage_limit) {
+		//TODO define delta values to intensify and diversify variables, functionality o data should be configure inside a metaheuristic
 
+		final int distanceWhereSolutionIsSimilar = qap_size * solutionSimilarityPercertage / 100;
 		final double[] change_pdf_percentage_limit = { 10, 5, 1, 0.5, 0.3 };
 		final double divisor = (float) totalAdaptations / change_pdf_percentage_limit.length;
 		int[] new_params = { 0, 0, 0 };
@@ -108,7 +110,7 @@ public class ParameterControl {
 
 		case AlgorithmConfiguration.ROTS:
 			if (behavior_mh[0] > 0 && behavior_mh[0] <= diversify_percentage_limit[current_iteration]
-					&& behavior_mh[1] <= solutionSimilarityPercertage) {
+					&& behavior_mh[1] <= distanceWhereSolutionIsSimilar) {
 				// is necessary diversify
 				new_params[0] = parameter[0] + Math.floorDiv(qap_size, 2);
 				new_params[1] = parameter[1] + Math.floorDiv(qap_size * qap_size, 2);
@@ -118,6 +120,8 @@ public class ParameterControl {
 				new_params[1] = parameter[1] - Math.floorDiv(qap_size, 2);
 			}
 
+			// check parameters inside the ranges
+			// range 4n to 20n
 			if (new_params[0] > 20 * qap_size) {
 				new_params[0] = 4 * qap_size + threadLocalRandom.nextInt(16 * qap_size); // 4n to 20n
 			}
@@ -126,16 +130,13 @@ public class ParameterControl {
 				new_params[0] = 4 * qap_size + threadLocalRandom.nextInt(16 * qap_size); // 4n to 20n
 			}
 
+			// range n*n to 10n*n
 			if (new_params[1] > 10 * qap_size * qap_size) {
-				new_params[1] = qap_size * qap_size + threadLocalRandom.nextInt(9 * qap_size * qap_size); // n*n
-																											// to
-																											// 10*n*n
+				new_params[1] = qap_size * qap_size + threadLocalRandom.nextInt(9 * qap_size * qap_size);
 			}
 
 			if (new_params[1] < qap_size * qap_size) {
-				new_params[1] = qap_size * qap_size + threadLocalRandom.nextInt(9 * qap_size * qap_size); // n*n
-																											// to
-																											// 10*n*n
+				new_params[1] = qap_size * qap_size + threadLocalRandom.nextInt(9 * qap_size * qap_size);
 			}
 
 			break;
@@ -145,7 +146,7 @@ public class ParameterControl {
 			// parameter[1] : probability function
 
 			if (behavior_mh[0] > 0 && behavior_mh[0] <= diversify_percentage_limit[current_iteration]
-					&& behavior_mh[1] <= solutionSimilarityPercertage) {
+					&& behavior_mh[1] <= distanceWhereSolutionIsSimilar) {
 				// is necessary diversify
 				switch (parameter[1]) {
 				case 2:// gamma tau: 0 to 1 means intensify to diversify

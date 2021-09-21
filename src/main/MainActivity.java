@@ -15,160 +15,119 @@ public class MainActivity {
 	private static AtomicBoolean no_find_BKS = new AtomicBoolean(true);
 
 	public static void main(String[] args) {
+
+		if (validateAlgorithmConfiguration()) {
+			System.out.println(
+					"\n******************    All data is correct for execution     ******************************");
+		} else {
+			return;
+		}
+
 		QAPData qap;
-		int totalAdaptations;
-
-		String problem;
-		int totalSearchers;
-		int iterationTime;// by iteration
-
-		switch (args.length) {
-		case 5:
-			problem = args[0];
-			totalSearchers = Integer.parseInt(args[1]);
-			iterationTime = Integer.parseInt(args[2]);
-			totalAdaptations = Integer.parseInt(args[3]);
-			break;
-		case 4:
-			problem = args[0];
-			totalSearchers = Integer.parseInt(args[1]);
-			iterationTime = Integer.parseInt(args[2]);
-			totalAdaptations = Integer.parseInt(args[3]);
-			break;
-		case 3:
-			problem = args[0];
-			totalSearchers = Integer.parseInt(args[1]);
-			iterationTime = Integer.parseInt(args[2]);
-			totalAdaptations = 15;
-			break;
-		case 2:
-			problem = args[0];
-			totalSearchers = Integer.parseInt(args[1]);
-			iterationTime = 20000;
-			totalAdaptations = 15;
-			break;
-		case 1:
-			problem = args[0];
-			totalSearchers = 3;
-			iterationTime = 20000;
-			totalAdaptations = 15;
-			break;
-		default:
-			problem = "bur26a.qap";
-			totalSearchers = 63;
-			iterationTime = 20000;
-			totalAdaptations = 15;
-			break;
-		}
-
-		final int teams = 1;
-		// problem = args[0];
-		totalSearchers = 3;
-		iterationTime = 2000;
-		totalAdaptations = 15;
-
-		// checking some conditions for execution
-		if ((totalSearchers % AlgorithmConfiguration.DIFFERENT_MH) != 0) {
-			System.out.println(
-					"\n***************** Please enter workers multiple of 3     ********************************");
-			return;
-		}
-
-		if ((totalSearchers % teams) != 0) {
-			System.out.println("\n***************** Please enter teams multiple of " + totalSearchers
-					+ "    ********************************");
-			return;
-		}
-
-		if (((totalSearchers / teams) % AlgorithmConfiguration.DIFFERENT_MH) != 0) {
-			System.out.println(
-					"\n***************** Threads by team must be multiple of 3     ********************************");
-			return;
-		}
+		final int totalTeams = AlgorithmConfiguration.totalTeamsParamsAdapted
+				+ AlgorithmConfiguration.totalTeamsParamsRandom + AlgorithmConfiguration.totalTeamsParamsFixed;
 
 		for (int k = 0; k < 1; k += 1) {
 			final long start = System.currentTimeMillis();
 
-			System.out.println("\n*****************    Problem: " + problem + "    ********************************");
-			System.out.println("Total Teams: " + teams);
+			System.out.println("\n----------------    Problem: " + AlgorithmConfiguration.problemName
+					+ "    -----------------------");
+			System.out.println("Total Teams: " + totalTeams);
 			System.out.println("execution: " + k);
 
-			final ReadFile readFile = new ReadFile("Data/" + problem);
+			final ReadFile readFile = new ReadFile("Data/" + AlgorithmConfiguration.problemName);
 			// final ReadFile readFile = new ReadFile("../../Data/" + problem);
 
 			// initialize qap data, flow and distance matrix, format [row][col]
 			final int[][] flow = readFile.getFlow(), distance = readFile.getDistance();
 			qap = new QAPData(distance, flow, readFile.getTarget());
 
-			ForkJoinPool pool = new ForkJoinPool(teams);
-			List<GenericTeam> list_teams = new ArrayList<>(teams);// these lists are necessary for the executing in
-																	// parallel
-																	// of each team
+			ForkJoinPool pool = new ForkJoinPool(totalTeams);
+			// these lists are necessary for the executing in parallel of each team
+			List<GenericTeam> listTeams = new ArrayList<>(totalTeams);
 
 			double initTime = (System.currentTimeMillis() - start);
 			initTime /= 1000.0;
 
-			for (int i = 0; i < teams; i += 1) {
-				TeamParamsAdapted team1 = new TeamParamsAdapted(totalSearchers / teams, iterationTime, totalAdaptations,
-						qap, i, SolutionPopulation.REQUEST_RANDOM, SolutionPopulation.ENTRY_IF_DIFERENT,
-						qap.size / 3.0);
-				list_teams.add(team1);
+			for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsAdapted; i += 1) {
+				TeamParamsAdapted teamParamsAdapted = new TeamParamsAdapted(qap, i, AlgorithmConfiguration.teamSize,
+						AlgorithmConfiguration.iterationTimeTeamParamsAdapted[i],
+						AlgorithmConfiguration.totalAdaptationsTeamParamsAdapted[i],
+						AlgorithmConfiguration.requestPolicyTeamParamsAdapted[i],
+						AlgorithmConfiguration.entryPolicyTeamParamsAdapted[i],
+						AlgorithmConfiguration.solutionSimilarityPercertageTeamParamsAdapted[i]);
+				listTeams.add(teamParamsAdapted);
 			}
 
-			// this line is important if we want to execute other type of team with other
-			// setup
-			/*
-			 * TeamParamsRandom team2 = new TeamParamsRandom(totalSearchers / teams,
-			 * iterationTime, totalAdaptations, qap, 1, SolutionPopulation.REQUEST_RANDOM,
-			 * SolutionPopulation.ENTRY_IF_DIFERENT, qap.size / 3.0); list_teams.add(team2);
-			 * 
-			 * TeamParamsFixed team3 = new TeamParamsFixed(totalSearchers / teams,
-			 * iterationTime, totalAdaptations, qap, 2, SolutionPopulation.REQUEST_SAME,
-			 * SolutionPopulation.ENTRY_SAME, qap.size / 3.0); list_teams.add(team3);
-			 */
+			for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsRandom; i += 1) {
+				TeamParamsRandom teamParamsRandom = new TeamParamsRandom(qap, i, AlgorithmConfiguration.teamSize,
+						AlgorithmConfiguration.iterationTimeTeamParamsRandom[i],
+						AlgorithmConfiguration.totalAdaptationsTeamParamsRandom[i],
+						AlgorithmConfiguration.requestPolicyTeamParamsRandom[i],
+						AlgorithmConfiguration.entryPolicyTeamParamsRandom[i], 0);// 0 because no use
+																					// solutionSimilarityPercertage
+				listTeams.add(teamParamsRandom);
+			}
+
+			for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsFixed; i += 1) {
+				TeamParamsFixed teamParamsFixed = new TeamParamsFixed(qap, i, AlgorithmConfiguration.teamSize,
+						AlgorithmConfiguration.iterationTimeTeamParamsFixed[i],
+						AlgorithmConfiguration.totalAdaptationsTeamParamsFixed[i],
+						AlgorithmConfiguration.requestPolicyTeamParamsFixed[i],
+						AlgorithmConfiguration.entryPolicyTeamParamsFixed[i], 0);// 0 because no use
+																					// solutionSimilarityPercertage
+				listTeams.add(teamParamsFixed);
+			}
 
 			// launch execution in parallel for all teams
-			for (int i = 0; i < teams; i += 1) {
-				pool.submit(list_teams.get(i));
+			for (int i = 0; i < totalTeams; i += 1) {
+				pool.submit(listTeams.get(i));
 			}
 
 			// wait for each team
-			for (int i = 0; i < teams; i += 1) {
-				list_teams.get(i).join();
+			for (int i = 0; i < totalTeams; i += 1) {
+				listTeams.get(i).join();
 			}
 
 			// get the results for each team
-			List<Solution> list_teams_solutions = new ArrayList<>();
-			for (int i = 0; i < teams; i += 1) {
-				Solution solution = list_teams.get(i).getBestTeamSolution();
-				list_teams_solutions.add(solution);
+			List<Solution> listTeamsSolutions = new ArrayList<>();
+			for (int i = 0; i < totalTeams; i += 1) {
+				Solution solution = listTeams.get(i).getBestTeamSolution();
+				listTeamsSolutions.add(solution);
 			}
 
-			Solution bestTeamSolution = list_teams_solutions.get(0);
+			Solution bestTeamSolution = listTeamsSolutions.get(0);
 			int best_cost = qap.evaluateSolution(bestTeamSolution.getArray());
-			int team = list_teams.get(0).getTeamId();
+			int team = listTeams.get(0).getTeamId();
 			// get the best result
-			for (int i = 0; i < list_teams_solutions.size(); i++) {
-				int temp_cost = qap.evaluateSolution(list_teams_solutions.get(i).getArray());
+			for (int i = 0; i < listTeamsSolutions.size(); i++) {
+				int temp_cost = qap.evaluateSolution(listTeamsSolutions.get(i).getArray());
 
 				if (temp_cost < best_cost) {
 					best_cost = temp_cost;
-					bestTeamSolution = list_teams_solutions.get(i);
-					team = list_teams.get(i).getTeamId();
+					bestTeamSolution = listTeamsSolutions.get(i);
+					team = listTeams.get(i).getTeamId();
 				}
 			}
 
 			double totalTime = (System.currentTimeMillis() - start);
 			totalTime /= 1000.0;
 
-			printResultInConsole(bestTeamSolution, problem, totalTime, qap, team);
-			printResultInFile(bestTeamSolution, problem, totalTime, qap, team, initTime);
+			if (AlgorithmConfiguration.printResultInConsole) {
+				printResultInConsole(bestTeamSolution, totalTime, qap, team);
+			}
 
-			list_teams.clear();
-			list_teams_solutions.clear();
+			if (AlgorithmConfiguration.printResultInCSVFile) {
+				printResultInFile(bestTeamSolution, totalTime, qap, team, initTime);
+			}
+
+			listTeams.clear();
+			listTeamsSolutions.clear();
 			no_find_BKS.set(true);
 
 		}
+		System.out.println(
+				"\n**************************      Execution finished     ***********************************");
 
 	}
 
@@ -182,8 +141,154 @@ public class MainActivity {
 		return no_find_BKS.get();
 	}
 
-	public static void printResultInConsole(Solution bestTeamSolution, String problem, double totalTime, QAPData qap,
-			int team) {
+	@SuppressWarnings("unused")
+	public static boolean validateAlgorithmConfiguration() {
+
+		if (AlgorithmConfiguration.problemName.isEmpty()) {
+			System.out.println(
+					"\n***************** Please enter a problem name to solve     ********************************");
+			return false;
+		}
+
+		// checking some conditions for execution
+		if ((AlgorithmConfiguration.teamSize % AlgorithmConfiguration.DIFFERENT_MH) != 0) {
+			System.out.println(
+					"\n***************** Please enter a team size multiple of 3     ********************************");
+			return false;
+		}
+
+		// TODO validate request and entry policy options
+		if (AlgorithmConfiguration.totalTeamsParamsAdapted > 0) {
+			if (AlgorithmConfiguration.totalAdaptationsTeamParamsAdapted == null
+					|| AlgorithmConfiguration.iterationTimeTeamParamsAdapted == null
+					|| AlgorithmConfiguration.requestPolicyTeamParamsAdapted == null
+					|| AlgorithmConfiguration.entryPolicyTeamParamsAdapted == null
+					|| AlgorithmConfiguration.solutionSimilarityPercertageTeamParamsAdapted == null) {
+				System.out.println(
+						"\n***************** Data for TeamsParamsAdapted: some data have a null value *****************");
+				return false;
+			}
+
+			if (AlgorithmConfiguration.totalAdaptationsTeamParamsAdapted.length == AlgorithmConfiguration.totalTeamsParamsAdapted
+					&& AlgorithmConfiguration.iterationTimeTeamParamsAdapted.length == AlgorithmConfiguration.totalTeamsParamsAdapted
+					&& AlgorithmConfiguration.requestPolicyTeamParamsAdapted.length == AlgorithmConfiguration.totalTeamsParamsAdapted
+					&& AlgorithmConfiguration.entryPolicyTeamParamsAdapted.length == AlgorithmConfiguration.totalTeamsParamsAdapted
+					&& AlgorithmConfiguration.solutionSimilarityPercertageTeamParamsAdapted.length == AlgorithmConfiguration.totalTeamsParamsAdapted) {
+
+				for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsAdapted; i++) {
+					if (AlgorithmConfiguration.totalAdaptationsTeamParamsAdapted[i] <= 0
+							|| AlgorithmConfiguration.iterationTimeTeamParamsAdapted[i] <= 0
+							|| AlgorithmConfiguration.solutionSimilarityPercertageTeamParamsAdapted[i] <= 0) {
+						System.out.println(
+								"\n***************** Data for TeamsParamsAdapted: Please the values for adaptations number, iteration times and solution "
+										+ "similarity percentage should be bigger than 0 ********************************");
+						return false;
+					}
+
+					if (AlgorithmConfiguration.totalAdaptationsTeamParamsAdapted[i]
+							* AlgorithmConfiguration.iterationTimeTeamParamsAdapted[i]
+							/ 1000.0 != AlgorithmConfiguration.totalTimeOut) {
+						System.out.println(
+								"\n***************** Data for TeamsParamsAdapted: Please enter the values for adaptations number * iteration time = total time out ***************************");
+						return false;
+
+					}
+				}
+
+			} else {
+				System.out.println(
+						"\n***************** Data for TeamsParamsAdapted: some data missing  *****************");
+				return false;
+			}
+		}
+
+		if (AlgorithmConfiguration.totalTeamsParamsRandom > 0) {
+			if (AlgorithmConfiguration.totalAdaptationsTeamParamsRandom == null
+					|| AlgorithmConfiguration.iterationTimeTeamParamsRandom == null
+					|| AlgorithmConfiguration.requestPolicyTeamParamsRandom == null
+					|| AlgorithmConfiguration.entryPolicyTeamParamsRandom == null) {
+				System.out.println(
+						"\n***************** Data for TeamParamsRandom: some data have a null value *****************");
+				return false;
+			}
+
+			if (AlgorithmConfiguration.totalAdaptationsTeamParamsRandom.length == AlgorithmConfiguration.totalTeamsParamsRandom
+					&& AlgorithmConfiguration.iterationTimeTeamParamsRandom.length == AlgorithmConfiguration.totalTeamsParamsRandom
+					&& AlgorithmConfiguration.requestPolicyTeamParamsRandom.length == AlgorithmConfiguration.totalTeamsParamsRandom
+					&& AlgorithmConfiguration.entryPolicyTeamParamsRandom.length == AlgorithmConfiguration.totalTeamsParamsRandom) {
+
+				for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsRandom; i++) {
+					if (AlgorithmConfiguration.totalAdaptationsTeamParamsRandom[i] <= 0
+							|| AlgorithmConfiguration.iterationTimeTeamParamsRandom[i] <= 0) {
+						System.out.println(
+								"\n***************** Data for TeamParamsRandom: Please the values for adaptations number, and iteration times "
+										+ "should be bigger than 0 ********************************");
+						return false;
+					}
+
+					if (AlgorithmConfiguration.totalAdaptationsTeamParamsRandom[i]
+							* AlgorithmConfiguration.iterationTimeTeamParamsRandom[i]
+							/ 1000.0 != AlgorithmConfiguration.totalTimeOut) {
+						System.out.println(
+								"\n***************** Data for TeamParamsRandom: Please enter the values for adaptations number * iteration time = total time out ***************************");
+						return false;
+
+					}
+				}
+
+			} else {
+				System.out
+						.println("\n***************** Data for TeamParamsRandom: some data missing  *****************");
+				return false;
+			}
+		}
+
+		if (AlgorithmConfiguration.totalTeamsParamsFixed > 0) {
+			if (AlgorithmConfiguration.totalAdaptationsTeamParamsFixed == null
+					|| AlgorithmConfiguration.iterationTimeTeamParamsFixed == null
+					|| AlgorithmConfiguration.requestPolicyTeamParamsFixed == null
+					|| AlgorithmConfiguration.entryPolicyTeamParamsFixed == null) {
+				System.out.println(
+						"\n***************** Data for TeamParamsFixed: some data have a null value *****************");
+				return false;
+			}
+
+			if (AlgorithmConfiguration.totalAdaptationsTeamParamsFixed.length == AlgorithmConfiguration.totalTeamsParamsFixed
+					&& AlgorithmConfiguration.iterationTimeTeamParamsFixed.length == AlgorithmConfiguration.totalTeamsParamsFixed
+					&& AlgorithmConfiguration.requestPolicyTeamParamsFixed.length == AlgorithmConfiguration.totalTeamsParamsFixed
+					&& AlgorithmConfiguration.entryPolicyTeamParamsFixed.length == AlgorithmConfiguration.totalTeamsParamsFixed) {
+
+				for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsFixed; i++) {
+					if (AlgorithmConfiguration.totalAdaptationsTeamParamsFixed[i] <= 0
+							|| AlgorithmConfiguration.iterationTimeTeamParamsFixed[i] <= 0) {
+						System.out.println(
+								"\n***************** Data for TeamParamsFixed: Please the values for adaptations number, and iteration times "
+										+ "should be bigger than 0 ********************************");
+						return false;
+					}
+
+					if (AlgorithmConfiguration.totalAdaptationsTeamParamsFixed[i]
+							* AlgorithmConfiguration.iterationTimeTeamParamsFixed[i]
+							/ 1000.0 != AlgorithmConfiguration.totalTimeOut) {
+						System.out.println(
+								"\n***************** Data for TeamParamsFixed: Please enter the values for adaptations number * iteration time = total time out ***************************");
+						return false;
+
+					}
+				}
+
+			} else {
+				System.out
+						.println("\n***************** Data for TeamParamsFixed: some data missing  *****************");
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public static void printResultInConsole(Solution bestTeamSolution, double totalTime, QAPData qap, int team) {
+		// TODO print more data
 		int[] best_solution = bestTeamSolution.getArray();
 		int[] best_params = bestTeamSolution.getParams();
 		String best_method = bestTeamSolution.getMetaheuristicName();
@@ -191,7 +296,7 @@ public class MainActivity {
 
 		final double std = best_cost * 100.0 / qap.getBKS() - 100;
 
-		System.out.println("\n*****************      Results     ********************************");
+		System.out.println("\n-----------------      Results     -------------------------------");
 		System.out.println("Best cost achieved: " + best_cost + " " + Tools.DECIMAL_FORMAT_2D.format(std) + "%");
 		System.out.println("Method: " + best_method);
 		System.out.println("Parameters:");
@@ -200,8 +305,9 @@ public class MainActivity {
 		System.out.println("Total time: " + totalTime + " sec");
 	}
 
-	public static void printResultInFile(Solution bestTeamSolution, String problem, double totalTime, QAPData qap,
-			int team, double initTime) {
+	public static void printResultInFile(Solution bestTeamSolution, double totalTime, QAPData qap, int team,
+			double initTime) {
+		// TODO print more data
 		int[] best_solution = bestTeamSolution.getArray();
 		int[] best_params = bestTeamSolution.getParams();
 		String best_method = bestTeamSolution.getMetaheuristicName();
@@ -209,10 +315,10 @@ public class MainActivity {
 
 		final double std = best_cost * 100.0 / qap.getBKS() - 100;
 
-		// final String dir_file = "Results/";
-		final String dir_file = "../Result-26/";
+		final String dir_file = "Results/";
+		// final String dir_file = "../Result-26/";
 
-		final String file_name = problem.replace(".qap", "");
+		final String file_name = AlgorithmConfiguration.problemName.replace(".qap", "");
 		File idea = new File(dir_file + file_name + ".csv");
 		FileWriter fileWriter;
 		if (!idea.exists()) {
