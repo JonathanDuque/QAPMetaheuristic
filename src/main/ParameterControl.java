@@ -11,7 +11,9 @@ public class ParameterControl {
 	final private int solutionSimilarityPercertage;
 	List<List<Params>> listParameters;
 
-	private int[] not_improve = { 0, 0, 0 }; // TODO redefine functionality, in that way is no working
+	// TODO redefine functionality, in that way is no working
+	// TODO implement logic for iterations without improve for setting categorical parameters
+	private int[] not_improve = { 0, 0, 0 };
 
 	public ParameterControl(int qap_size, int solutionSimilarityPercertage) {
 		super();

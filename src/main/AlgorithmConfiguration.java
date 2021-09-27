@@ -1,7 +1,8 @@
 package main;
 
 public class AlgorithmConfiguration {
-	//TODO create readme for this file
+	// TODO create README for this file
+	// TODO create delta parameter for each metaheurtist
 
 	// fixed data for the algorithm
 	final static int MTLS = 0, ROTS = 1, EO = 2;
@@ -16,7 +17,7 @@ public class AlgorithmConfiguration {
 	final static boolean printResultInConsole = true;
 	final static boolean printResultInCSVFile = true;
 
-	// data for team of kind:TeamParamsAdapted
+	// data for team of kind: AdaptedParamsTeam
 	final static int totalTeamsParamsAdapted = 2;
 	final static int[] iterationTimeTeamParamsAdapted = { 20000, 15000 };// by iteration in millisecond
 	final static int[] totalAdaptationsTeamParamsAdapted = { 15, 20 };
@@ -26,14 +27,14 @@ public class AlgorithmConfiguration {
 			SolutionPopulation.ENTRY_SAME };
 	final static int[] solutionSimilarityPercertageTeamParamsAdapted = { 33, 33 };
 
-	// data for team of kind: TeamParamsRandom
+	// data for team of kind: RandomParamsTeam
 	final static int totalTeamsParamsRandom = 1;
 	final static int[] iterationTimeTeamParamsRandom = { 20000 };
 	final static int[] totalAdaptationsTeamParamsRandom = { 15 };
 	final static int[] requestPolicyTeamParamsRandom = { SolutionPopulation.REQUEST_RANDOM };
 	final static int[] entryPolicyTeamParamsRandom = { SolutionPopulation.ENTRY_IF_DIFERENT };
 
-	// data for team of kind: TeamParamsFixed
+	// data for team of kind: FixedParamsTeam
 	final static int totalTeamsParamsFixed = 0;
 	final static int[] iterationTimeTeamParamsFixed = null;
 	final static int[] totalAdaptationsTeamParamsFixed = null;

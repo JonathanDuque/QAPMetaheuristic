@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
-public class TeamParamsAdapted extends GenericTeam {
+public class AdaptedParamsTeam extends GenericTeam {
 	private static final long serialVersionUID = 1L;
 
-	public TeamParamsAdapted(QAPData qap, int teamId, int searchers, int iterationTime, int totalAdaptations,
+	public AdaptedParamsTeam(QAPData qap, int teamId, int searchers, int iterationTime, int totalAdaptations,
 			int requestPolicy, int entryPolicy, int solutionSimilarityPercertage) {
 		super(qap, teamId, searchers, iterationTime, totalAdaptations, requestPolicy, entryPolicy,
 				solutionSimilarityPercertage);
@@ -125,4 +125,9 @@ public class TeamParamsAdapted extends GenericTeam {
 		// create and initiate variables for team results
 		setBestTeamSolution(solutionPopulation.getBestSolution());
 	}
+	
+
+	// please put here your own definition of the function getDiversifyPercentageLimit
+	/*public double[] getDiversifyPercentageLimit(int totalAdaptations) {
+	}*/
 }

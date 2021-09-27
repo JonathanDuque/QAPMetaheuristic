@@ -50,33 +50,33 @@ public class MainActivity {
 			initTime /= 1000.0;
 
 			for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsAdapted; i += 1) {
-				TeamParamsAdapted teamParamsAdapted = new TeamParamsAdapted(qap, i, AlgorithmConfiguration.teamSize,
+				AdaptedParamsTeam adaptedParamsTeam = new AdaptedParamsTeam(qap, i, AlgorithmConfiguration.teamSize,
 						AlgorithmConfiguration.iterationTimeTeamParamsAdapted[i],
 						AlgorithmConfiguration.totalAdaptationsTeamParamsAdapted[i],
 						AlgorithmConfiguration.requestPolicyTeamParamsAdapted[i],
 						AlgorithmConfiguration.entryPolicyTeamParamsAdapted[i],
 						AlgorithmConfiguration.solutionSimilarityPercertageTeamParamsAdapted[i]);
-				listTeams.add(teamParamsAdapted);
+				listTeams.add(adaptedParamsTeam);
 			}
 
 			for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsRandom; i += 1) {
-				TeamParamsRandom teamParamsRandom = new TeamParamsRandom(qap, i, AlgorithmConfiguration.teamSize,
+				RandomParamsTeam randomParamsTeam = new RandomParamsTeam(qap, i, AlgorithmConfiguration.teamSize,
 						AlgorithmConfiguration.iterationTimeTeamParamsRandom[i],
 						AlgorithmConfiguration.totalAdaptationsTeamParamsRandom[i],
 						AlgorithmConfiguration.requestPolicyTeamParamsRandom[i],
 						AlgorithmConfiguration.entryPolicyTeamParamsRandom[i], 0);// 0 because no use
 																					// solutionSimilarityPercertage
-				listTeams.add(teamParamsRandom);
+				listTeams.add(randomParamsTeam);
 			}
 
 			for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsFixed; i += 1) {
-				TeamParamsFixed teamParamsFixed = new TeamParamsFixed(qap, i, AlgorithmConfiguration.teamSize,
+				FixedParamsTeam fixedParamsTeam = new FixedParamsTeam(qap, i, AlgorithmConfiguration.teamSize,
 						AlgorithmConfiguration.iterationTimeTeamParamsFixed[i],
 						AlgorithmConfiguration.totalAdaptationsTeamParamsFixed[i],
 						AlgorithmConfiguration.requestPolicyTeamParamsFixed[i],
 						AlgorithmConfiguration.entryPolicyTeamParamsFixed[i], 0);// 0 because no use
 																					// solutionSimilarityPercertage
-				listTeams.add(teamParamsFixed);
+				listTeams.add(fixedParamsTeam);
 			}
 
 			// launch execution in parallel for all teams

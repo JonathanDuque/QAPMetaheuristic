@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
-public class TeamParamsRandom extends GenericTeam {
+public class FixedParamsTeam extends GenericTeam {
 	private static final long serialVersionUID = 1L;
 
-	public TeamParamsRandom(QAPData qap, int teamId, int searchers, int iterationTime, int totalAdaptations,
+	public FixedParamsTeam(QAPData qap, int teamId, int searchers, int iterationTime, int totalAdaptations,
 			int requestPolicy, int entryPolicy, int solutionSimilarityPercertage) {
 		super(qap, teamId, searchers, iterationTime, totalAdaptations, requestPolicy, entryPolicy,
 				solutionSimilarityPercertage);
@@ -90,9 +90,10 @@ public class TeamParamsRandom extends GenericTeam {
 				int[] params_ROTS = new int[3];
 				int[] params_EO = new int[3];
 
-				params_MTLS = parameterControls.createParameter(AlgorithmConfiguration.MTLS);
-				params_ROTS = parameterControls.createParameter(AlgorithmConfiguration.ROTS);
-				params_EO = parameterControls.createParameter(AlgorithmConfiguration.EO);
+				// fixed parameter, same parameter always
+				params_MTLS = list_mtls.get(i).getParams();
+				params_ROTS = list_rots.get(i).getParams();
+				params_EO = list_eo.get(i).getParams();
 
 				// insert the new parameters into parameters population, each one in the same
 				// position
