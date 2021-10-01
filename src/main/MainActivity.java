@@ -24,8 +24,8 @@ public class MainActivity {
 		}
 
 		QAPData qap;
-		final int totalTeams = AlgorithmConfiguration.totalTeamsParamsAdapted
-				+ AlgorithmConfiguration.totalTeamsParamsRandom + AlgorithmConfiguration.totalTeamsParamsFixed;
+		final int totalTeams = AlgorithmConfiguration.totalAdaptedParamsTeams
+				+ AlgorithmConfiguration.totalRandomParamsTeams + AlgorithmConfiguration.totalFixedParamsTeams;
 
 		for (int k = 0; k < 1; k += 1) {
 			final long start = System.currentTimeMillis();
@@ -49,32 +49,32 @@ public class MainActivity {
 			double initTime = (System.currentTimeMillis() - start);
 			initTime /= 1000.0;
 
-			for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsAdapted; i += 1) {
+			for (int i = 0; i < AlgorithmConfiguration.totalAdaptedParamsTeams; i += 1) {
 				AdaptedParamsTeam adaptedParamsTeam = new AdaptedParamsTeam(qap, i, AlgorithmConfiguration.teamSize,
-						AlgorithmConfiguration.iterationTimeTeamParamsAdapted[i],
-						AlgorithmConfiguration.totalAdaptationsTeamParamsAdapted[i],
-						AlgorithmConfiguration.requestPolicyTeamParamsAdapted[i],
-						AlgorithmConfiguration.entryPolicyTeamParamsAdapted[i],
-						AlgorithmConfiguration.solutionSimilarityPercertageTeamParamsAdapted[i]);
+						AlgorithmConfiguration.iterationTimeAdaptedParamsTeam[i],
+						AlgorithmConfiguration.totalAdaptationsAdaptedParamsTeam[i],
+						AlgorithmConfiguration.requestPolicyAdaptedParamsTeam[i],
+						AlgorithmConfiguration.entryPolicyAdaptedParamsTeam[i],
+						AlgorithmConfiguration.solutionSimilarityPercertageAdaptedParamsTeam[i]);
 				listTeams.add(adaptedParamsTeam);
 			}
 
-			for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsRandom; i += 1) {
+			for (int i = 0; i < AlgorithmConfiguration.totalRandomParamsTeams; i += 1) {
 				RandomParamsTeam randomParamsTeam = new RandomParamsTeam(qap, i, AlgorithmConfiguration.teamSize,
-						AlgorithmConfiguration.iterationTimeTeamParamsRandom[i],
-						AlgorithmConfiguration.totalAdaptationsTeamParamsRandom[i],
-						AlgorithmConfiguration.requestPolicyTeamParamsRandom[i],
-						AlgorithmConfiguration.entryPolicyTeamParamsRandom[i], 0);// 0 because no use
+						AlgorithmConfiguration.iterationTimeRandomParamsTeam[i],
+						AlgorithmConfiguration.totalAdaptationsRandomParamsTeam[i],
+						AlgorithmConfiguration.requestPolicyRandomParamsTeam[i],
+						AlgorithmConfiguration.entryPolicyRandomParamsTeam[i], 0);// 0 because no use
 																					// solutionSimilarityPercertage
 				listTeams.add(randomParamsTeam);
 			}
 
-			for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsFixed; i += 1) {
+			for (int i = 0; i < AlgorithmConfiguration.totalFixedParamsTeams; i += 1) {
 				FixedParamsTeam fixedParamsTeam = new FixedParamsTeam(qap, i, AlgorithmConfiguration.teamSize,
-						AlgorithmConfiguration.iterationTimeTeamParamsFixed[i],
-						AlgorithmConfiguration.totalAdaptationsTeamParamsFixed[i],
-						AlgorithmConfiguration.requestPolicyTeamParamsFixed[i],
-						AlgorithmConfiguration.entryPolicyTeamParamsFixed[i], 0);// 0 because no use
+						AlgorithmConfiguration.iterationTimeFixedParamsTeam[i],
+						AlgorithmConfiguration.totalAdaptationsFixedParamsTeam[i],
+						AlgorithmConfiguration.requestPolicyFixedParamsTeam[i],
+						AlgorithmConfiguration.entryPolicyFixedParamsTeam[i], 0);// 0 because no use
 																					// solutionSimilarityPercertage
 				listTeams.add(fixedParamsTeam);
 			}
@@ -158,35 +158,35 @@ public class MainActivity {
 		}
 
 		// TODO validate request and entry policy options
-		if (AlgorithmConfiguration.totalTeamsParamsAdapted > 0) {
-			if (AlgorithmConfiguration.totalAdaptationsTeamParamsAdapted == null
-					|| AlgorithmConfiguration.iterationTimeTeamParamsAdapted == null
-					|| AlgorithmConfiguration.requestPolicyTeamParamsAdapted == null
-					|| AlgorithmConfiguration.entryPolicyTeamParamsAdapted == null
-					|| AlgorithmConfiguration.solutionSimilarityPercertageTeamParamsAdapted == null) {
+		if (AlgorithmConfiguration.totalAdaptedParamsTeams > 0) {
+			if (AlgorithmConfiguration.totalAdaptationsAdaptedParamsTeam == null
+					|| AlgorithmConfiguration.iterationTimeAdaptedParamsTeam == null
+					|| AlgorithmConfiguration.requestPolicyAdaptedParamsTeam == null
+					|| AlgorithmConfiguration.entryPolicyAdaptedParamsTeam == null
+					|| AlgorithmConfiguration.solutionSimilarityPercertageAdaptedParamsTeam == null) {
 				System.out.println(
 						"\n***************** Data for TeamsParamsAdapted: some data have a null value *****************");
 				return false;
 			}
 
-			if (AlgorithmConfiguration.totalAdaptationsTeamParamsAdapted.length == AlgorithmConfiguration.totalTeamsParamsAdapted
-					&& AlgorithmConfiguration.iterationTimeTeamParamsAdapted.length == AlgorithmConfiguration.totalTeamsParamsAdapted
-					&& AlgorithmConfiguration.requestPolicyTeamParamsAdapted.length == AlgorithmConfiguration.totalTeamsParamsAdapted
-					&& AlgorithmConfiguration.entryPolicyTeamParamsAdapted.length == AlgorithmConfiguration.totalTeamsParamsAdapted
-					&& AlgorithmConfiguration.solutionSimilarityPercertageTeamParamsAdapted.length == AlgorithmConfiguration.totalTeamsParamsAdapted) {
+			if (AlgorithmConfiguration.totalAdaptationsAdaptedParamsTeam.length == AlgorithmConfiguration.totalAdaptedParamsTeams
+					&& AlgorithmConfiguration.iterationTimeAdaptedParamsTeam.length == AlgorithmConfiguration.totalAdaptedParamsTeams
+					&& AlgorithmConfiguration.requestPolicyAdaptedParamsTeam.length == AlgorithmConfiguration.totalAdaptedParamsTeams
+					&& AlgorithmConfiguration.entryPolicyAdaptedParamsTeam.length == AlgorithmConfiguration.totalAdaptedParamsTeams
+					&& AlgorithmConfiguration.solutionSimilarityPercertageAdaptedParamsTeam.length == AlgorithmConfiguration.totalAdaptedParamsTeams) {
 
-				for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsAdapted; i++) {
-					if (AlgorithmConfiguration.totalAdaptationsTeamParamsAdapted[i] <= 0
-							|| AlgorithmConfiguration.iterationTimeTeamParamsAdapted[i] <= 0
-							|| AlgorithmConfiguration.solutionSimilarityPercertageTeamParamsAdapted[i] <= 0) {
+				for (int i = 0; i < AlgorithmConfiguration.totalAdaptedParamsTeams; i++) {
+					if (AlgorithmConfiguration.totalAdaptationsAdaptedParamsTeam[i] <= 0
+							|| AlgorithmConfiguration.iterationTimeAdaptedParamsTeam[i] <= 0
+							|| AlgorithmConfiguration.solutionSimilarityPercertageAdaptedParamsTeam[i] <= 0) {
 						System.out.println(
 								"\n***************** Data for TeamsParamsAdapted: Please the values for adaptations number, iteration times and solution "
 										+ "similarity percentage should be bigger than 0 ********************************");
 						return false;
 					}
 
-					if (AlgorithmConfiguration.totalAdaptationsTeamParamsAdapted[i]
-							* AlgorithmConfiguration.iterationTimeTeamParamsAdapted[i]
+					if (AlgorithmConfiguration.totalAdaptationsAdaptedParamsTeam[i]
+							* AlgorithmConfiguration.iterationTimeAdaptedParamsTeam[i]
 							/ 1000.0 != AlgorithmConfiguration.totalTimeOut) {
 						System.out.println(
 								"\n***************** Data for TeamsParamsAdapted: Please enter the values for adaptations number * iteration time = total time out ***************************");
@@ -202,32 +202,32 @@ public class MainActivity {
 			}
 		}
 
-		if (AlgorithmConfiguration.totalTeamsParamsRandom > 0) {
-			if (AlgorithmConfiguration.totalAdaptationsTeamParamsRandom == null
-					|| AlgorithmConfiguration.iterationTimeTeamParamsRandom == null
-					|| AlgorithmConfiguration.requestPolicyTeamParamsRandom == null
-					|| AlgorithmConfiguration.entryPolicyTeamParamsRandom == null) {
+		if (AlgorithmConfiguration.totalRandomParamsTeams > 0) {
+			if (AlgorithmConfiguration.totalAdaptationsRandomParamsTeam == null
+					|| AlgorithmConfiguration.iterationTimeRandomParamsTeam == null
+					|| AlgorithmConfiguration.requestPolicyRandomParamsTeam == null
+					|| AlgorithmConfiguration.entryPolicyRandomParamsTeam == null) {
 				System.out.println(
-						"\n***************** Data for TeamParamsRandom: some data have a null value *****************");
+						"\n***************** Data for RandomParamsTeam: some data have a null value *****************");
 				return false;
 			}
 
-			if (AlgorithmConfiguration.totalAdaptationsTeamParamsRandom.length == AlgorithmConfiguration.totalTeamsParamsRandom
-					&& AlgorithmConfiguration.iterationTimeTeamParamsRandom.length == AlgorithmConfiguration.totalTeamsParamsRandom
-					&& AlgorithmConfiguration.requestPolicyTeamParamsRandom.length == AlgorithmConfiguration.totalTeamsParamsRandom
-					&& AlgorithmConfiguration.entryPolicyTeamParamsRandom.length == AlgorithmConfiguration.totalTeamsParamsRandom) {
+			if (AlgorithmConfiguration.totalAdaptationsRandomParamsTeam.length == AlgorithmConfiguration.totalRandomParamsTeams
+					&& AlgorithmConfiguration.iterationTimeRandomParamsTeam.length == AlgorithmConfiguration.totalRandomParamsTeams
+					&& AlgorithmConfiguration.requestPolicyRandomParamsTeam.length == AlgorithmConfiguration.totalRandomParamsTeams
+					&& AlgorithmConfiguration.entryPolicyRandomParamsTeam.length == AlgorithmConfiguration.totalRandomParamsTeams) {
 
-				for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsRandom; i++) {
-					if (AlgorithmConfiguration.totalAdaptationsTeamParamsRandom[i] <= 0
-							|| AlgorithmConfiguration.iterationTimeTeamParamsRandom[i] <= 0) {
+				for (int i = 0; i < AlgorithmConfiguration.totalRandomParamsTeams; i++) {
+					if (AlgorithmConfiguration.totalAdaptationsRandomParamsTeam[i] <= 0
+							|| AlgorithmConfiguration.iterationTimeRandomParamsTeam[i] <= 0) {
 						System.out.println(
-								"\n***************** Data for TeamParamsRandom: Please the values for adaptations number, and iteration times "
+								"\n***************** Data for RandomParamsTeam: Please the values for adaptations number, and iteration times "
 										+ "should be bigger than 0 ********************************");
 						return false;
 					}
 
-					if (AlgorithmConfiguration.totalAdaptationsTeamParamsRandom[i]
-							* AlgorithmConfiguration.iterationTimeTeamParamsRandom[i]
+					if (AlgorithmConfiguration.totalAdaptationsRandomParamsTeam[i]
+							* AlgorithmConfiguration.iterationTimeRandomParamsTeam[i]
 							/ 1000.0 != AlgorithmConfiguration.totalTimeOut) {
 						System.out.println(
 								"\n***************** Data for TeamParamsRandom: Please enter the values for adaptations number * iteration time = total time out ***************************");
@@ -243,32 +243,32 @@ public class MainActivity {
 			}
 		}
 
-		if (AlgorithmConfiguration.totalTeamsParamsFixed > 0) {
-			if (AlgorithmConfiguration.totalAdaptationsTeamParamsFixed == null
-					|| AlgorithmConfiguration.iterationTimeTeamParamsFixed == null
-					|| AlgorithmConfiguration.requestPolicyTeamParamsFixed == null
-					|| AlgorithmConfiguration.entryPolicyTeamParamsFixed == null) {
+		if (AlgorithmConfiguration.totalFixedParamsTeams > 0) {
+			if (AlgorithmConfiguration.totalAdaptationsFixedParamsTeam == null
+					|| AlgorithmConfiguration.iterationTimeFixedParamsTeam == null
+					|| AlgorithmConfiguration.requestPolicyFixedParamsTeam == null
+					|| AlgorithmConfiguration.entryPolicyFixedParamsTeam == null) {
 				System.out.println(
-						"\n***************** Data for TeamParamsFixed: some data have a null value *****************");
+						"\n***************** Data for FixedParamsTeam: some data have a null value *****************");
 				return false;
 			}
 
-			if (AlgorithmConfiguration.totalAdaptationsTeamParamsFixed.length == AlgorithmConfiguration.totalTeamsParamsFixed
-					&& AlgorithmConfiguration.iterationTimeTeamParamsFixed.length == AlgorithmConfiguration.totalTeamsParamsFixed
-					&& AlgorithmConfiguration.requestPolicyTeamParamsFixed.length == AlgorithmConfiguration.totalTeamsParamsFixed
-					&& AlgorithmConfiguration.entryPolicyTeamParamsFixed.length == AlgorithmConfiguration.totalTeamsParamsFixed) {
+			if (AlgorithmConfiguration.totalAdaptationsFixedParamsTeam.length == AlgorithmConfiguration.totalFixedParamsTeams
+					&& AlgorithmConfiguration.iterationTimeFixedParamsTeam.length == AlgorithmConfiguration.totalFixedParamsTeams
+					&& AlgorithmConfiguration.requestPolicyFixedParamsTeam.length == AlgorithmConfiguration.totalFixedParamsTeams
+					&& AlgorithmConfiguration.entryPolicyFixedParamsTeam.length == AlgorithmConfiguration.totalFixedParamsTeams) {
 
-				for (int i = 0; i < AlgorithmConfiguration.totalTeamsParamsFixed; i++) {
-					if (AlgorithmConfiguration.totalAdaptationsTeamParamsFixed[i] <= 0
-							|| AlgorithmConfiguration.iterationTimeTeamParamsFixed[i] <= 0) {
+				for (int i = 0; i < AlgorithmConfiguration.totalFixedParamsTeams; i++) {
+					if (AlgorithmConfiguration.totalAdaptationsFixedParamsTeam[i] <= 0
+							|| AlgorithmConfiguration.iterationTimeFixedParamsTeam[i] <= 0) {
 						System.out.println(
-								"\n***************** Data for TeamParamsFixed: Please the values for adaptations number, and iteration times "
+								"\n***************** Data for FixedParamsTeam: Please the values for adaptations number, and iteration times "
 										+ "should be bigger than 0 ********************************");
 						return false;
 					}
 
-					if (AlgorithmConfiguration.totalAdaptationsTeamParamsFixed[i]
-							* AlgorithmConfiguration.iterationTimeTeamParamsFixed[i]
+					if (AlgorithmConfiguration.totalAdaptationsFixedParamsTeam[i]
+							* AlgorithmConfiguration.iterationTimeFixedParamsTeam[i]
 							/ 1000.0 != AlgorithmConfiguration.totalTimeOut) {
 						System.out.println(
 								"\n***************** Data for TeamParamsFixed: Please enter the values for adaptations number * iteration time = total time out ***************************");

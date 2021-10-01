@@ -17,27 +17,27 @@ public class AlgorithmConfiguration {
 	final static boolean printResultInConsole = true;
 	final static boolean printResultInCSVFile = true;
 
-	// data for team of kind: AdaptedParamsTeam
-	final static int totalTeamsParamsAdapted = 2;
-	final static int[] iterationTimeTeamParamsAdapted = { 20000, 15000 };// by iteration in millisecond
-	final static int[] totalAdaptationsTeamParamsAdapted = { 15, 20 };
-	final static int[] requestPolicyTeamParamsAdapted = { SolutionPopulation.REQUEST_RANDOM,
+	// data for team of type: AdaptedParamsTeam
+	final static int totalAdaptedParamsTeams = 2;
+	final static int[] iterationTimeAdaptedParamsTeam = { 20000, 15000 };// by iteration in millisecond
+	final static int[] totalAdaptationsAdaptedParamsTeam = { 15, 20 };
+	final static int[] requestPolicyAdaptedParamsTeam = { SolutionPopulation.REQUEST_RANDOM,
 			SolutionPopulation.REQUEST_SAME };
-	final static int[] entryPolicyTeamParamsAdapted = { SolutionPopulation.ENTRY_IF_DIFERENT,
+	final static int[] entryPolicyAdaptedParamsTeam = { SolutionPopulation.ENTRY_IF_DIFERENT,
 			SolutionPopulation.ENTRY_SAME };
-	final static int[] solutionSimilarityPercertageTeamParamsAdapted = { 33, 33 };
+	final static int[] solutionSimilarityPercertageAdaptedParamsTeam = { 33, 33 };
 
-	// data for team of kind: RandomParamsTeam
-	final static int totalTeamsParamsRandom = 1;
-	final static int[] iterationTimeTeamParamsRandom = { 20000 };
-	final static int[] totalAdaptationsTeamParamsRandom = { 15 };
-	final static int[] requestPolicyTeamParamsRandom = { SolutionPopulation.REQUEST_RANDOM };
-	final static int[] entryPolicyTeamParamsRandom = { SolutionPopulation.ENTRY_IF_DIFERENT };
+	// data for team of type: RandomParamsTeam
+	final static int totalRandomParamsTeams = 1;
+	final static int[] iterationTimeRandomParamsTeam = { 20000 };
+	final static int[] totalAdaptationsRandomParamsTeam= { 15 };
+	final static int[] requestPolicyRandomParamsTeam = { SolutionPopulation.REQUEST_RANDOM };
+	final static int[] entryPolicyRandomParamsTeam = { SolutionPopulation.ENTRY_IF_DIFERENT };
 
-	// data for team of kind: FixedParamsTeam
-	final static int totalTeamsParamsFixed = 0;
-	final static int[] iterationTimeTeamParamsFixed = null;
-	final static int[] totalAdaptationsTeamParamsFixed = null;
-	final static int[] requestPolicyTeamParamsFixed = null;
-	final static int[] entryPolicyTeamParamsFixed = null;
+	// data for team of type: FixedParamsTeam
+	final static int totalFixedParamsTeams = 0;
+	final static int[] iterationTimeFixedParamsTeam= null;
+	final static int[] totalAdaptationsFixedParamsTeam = null;
+	final static int[] requestPolicyFixedParamsTeam = null;
+	final static int[] entryPolicyFixedParamsTeam = null;
 }
