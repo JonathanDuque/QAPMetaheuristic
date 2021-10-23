@@ -12,7 +12,8 @@ public class ParameterControl {
 	List<List<Params>> listParameters;
 
 	// TODO redefine functionality, in that way is no working
-	// TODO implement logic for iterations without improve for setting categorical parameters
+	// TODO implement logic for iterations without improve for setting categorical
+	// parameters
 	private int[] not_improve = { 0, 0, 0 };
 
 	public ParameterControl(int qap_size, int solutionSimilarityPercertage) {
@@ -89,7 +90,8 @@ public class ParameterControl {
 
 	public int[] adaptParameter(final int[] parameter, final double[] behavior_mh, final int type,
 			final int current_iteration, final int totalAdaptations, final double[] diversify_percentage_limit) {
-		//TODO define delta values to intensify and diversify variables, functionality o data should be configure inside a metaheuristic
+		// TODO define delta values to intensify and diversify variables, functionality
+		// o data should be configure inside a metaheuristic
 
 		final int distanceWhereSolutionIsSimilar = qap_size * solutionSimilarityPercertage / 100;
 		final double[] change_pdf_percentage_limit = { 10, 5, 1, 0.5, 0.3 };
@@ -102,6 +104,8 @@ public class ParameterControl {
 		// if (behavior_mh[0] > 0) {
 		switch (type) {
 		case AlgorithmConfiguration.MTLS:
+			// parameter[0] : restart type
+
 			if (behavior_mh[0] > 0) {
 				// case MTLS keep equal
 				new_params[0] = parameter[0];
@@ -111,15 +115,18 @@ public class ParameterControl {
 			break;
 
 		case AlgorithmConfiguration.ROTS:
+			// parameter[0] : tabu duration factor
+			// parameter[1] : aspiration factor
+
 			if (behavior_mh[0] > 0 && behavior_mh[0] <= diversify_percentage_limit[current_iteration]
 					&& behavior_mh[1] <= distanceWhereSolutionIsSimilar) {
 				// is necessary diversify
-				new_params[0] = parameter[0] + Math.floorDiv(qap_size, 2);
-				new_params[1] = parameter[1] + Math.floorDiv(qap_size * qap_size, 2);
+				new_params[0] = parameter[0] + RobustTabuSearch.getTabuDurationDeltaToDiversify(qap_size);
+				new_params[1] = parameter[1] + RobustTabuSearch.getAspitationFactorToDiversify(qap_size);
 			} else {
 				// is necessary intensify
-				new_params[0] = parameter[0] - Math.floorDiv(qap_size, 3);
-				new_params[1] = parameter[1] - Math.floorDiv(qap_size, 2);
+				new_params[0] = parameter[0] - RobustTabuSearch.getTabuDurationDeltaToIntensify(qap_size);
+				new_params[1] = parameter[1] - RobustTabuSearch.getAspirationFactorToIntensify(qap_size);
 			}
 
 			// check parameters inside the ranges
@@ -152,24 +159,24 @@ public class ParameterControl {
 				// is necessary diversify
 				switch (parameter[1]) {
 				case 2:// gamma tau: 0 to 1 means intensify to diversify
-					new_params[0] = parameter[0] + 6;
+					new_params[0] = parameter[0] + ExtremalOptimization.deltaTauToDiversify;
 					break;
 				default:
 					// Exponential tau: 0 to 1 means diversify to intensify
 					// Power tau: 0 to 1 means diversify to intensify
-					new_params[0] = parameter[0] - 6;
+					new_params[0] = parameter[0] - ExtremalOptimization.deltaTauToDiversify;
 					break;
 				}
 			} else {
 				// is necessary intensify
 				switch (parameter[1]) {
 				case 2:// gamma tau: 0 to 1 means intensify to diversify
-					new_params[0] = parameter[0] - 6;
+					new_params[0] = parameter[0] - ExtremalOptimization.deltaTauToIntensify;
 					break;
 				default:
 					// Exponential tau: 0 to 1 means diversify to intensify
 					// Power tau: 0 to 1 means diversify to intensify
-					new_params[0] = parameter[0] + 6;
+					new_params[0] = parameter[0] + ExtremalOptimization.deltaTauToIntensify;
 					break;
 				}
 			}

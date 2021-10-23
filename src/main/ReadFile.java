@@ -18,7 +18,7 @@ public class ReadFile {
 			int n = Integer.parseInt(scanner.next());
 			// scanner.next(); //skip a data no necessary
 			target = Integer.parseInt(scanner.next());
-			if (target < 0) { //means there is no optimal
+			if (target < 0) { //means there is not optimal
 				target = Integer.parseInt(scanner.next());
 			} else {
 				scanner.next(); // skip a data no necessary

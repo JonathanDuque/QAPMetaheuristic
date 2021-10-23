@@ -133,4 +133,21 @@ public class RobustTabuSearch extends MetaheuristicSearch {
 		return (actualCost < bestCostFound) ? true : false;
 	}
 
+	// getters for deltas to adapt parameters
+	public static int getTabuDurationDeltaToDiversify(final int qap_size) {
+		return Math.floorDiv(qap_size, 2);
+	}
+
+	public static int getTabuDurationDeltaToIntensify(final int qap_size) {
+		return Math.floorDiv(qap_size, 3);
+	}
+
+	public static int getAspitationFactorToDiversify(final int qap_size) {
+		return Math.floorDiv(qap_size * qap_size, 2);
+	}
+
+	public static int getAspirationFactorToIntensify(final int qap_size) {
+		return Math.floorDiv(qap_size, 2);
+	}
+
 }

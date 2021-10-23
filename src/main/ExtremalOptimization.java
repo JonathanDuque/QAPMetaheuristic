@@ -22,6 +22,11 @@ public class ExtremalOptimization extends MetaheuristicSearch {
 
 	double[] pdf;
 
+	// TODO for future: define deltas for each tau of a function
+	// tau is a decimal between 0 and 1, so
+	final static int deltaTauToIntensify = 6; // means 0.06
+	final static int deltaTauToDiversify = 6; // means 0.06
+
 	public ExtremalOptimization(QAPData qapData, int metaheuristicId) {
 		super(qapData, metaheuristicId);
 	}
