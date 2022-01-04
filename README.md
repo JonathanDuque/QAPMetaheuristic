@@ -1,6 +1,6 @@
 # J-PACAS
 ## A Java Implementation of PACAS framework
-This document is a guide with the steps for setting J-PACAS.
+This document is a guide with the steps for setting J-PACAS. It is possible to download the project and execute in whatever architecture that supported a shared memory model.
 
 
 ## Introduction
@@ -9,13 +9,16 @@ J-PACAS is an implementation in the Java programming language of the framework P
 
 
 ## System requirements
+J-PACAS framework is implemented in Java 11 using the *ForkJoinPool* and *AtomicType* classes to handle the parallelism in a shared memory model. 
+
+We recommended to have installed at least a java 11 version or higher. However, we think that is enough a version of java that supports the classes for handling the parallelism, these are: *ForkJoinPool* and *AtomicType*.
 
 
-
+## Download
+To download the project is only neccesary clone it. To clone used this link: https://github.com/JonathanDuque/QAPMetaheuristic.git
 
 
 ## Configuration
-
 
 
 
