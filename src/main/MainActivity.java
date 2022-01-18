@@ -10,6 +10,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity {
+	// TODO create manageFile class
 
 	// atomic variable to avoid race condition reading and writing it throw threads
 	private static AtomicBoolean no_find_BKS = new AtomicBoolean(true);
@@ -55,7 +56,7 @@ public class MainActivity {
 						AlgorithmConfiguration.totalAdaptationsAdaptedParamsTeam[i],
 						AlgorithmConfiguration.requestPolicyAdaptedParamsTeam[i],
 						AlgorithmConfiguration.entryPolicyAdaptedParamsTeam[i],
-						AlgorithmConfiguration.solutionSimilarityPercertageAdaptedParamsTeam[i]);
+						AlgorithmConfiguration.solutionSimilarityPercentageAdaptedParamsTeam[i]);
 				listTeams.add(adaptedParamsTeam);
 			}
 
@@ -163,7 +164,7 @@ public class MainActivity {
 					|| AlgorithmConfiguration.iterationTimeAdaptedParamsTeam == null
 					|| AlgorithmConfiguration.requestPolicyAdaptedParamsTeam == null
 					|| AlgorithmConfiguration.entryPolicyAdaptedParamsTeam == null
-					|| AlgorithmConfiguration.solutionSimilarityPercertageAdaptedParamsTeam == null) {
+					|| AlgorithmConfiguration.solutionSimilarityPercentageAdaptedParamsTeam == null) {
 				System.out.println(
 						"\n***************** Data for TeamsParamsAdapted: some data have a null value *****************");
 				return false;
@@ -173,12 +174,12 @@ public class MainActivity {
 					&& AlgorithmConfiguration.iterationTimeAdaptedParamsTeam.length == AlgorithmConfiguration.totalAdaptedParamsTeams
 					&& AlgorithmConfiguration.requestPolicyAdaptedParamsTeam.length == AlgorithmConfiguration.totalAdaptedParamsTeams
 					&& AlgorithmConfiguration.entryPolicyAdaptedParamsTeam.length == AlgorithmConfiguration.totalAdaptedParamsTeams
-					&& AlgorithmConfiguration.solutionSimilarityPercertageAdaptedParamsTeam.length == AlgorithmConfiguration.totalAdaptedParamsTeams) {
+					&& AlgorithmConfiguration.solutionSimilarityPercentageAdaptedParamsTeam.length == AlgorithmConfiguration.totalAdaptedParamsTeams) {
 
 				for (int i = 0; i < AlgorithmConfiguration.totalAdaptedParamsTeams; i++) {
 					if (AlgorithmConfiguration.totalAdaptationsAdaptedParamsTeam[i] <= 0
 							|| AlgorithmConfiguration.iterationTimeAdaptedParamsTeam[i] <= 0
-							|| AlgorithmConfiguration.solutionSimilarityPercertageAdaptedParamsTeam[i] <= 0) {
+							|| AlgorithmConfiguration.solutionSimilarityPercentageAdaptedParamsTeam[i] <= 0) {
 						System.out.println(
 								"\n***************** Data for TeamsParamsAdapted: Please the values for adaptations number, iteration times and solution "
 										+ "similarity percentage should be bigger than 0 ********************************");

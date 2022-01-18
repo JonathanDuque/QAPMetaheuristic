@@ -1,8 +1,7 @@
 package main;
 
 public class AlgorithmConfiguration {
-	// TODO create README for this file
-	// TODO create delta parameter for each metaheurtist
+	// TODO create delta parameter for each metaheuristic
 
 	// fixed data for the algorithm
 	final static int MTLS = 0, ROTS = 1, EO = 2;
@@ -25,7 +24,7 @@ public class AlgorithmConfiguration {
 			SolutionPopulation.REQUEST_SAME };
 	final static int[] entryPolicyAdaptedParamsTeam = { SolutionPopulation.ENTRY_IF_DIFERENT,
 			SolutionPopulation.ENTRY_SAME };
-	final static int[] solutionSimilarityPercertageAdaptedParamsTeam = { 33, 33 };
+	final static int[] solutionSimilarityPercentageAdaptedParamsTeam = { 33, 33 };
 
 	// data for team of type: RandomParamsTeam
 	final static int totalRandomParamsTeams = 1;
